@@ -10,11 +10,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "users")
+@ToString(exclude = "users")
 @Builder
 @Entity
 @Table(name = "films")
@@ -37,4 +40,13 @@ public class Film {
 
     @Positive(message = "Should be positive")
     private Duration duration;
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(
+            name = "users_films",
+            joinColumns = @JoinColumn(name = "film_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> users = new ArrayList<>();
 }

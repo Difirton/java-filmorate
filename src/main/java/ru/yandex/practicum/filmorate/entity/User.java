@@ -5,11 +5,14 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "email")
+@EqualsAndHashCode(of = {"email", "login"})
+@ToString(exclude = "films")
 @Builder
 @Entity
 @Table(name = "users")
@@ -34,4 +37,13 @@ public class User {
 
     @Past
     private LocalDate birthday;
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(
+            name = "users_films",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "film_id")
+    )
+    private List<Film> films = new ArrayList<>();
 }
