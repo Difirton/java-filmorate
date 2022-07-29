@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
@@ -19,16 +18,22 @@ import java.time.LocalDate;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email should not be blank")
     @Column(unique = true, nullable = false)
     private String email;
 
+    @NotBlank
     @Column(unique = true, nullable = false)
+    @Pattern(regexp = "/^\\S*$/", message = "Login should not contain spaces")
     private String login;
 
-    private String name;
+    private String name = login;
 
+    @Past
     private LocalDate birthday;
 
 }
