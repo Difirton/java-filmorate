@@ -6,14 +6,13 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@EqualsAndHashCode
 @Builder
 @Entity
 @Table(name = "films")
@@ -29,7 +28,6 @@ public class Film {
     @Column(length = 200)
     private String description;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
