@@ -5,8 +5,8 @@ import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.filmorate.config.validator.AfterDate;
 
 import javax.persistence.*;
-import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -23,6 +23,7 @@ public class Film {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Film name should not be empty")
     @NotBlank(message = "Film name should not be empty")
     private String name;
 
@@ -31,7 +32,6 @@ public class Film {
     private String description;
 
     @AfterDate(day = 28, month = 12, year = 1985, message = "Release date should be no earlier than december 28, 1895")
-    @FutureOrPresent
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
