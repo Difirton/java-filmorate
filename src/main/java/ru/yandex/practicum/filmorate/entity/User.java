@@ -29,11 +29,11 @@ public class User {
 
     @NotNull(message = "Login should not be empty")
     @NotBlank(message = "Login should not be blank")
-    @Pattern(regexp = "/^\\S+$/", message = "Login should not contain spaces")
+    @Pattern(regexp = "[a-zA-Z0-9_.]*", message = "Login should not contain spaces")
     @Column(unique = true, nullable = false)
     private String login;
 
-    private String name = login;
+    private String name;
 
     @Past
     private LocalDate birthday;

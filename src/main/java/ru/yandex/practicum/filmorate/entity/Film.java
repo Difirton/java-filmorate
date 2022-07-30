@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.config.validator.AfterDate;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,11 +33,10 @@ public class Film {
     @Column(length = 200)
     private String description;
 
-    @AfterDate(day = 28, month = 12, year = 1985, message = "Release date should be no earlier than december 28, 1895")
+    @AfterDate(day = 28, month = 12, year = 1895, message = "Release date should be not earlier than december 28, 1895")
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
-    @Positive(message = "Should be positive")
     private Duration duration;
 
     @Builder.Default
