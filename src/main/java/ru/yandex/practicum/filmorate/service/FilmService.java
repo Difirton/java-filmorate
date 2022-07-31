@@ -25,7 +25,7 @@ public class FilmService {
         return filmRepository.findAll();
     }
 
-    public Film saveOrUpdateFilm(Long id, Film newFilm) {
+    public Film updateFilm(Long id, Film newFilm) {
         return filmRepository.findById(id)
                 .map(f -> {
                     f.setName(newFilm.getName());
@@ -34,7 +34,7 @@ public class FilmService {
                     f.setDuration(newFilm.getDuration());
                     return filmRepository.save(f);
                 })
-                .orElseGet(() -> filmRepository.save(newFilm));
+                .orElseThrow(() -> new FilmNotFoundException(id));
     }
 
     public Film getFilmById(Long id) {

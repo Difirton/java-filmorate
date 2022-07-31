@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.config.validator.AfterDate;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,7 +38,8 @@ public class Film {
     @Column(name = "release_date")
     private LocalDate releaseDate;
 
-    private Duration duration;
+    @PositiveOrZero
+    private Integer duration;
 
     @Builder.Default
     @ManyToMany

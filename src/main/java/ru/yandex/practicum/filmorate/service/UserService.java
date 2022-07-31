@@ -18,7 +18,7 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        if (user.getName() == null) {
+        if (user.getName() == null || user.getName().equals("")) {
             user.setName(user.getLogin());
         }
         return userRepository.save(user);
@@ -28,7 +28,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User saveOrUpdateUser(Long id, User newUser) {
+    public User updateUser(Long id, User newUser) {
         return userRepository.findById(id)
                 .map(u -> {
                     u.setEmail(newUser.getEmail());
@@ -39,9 +39,10 @@ public class UserService {
                         u.setName(newUser.getName());
                     }
                     u.setBirthday(newUser.getBirthday());
+                    System.out.println(u);
                     return userRepository.save(u);
                 })
-                .orElseGet(() -> userRepository.save(newUser));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public User getUserById(Long id) {

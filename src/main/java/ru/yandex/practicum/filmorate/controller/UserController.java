@@ -10,7 +10,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/filmorate/users")
+@RequestMapping("/users")
 public class UserController {
     private UserService userService;
 
@@ -33,9 +33,9 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
-    public User saveOrUpdateFilm(@PathVariable("id") Long id,
+    public User updateUser(@PathVariable("id") Long id,
                                  @Valid @RequestBody User user) {
-        return userService.saveOrUpdateUser(id, user);
+        return userService.updateUser(id, user);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -48,5 +48,11 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable("id") Long id) {
         userService.removeUserById(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping
+    public User updateUserRootMapping(@Valid @RequestBody User user) {
+        return userService.updateUser(user.getId(), user);
     }
 }
