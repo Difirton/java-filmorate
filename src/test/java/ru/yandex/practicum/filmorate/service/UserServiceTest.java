@@ -52,20 +52,20 @@ class UserServiceTest {
         String expected = "R2D2";
         assertEquals(expected, actual);
     }
-
-    @Test
-    @DisplayName("Update all fields User, expected ok")
-    public void updateAllFieldsUser() {
-        User updatedUser = User.builder()
-                .email("22mail@mail.ru")
-                .login("R2D2")
-                .name("Serious Sam")
-                .birthday(LocalDate.of(1981, 5, 10))
-                .build();
-        userService.updateUser(1L, updatedUser);
-        User userAfterPost = userService.getUserById(2L);
-        String actual = userAfterPost.getName();
-        String expected = "R2D2";
-        assertEquals(expected, actual);
-    }
+//
+//    @Test
+//    @DisplayName("Update all fields User, expected ok")
+//    public void updateAllFieldsUser() {
+//        User updatedUser = User.builder()
+//                .email("22mail@mail.ru")
+//                .login("R2D2")
+//                .name("Serious Sam")
+//                .birthday(LocalDate.of(1981, 5, 10))
+//                .build();
+//        userService.updateUser(1L, updatedUser);
+//        User userAfterPost = userService.getUserById(2L);
+//        String actual = userAfterPost.getName();
+//        String expected = "R2D2";
+//        assertEquals(expected, actual);
+//    }
 }
