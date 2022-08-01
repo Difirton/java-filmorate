@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -9,10 +10,11 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import javax.validation.Valid;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private FilmService filmService;
+    private final FilmService filmService;
 
     @Autowired
     public FilmController(FilmService filmService) {
@@ -22,6 +24,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Film newFilm(@Valid @RequestBody Film film) {
+        log.info("Request to create new film: " + film.toString());
         return filmService.createFilm(film);
     }
 
@@ -35,6 +38,7 @@ public class FilmController {
     @PutMapping("/{id}")
     public Film updateFilm(@PathVariable("id") Long id,
                                  @Valid @RequestBody Film film) {
+        log.info("Request to update film with id = {}, parameters to update: {}", id ,film.toString());
         return filmService.updateFilm(id, film);
     }
 
@@ -47,12 +51,14 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
     public void deleteFilm(@PathVariable("id") Long id) {
+        log.info("Request to delete film with {}, parameters to update: ", id);
         filmService.removeFilmById(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public Film updateFilmRootMapping(@Valid @RequestBody Film film) {
+        log.info("Request to update film with id = {}, parameters to update: {}", film.getId() ,film);
         return filmService.updateFilm(film.getId(), film);
     }
 }

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.entity.Film;
@@ -9,10 +8,9 @@ import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.util.List;
 
-@Slf4j
 @Service
 public class FilmService {
-    private FilmRepository filmRepository;
+    private final FilmRepository filmRepository;
 
     @Autowired
     public FilmService(FilmRepository filmRepository) {
