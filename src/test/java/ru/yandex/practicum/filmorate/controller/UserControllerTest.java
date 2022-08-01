@@ -55,7 +55,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Method GET /users/1, expected host answer OK")
-    public void findUsrByIdOK_200() throws Exception {
+    public void testFindUsrById_OK_200() throws Exception {
         mockMvc.perform(get("/users/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -69,7 +69,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Method POST /users, expected host answer CREATED")
-    public void postNewUserCREATED_201() throws Exception {
+    public void testPostNewUser_CREATED_201() throws Exception {
         User newUser = User.builder()
                 .id(2L)
                 .email("222mail@mail.ru")
@@ -93,7 +93,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Method GET /users, expected host answer OK")
-    public void findAllUsersOK_200() throws Exception {
+    public void testFindAllUsers_OK_200() throws Exception {
         List<User> users = Arrays.asList(
                 User.builder()
                         .id(1L)
@@ -129,7 +129,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Method PUT /users/1, expected host answer OK")
-    public void updateUserOK_200() throws Exception {
+    public void testUpdateUser_OK_200() throws Exception {
         User updateUser = User.builder()
                 .id(1L)
                 .email("update@yandex.com")
@@ -153,7 +153,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Method DELETE /users/1, expected host answer OK")
-    public void deleteUserOK_200() throws Exception {
+    public void testDeleteUser_OK_200() throws Exception {
         doNothing().when(mockRepository).deleteById(1L);
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());

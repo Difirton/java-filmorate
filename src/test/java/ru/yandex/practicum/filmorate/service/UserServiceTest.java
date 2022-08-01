@@ -68,15 +68,14 @@ class UserServiceTest {
                 .birthday(LocalDate.of(1981, 5, 10))
                 .build();
         when(mockRepository.save(any(User.class))).thenReturn(user);
-        userService.updateUser(1L, updatedUser);
-        User userAfterPost = userService.updateUser(1L, updatedUser);
-        String actualEmail = userAfterPost.getEmail();
+        User userAfterUpdate = userService.updateUser(1L, updatedUser);
+        String actualEmail = userAfterUpdate.getEmail();
         String expectedEmail = "22mail@mail.ru";
-        String actualLogin = userAfterPost.getLogin();
+        String actualLogin = userAfterUpdate.getLogin();
         String expectedLogin = "R2D2";
-        String actualName = userAfterPost.getName();
+        String actualName = userAfterUpdate.getName();
         String expectedName = "Serious Sam";
-        LocalDate actualBirthday = userAfterPost.getBirthday();
+        LocalDate actualBirthday = userAfterUpdate.getBirthday();
         LocalDate expectedBirthday = LocalDate.of(1981, 5, 10);
         assertEquals(expectedEmail, actualEmail);
         assertEquals(expectedLogin, actualLogin);

@@ -55,7 +55,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Method GET /films/1, expected host answer OK")
-    public void findFilmByIdOK_200() throws Exception {
+    public void testFindFilmById_OK_200() throws Exception {
         mockMvc.perform(get("/films/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -69,7 +69,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Method POST /films, expected host answer CREATED")
-    public void postNewFilmCREATED_201() throws Exception {
+    public void testPostNewFilm_CREATED_201() throws Exception {
         Film newFilm = Film.builder()
                 .id(2L)
                 .name("name film 2")
@@ -93,7 +93,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Method GET /films, expected host answer OK")
-    public void findAllFilmsOK_200() throws Exception {
+    public void testFindAllFilms_OK_200() throws Exception {
         List<Film> films = Arrays.asList(
                 Film.builder()
                         .id(1L)
@@ -129,7 +129,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Method PUT /films/1, expected host answer OK")
-    public void updateFilmOK_200() throws Exception {
+    public void testUpdateFilm_OK_200() throws Exception {
         Film updateFilm = Film.builder()
                 .id(1L)
                 .name("update name")
@@ -153,10 +153,27 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Method DELETE /films/1, expected host answer OK")
-    public void deleteFilmOK_200() throws Exception {
+    public void testDeleteFilm_OK_200() throws Exception {
         doNothing().when(mockRepository).deleteById(1L);
         mockMvc.perform(delete("/films/1"))
                 .andExpect(status().isOk());
         verify(mockRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Test custom validation, expected host answer BAD REQUEST")
+    public void testUpdateFilmWithNotValidDate_BAD_REQUEST_400() throws Exception {
+        Film updateFilm = Film.builder()
+                .id(1L)
+                .name("update name")
+                .description("update description")
+                .releaseDate(LocalDate.of(1000, 10, 5))
+                .duration(300)
+                .build();
+        when(mockRepository.save(any(Film.class))).thenReturn(updateFilm);
+        mockMvc.perform(put("/films/1")
+                        .content(jsonMapper.writeValueAsString(updateFilm))
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
     }
 }
