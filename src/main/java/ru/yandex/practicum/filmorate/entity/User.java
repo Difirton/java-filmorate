@@ -22,12 +22,10 @@ public class User {
     private Long id;
 
     @Email(message = "Invalid email format")
-    @NotNull(message = "Email should not be empty")
     @NotBlank(message = "Email should not be blank")
     @Column(unique = true, nullable = false)
     private String email;
 
-    @NotNull(message = "Login should not be empty")
     @NotBlank(message = "Login should not be blank")
     @Pattern(regexp = "[a-zA-Z0-9_.]*", message = "Login should not contain spaces")
     @Column(unique = true, nullable = false)
