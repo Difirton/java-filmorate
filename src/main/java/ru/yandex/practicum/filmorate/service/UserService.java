@@ -39,7 +39,6 @@ public class UserService {
                         u.setName(newUser.getName());
                     }
                     u.setBirthday(newUser.getBirthday());
-                    System.out.println(u);
                     return userRepository.save(u);
                 })
                 .orElseThrow(() -> new UserNotFoundException(id));
