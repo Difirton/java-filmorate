@@ -5,9 +5,9 @@ import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
 public class AfterDateValidator implements ConstraintValidator<AfterDate, LocalDate> {
-    int day;
-    int month;
-    int year;
+    private int day;
+    private int month;
+    private int year;
 
     @Override
     public void initialize(AfterDate constraintAnnotation) {

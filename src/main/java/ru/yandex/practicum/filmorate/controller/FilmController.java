@@ -36,8 +36,7 @@ public class FilmController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
-    public Film updateFilm(@PathVariable("id") Long id,
-                                 @Valid @RequestBody Film film) {
+    public Film updateFilm(@PathVariable("id") Long id, @Valid @RequestBody Film film) {
         log.info("Request to update film with id = {}, parameters to update: {}", id ,film.toString());
         return filmService.updateFilm(id, film);
     }

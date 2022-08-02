@@ -15,6 +15,7 @@
 	<description>Film rating web application.</description>
 	<properties>
 		<java.version>11</java.version>
+		<jackson-datatype.version>2.13.3</jackson-datatype.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -29,7 +30,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>2.13.3</version>
+			<version>${jackson-datatype.version}</version>
 		</dependency>
 	</dependencies>
 
