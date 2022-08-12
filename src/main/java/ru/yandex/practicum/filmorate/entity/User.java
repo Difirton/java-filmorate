@@ -57,15 +57,10 @@ public class User {
     private List<User> users = new ArrayList<>();
 
     @Builder.Default
-    @ManyToMany
+    @ManyToMany(mappedBy = "usersLikes")
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
-    @JoinTable(
-            name = "users_likes_films",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "film_id")
-    )
     @Column(name = "likes_films")
     private List<Film> likesFilms = new ArrayList<>();
 
