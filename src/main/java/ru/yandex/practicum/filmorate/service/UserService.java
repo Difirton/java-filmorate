@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.error.UserNotFoundException;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
@@ -53,10 +54,13 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    @Transactional
     public User addFriend(Long userId, Long friendId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         user.addFriend(friend);
+        userRepository.save(user);
+        userRepository.save(friend);
         return user;
     }
 

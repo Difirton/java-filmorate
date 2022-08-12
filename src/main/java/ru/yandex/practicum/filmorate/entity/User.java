@@ -1,5 +1,9 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -37,17 +41,22 @@ public class User {
 
     @Builder.Default
     @ManyToMany(cascade = CascadeType.ALL)
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "id")
     @JoinTable(
             name = "user_friends",
-            joinColumns = {@JoinColumn(name = "add_user", referencedColumnName = "id", nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "friends", referencedColumnName = "id", nullable = false)}
+            joinColumns = {@JoinColumn(name = "friend_id", referencedColumnName = "id", nullable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)}
     )
-    @Column(name = "add_user")
-    private List<User> addUser = new ArrayList<>();
+    private List<User> friends = new ArrayList<>();
 
     @Builder.Default
-    @ManyToMany(mappedBy = "addUser", cascade = CascadeType.ALL)
-    private List<User> friends = new ArrayList<>();
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "id")
+    @ManyToMany(mappedBy = "friends", cascade = CascadeType.ALL)
+    private List<User> users = new ArrayList<>();
 
     @Builder.Default
     @ManyToMany
