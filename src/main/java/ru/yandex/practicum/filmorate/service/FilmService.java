@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
@@ -48,18 +49,24 @@ public class FilmService {
         filmRepository.deleteById(id);
     }
 
+    @Transactional
     public Film addLikeFilm(Long id, Long userId) {
         Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
         film.addUserLike(userService.getUserById(userId));
+        filmRepository.save(film);
         return film;
     }
 
+    @Transactional
     public void removeLikeFilm(Long id, Long userId) {
         Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
         film.removeUserLike(userService.getUserById(userId));
+        filmRepository.save(film);
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return filmRepository.getPopularFilms(count);
+        List<Film> films = filmRepository.getPopularFilms(count);
+        System.out.println(films);
+        return films;
     }
 }

@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
@@ -15,7 +13,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"email", "login"})
-@ToString(exclude = {"films", "addUser", "friends"})
+@ToString(exclude = {"likesFilms", "addUser", "friends"})
 @Builder
 @Entity
 @Table(name = "users")
@@ -60,6 +58,9 @@ public class User {
 
     @Builder.Default
     @ManyToMany
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "id")
     @JoinTable(
             name = "users_likes_films",
             joinColumns = @JoinColumn(name = "user_id"),

@@ -64,10 +64,13 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public void removeFriend(Long userId, Long friendId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         user.removeFriend(friend);
+        userRepository.save(user);
+        userRepository.save(friend);
     }
 
     public List<User> getUserFriends(Long id) {

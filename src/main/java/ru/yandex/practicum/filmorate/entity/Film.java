@@ -15,8 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = "users")
-@ToString(exclude = "users")
+@EqualsAndHashCode(exclude = "usersLikes")
+@ToString(exclude = "usersLikes")
 @Builder
 @Entity
 @Table(name = "films")
