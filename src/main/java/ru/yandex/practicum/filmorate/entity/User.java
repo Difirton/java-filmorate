@@ -55,5 +55,21 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "film_id")
     )
+    @Column(name = "likes_films")
     private List<Film> likesFilms = new ArrayList<>();
+
+    public void addLikeFilm(Film film) {
+        likesFilms.add(film);
+        film.getUsersLikes().add(this);
+    }
+
+    public void addFriend(User user) {
+        friends.add(user);
+        user.getFriends().add(this);
+    }
+
+    public void removeFriend(User user) {
+        friends.remove(user);
+        user.getFriends().remove(this);
+    }
 }

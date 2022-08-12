@@ -52,4 +52,21 @@ public class UserService {
     public void removeUserById(Long id) {
         userRepository.deleteById(id);
     }
+
+    public User addFriend(Long userId, Long friendId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
+        user.addFriend(friend);
+        return user;
+    }
+
+    public void removeFriend(Long userId, Long friendId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
+        user.removeFriend(friend);
+    }
+
+    public List<User> getUserFriends(Long id) {
+        return userRepository.findAllFriendsUser(id);
+    }
 }

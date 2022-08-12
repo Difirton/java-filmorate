@@ -43,9 +43,15 @@ public class Film {
     @Builder.Default
     @ManyToMany
     @JoinTable(
-            name = "users_films",
+            name = "users_likes_films",
             joinColumns = @JoinColumn(name = "film_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> users = new ArrayList<>();
+    @Column(name = "user_likes")
+    private List<User> usersLikes = new ArrayList<>();
+
+    public void addUserLike(User user) {
+        usersLikes.add(user);
+        user.getLikesFilms().add(this);
+    }
 }

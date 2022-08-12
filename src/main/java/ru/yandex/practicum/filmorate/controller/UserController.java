@@ -60,4 +60,24 @@ public class UserController {
         log.info("Request to update user with id = {}, parameters to update: {}", user.getId() ,user);
         return userService.updateUser(user.getId(), user);
     }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping("{id}/friends/{friendId}")
+    public User addFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
+        log.info("Request to add a user with id = {} as a friend to a user with id ={}", id ,friendId);
+        return userService.addFriend(id, friendId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
+        log.info("Request to remove user with id = {} from friends of user with id = {}", friendId, id);
+        userService.removeFriend(id, friendId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("{id}/friends")
+    public List<User> getUsersFriends(@PathVariable("id") Long id) {
+        return userService.getUserFriends(id); //TODO написать тест
+    }
 }
