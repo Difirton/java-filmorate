@@ -61,7 +61,7 @@ public class UserController {
         return userService.updateUser(user.getId(), user);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping("{id}/friends/{friendId}")
     public User addFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
         log.info("Request to add a user with id = {} as a friend to a user with id ={}", id ,friendId);
