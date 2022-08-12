@@ -11,10 +11,12 @@ import java.util.List;
 @Service
 public class FilmService {
     private final FilmRepository filmRepository;
+    private final UserService userService;
 
     @Autowired
-    public FilmService(FilmRepository filmRepository) {
+    public FilmService(FilmRepository filmRepository, UserService userService) {
         this.filmRepository = filmRepository;
+        this.userService = userService;
     }
 
     public Film createFilm(Film film) {
@@ -44,5 +46,20 @@ public class FilmService {
 
     public void removeFilmById(Long id) {
         filmRepository.deleteById(id);
+    }
+
+    public Film addLikeFilm(Long id, Long userId) {
+        Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
+        film.addUserLike(userService.getUserById(userId));
+        return film;
+    }
+
+    public void removeLikeFilm(Long id, Long userId) {
+        Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
+        film.removeUserLike(userService.getUserById(userId));
+    }
+
+    public List<Film> getPopularFilms(Integer count) {
+        return filmRepository.getPopularFilms(count);
     }
 }

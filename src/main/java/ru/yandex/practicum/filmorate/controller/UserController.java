@@ -80,4 +80,10 @@ public class UserController {
     public List<User> getUsersFriends(@PathVariable("id") Long id) {
         return userService.getUserFriends(id); //TODO написать тест
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("{id}/friends/common/{otherId}")
+    public List<User> getCommonUsersFriends(@PathVariable("id") Long id, @PathVariable("otherId") Long otherId) {
+        return userService.getCommonUsersFriends(id, otherId);
+    }
 }

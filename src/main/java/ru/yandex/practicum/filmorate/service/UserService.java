@@ -69,4 +69,8 @@ public class UserService {
     public List<User> getUserFriends(Long id) {
         return userRepository.findAllFriendsUser(id);
     }
+
+    public List<User> getCommonUsersFriends(Long id, Long otherId) {
+        return userRepository.getCommonUsersFriends(id, otherId);
+    }
 }

@@ -54,4 +54,9 @@ public class Film {
         usersLikes.add(user);
         user.getLikesFilms().add(this);
     }
+
+    public void removeUserLike(User user) {
+        usersLikes.remove(user);
+        user.getLikesFilms().remove(this);
+    }
 }

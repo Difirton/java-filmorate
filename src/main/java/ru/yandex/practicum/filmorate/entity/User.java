@@ -39,14 +39,15 @@ public class User {
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "user_friends",
-            joinColumns = {@JoinColumn(name = "addUser", referencedColumnName = "id", nullable = false)},
+            joinColumns = {@JoinColumn(name = "add_user", referencedColumnName = "id", nullable = false)},
             inverseJoinColumns = {@JoinColumn(name = "friends", referencedColumnName = "id", nullable = false)}
     )
-    private Set<User> addUser = new HashSet<>();
+    @Column(name = "add_user")
+    private List<User> addUser = new ArrayList<>();
 
     @Builder.Default
     @ManyToMany(mappedBy = "addUser", cascade = CascadeType.ALL)
-    private Set<User> friends = new HashSet<>();
+    private List<User> friends = new ArrayList<>();
 
     @Builder.Default
     @ManyToMany
@@ -61,6 +62,11 @@ public class User {
     public void addLikeFilm(Film film) {
         likesFilms.add(film);
         film.getUsersLikes().add(this);
+    }
+
+    public void removeLikeFilm(Film film) {
+        likesFilms.remove(film);
+        film.getUsersLikes().remove(this);
     }
 
     public void addFriend(User user) {
