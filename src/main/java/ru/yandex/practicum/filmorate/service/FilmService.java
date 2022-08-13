@@ -65,7 +65,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        List<Film> films = filmRepository.getPopularFilms(count);
+        List<Film> films = filmRepository.findPopularFilms(count);
         System.out.println(films);
         return films;
     }

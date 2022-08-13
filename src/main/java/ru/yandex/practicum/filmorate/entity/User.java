@@ -13,7 +13,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"email", "login"})
-@ToString(exclude = {"likesFilms", "addUser", "friends"})
+@ToString(exclude = {"likesFilms", "users", "friends"})
 @Builder
 @Entity
 @Table(name = "users")
