@@ -78,6 +78,6 @@ public class UserService {
     }
 
     public List<User> getCommonUsersFriends(Long id, Long otherId) {
-        return userRepository.getCommonUsersFriends(id, otherId);
+        return userRepository.findCommonUsersFriends(id, otherId);
     }
 }
