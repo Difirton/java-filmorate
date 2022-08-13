@@ -78,7 +78,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("{id}/friends")
     public List<User> getUsersFriends(@PathVariable("id") Long id) {
-        return userService.getUserFriends(id); //TODO написать тест
+        return userService.getUserFriends(id);
     }
 
     @ResponseStatus(HttpStatus.OK)

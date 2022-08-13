@@ -14,12 +14,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.User;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,7 +36,7 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
-    private UserRepository mockRepository;
+    private UserService mockService;
 
     @BeforeEach
     public void setUp() {
@@ -48,7 +47,7 @@ class UserControllerTest {
                 .name("Nick Name")
                 .birthday(LocalDate.of(1981, 11, 15))
                 .build();
-        when(mockRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(mockService.getUserById(1L)).thenReturn(user);
     }
 
     @Test
@@ -62,7 +61,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.login", is("dolore")))
                 .andExpect(jsonPath("$.name", is("Nick Name")))
                 .andExpect(jsonPath("$.birthday", is("1981-11-15")));
-        verify(mockRepository, times(1)).findById(1L);
+        verify(mockService, times(1)).getUserById(1L);
     }
 
     @Test
@@ -75,7 +74,7 @@ class UserControllerTest {
                 .name("Second Name")
                 .birthday(LocalDate.of(1991, 12, 25))
                 .build();
-        when(mockRepository.save(any(User.class))).thenReturn(newUser);
+        when(mockService.createUser(any(User.class))).thenReturn(newUser);
 
         mockMvc.perform(post("/users")
                         .content(jsonMapper.writeValueAsString(newUser))
@@ -86,7 +85,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.login", is("222dolore")))
                 .andExpect(jsonPath("$.name", is("Second Name")))
                 .andExpect(jsonPath("$.birthday", is("1991-12-25")));
-        verify(mockRepository, times(1)).save(any(User.class));
+        verify(mockService, times(1)).createUser(any(User.class));
     }
 
     @Test
@@ -107,7 +106,7 @@ class UserControllerTest {
                         .name("Second Name")
                         .birthday(LocalDate.of(1991, 12, 25))
                         .build());
-        when(mockRepository.findAll()).thenReturn(users);
+        when(mockService.getAllUsers()).thenReturn(users);
         mockMvc.perform(get("/users"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -122,7 +121,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$[1].login", is("222dolore")))
                 .andExpect(jsonPath("$[1].name", is("Second Name")))
                 .andExpect(jsonPath("$[1].birthday", is("1991-12-25")));
-        verify(mockRepository, times(1)).findAll();
+        verify(mockService, times(1)).getAllUsers();
     }
 
     @Test
@@ -135,7 +134,7 @@ class UserControllerTest {
                 .name("Serious Sam")
                 .birthday(LocalDate.of(1985, 4, 20))
                 .build();
-        when(mockRepository.save(any(User.class))).thenReturn(updateUser);
+        when(mockService.updateUser(1L, updateUser)).thenReturn(updateUser);
 
         mockMvc.perform(put("/users/1")
                         .content(jsonMapper.writeValueAsString(updateUser))
@@ -152,9 +151,9 @@ class UserControllerTest {
     @Test
     @DisplayName("Method DELETE /users/1, expected host answer OK")
     public void testDeleteUser_OK_200() throws Exception {
-        doNothing().when(mockRepository).deleteById(1L);
+        doNothing().when(mockService).removeUserById(1L);
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
-        verify(mockRepository, times(1)).deleteById(1L);
+        verify(mockService, times(1)).removeUserById(1L);
     }
 }
