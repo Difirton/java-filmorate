@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -34,12 +36,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 class FilmControllerTest {
     private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
-
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
-    private FilmRepository mockRepository;
+    private FilmService mockService;
 
     @BeforeEach
     public void setUp() {
@@ -50,7 +50,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(1967, 3, 25))
                 .duration(100)
                 .build();
-        when(mockRepository.findById(1L)).thenReturn(Optional.of(film));
+        when(mockService.getFilmById(1L)).thenReturn(film);
     }
 
     @Test
@@ -64,7 +64,7 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.description", is("description film 1")))
                 .andExpect(jsonPath("$.releaseDate", is("1967-03-25")))
                 .andExpect(jsonPath("$.duration", is(100)));
-        verify(mockRepository, times(1)).findById(1L);
+        verify(mockService, times(1)).getFilmById(1L);
     }
 
     @Test
@@ -77,7 +77,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(2000, 10, 5))
                 .duration(300)
                 .build();
-        when(mockRepository.save(any(Film.class))).thenReturn(newFilm);
+        when(mockService.createFilm(any(Film.class))).thenReturn(newFilm);
 
         mockMvc.perform(post("/films")
                         .content(jsonMapper.writeValueAsString(newFilm))
@@ -88,7 +88,7 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.description", is("description film 2")))
                 .andExpect(jsonPath("$.releaseDate", is("2000-10-05")))
                 .andExpect(jsonPath("$.duration", is(300)));
-        verify(mockRepository, times(1)).save(any(Film.class));
+        verify(mockService, times(1)).createFilm(any(Film.class));
     }
 
     @Test
@@ -109,7 +109,7 @@ class FilmControllerTest {
                         .releaseDate(LocalDate.of(2000, 10, 5))
                         .duration(300)
                         .build());
-        when(mockRepository.findAll()).thenReturn(films);
+        when(mockService.getAllFilms()).thenReturn(films);
         mockMvc.perform(get("/films"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -124,7 +124,7 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$[1].description", is("description film 2")))
                 .andExpect(jsonPath("$[1].releaseDate", is("2000-10-05")))
                 .andExpect(jsonPath("$[1].duration", is(300)));
-        verify(mockRepository, times(1)).findAll();
+        verify(mockService, times(1)).getAllFilms();
     }
 
     @Test
@@ -137,7 +137,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(2000, 10, 5))
                 .duration(300)
                 .build();
-        when(mockRepository.save(any(Film.class))).thenReturn(updateFilm);
+        when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
 
         mockMvc.perform(put("/films/1")
                         .content(jsonMapper.writeValueAsString(updateFilm))
@@ -154,10 +154,10 @@ class FilmControllerTest {
     @Test
     @DisplayName("Method DELETE /films/1, expected host answer OK")
     public void testDeleteFilm_OK_200() throws Exception {
-        doNothing().when(mockRepository).deleteById(1L);
+        doNothing().when(mockService).removeFilmById(1L);
         mockMvc.perform(delete("/films/1"))
                 .andExpect(status().isOk());
-        verify(mockRepository, times(1)).deleteById(1L);
+        verify(mockService, times(1)).removeFilmById(1L);
     }
 
     @Test
@@ -170,7 +170,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(1000, 10, 5))
                 .duration(300)
                 .build();
-        when(mockRepository.save(any(Film.class))).thenReturn(updateFilm);
+        when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
         mockMvc.perform(put("/films/1")
                         .content(jsonMapper.writeValueAsString(updateFilm))
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))

@@ -59,8 +59,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         user.addFriend(friend);
-        userRepository.save(user);
-        userRepository.save(friend);
+        userRepository.saveAll(List.of(user, friend));
         return user;
     }
 
@@ -69,8 +68,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         user.removeFriend(friend);
-        userRepository.save(user);
-        userRepository.save(friend);
+        userRepository.saveAll(List.of(user, friend));
     }
 
     public List<User> getUserFriends(Long id) {
