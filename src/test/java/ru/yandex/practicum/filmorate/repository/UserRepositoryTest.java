@@ -90,4 +90,16 @@ class UserRepositoryTest {
         List<User> emptyCommonFriendsOfUsers1and2 = userRepository.findCommonUsersFriends(1L, 4L);
         assertThrows(IndexOutOfBoundsException.class, () -> emptyCommonFriendsOfUsers1and2.get(0));
     }
+
+    @Test
+    @DisplayName("Test absent common friends of two users, expected throw IndexOutOfBoundsException")
+    void testDeleteFriend() {
+        user1.addFriend(user2);
+        user1.addFriend(user3);
+        userRepository.saveAll(List.of(user1,user2, user3));
+        user1.removeFriend(user2);
+        userRepository.saveAll(List.of(user1,user2));
+        List<User> user1FriendsAfterDelete = userRepository.findAllFriendsUser(1L);
+        Assertions.assertThat(user1FriendsAfterDelete).isEqualTo(List.of(user3));
+    }
 }
