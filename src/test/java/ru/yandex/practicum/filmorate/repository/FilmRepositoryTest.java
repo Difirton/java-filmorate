@@ -20,20 +20,20 @@ import java.util.List;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class FilmRepositoryTest {
-    Film film1;
-    Film film2;
-    Film film3;
-    User user1;
-    User user2;
-    User user3;
-    User user4;
+    private Film film1;
+    private Film film2;
+    private Film film3;
+    private User user1;
+    private User user2;
+    private User user3;
+    private User user4;
     @Autowired
-    FilmRepository filmRepository;
+    private FilmRepository filmRepository;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         film1 = Film.builder().id(1L).name("name film 1").description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).build();
         film2 = Film.builder().id(2L).name("name film 2").description("description film 2")
@@ -54,7 +54,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test CRUD of FilmRepository, expected ok")
-    void testCreateReadDeleteFilmRepository() {
+    public void testCreateReadDeleteFilmRepository() {
         Iterable<Film> filmsBeforeUpdate = filmRepository.findAll();
         Assertions.assertThat(filmsBeforeUpdate).extracting(Film::getName).contains("name film 1");
         Film filmToUpdate = filmRepository.findById(1L).get();
@@ -68,7 +68,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test find 2 popular films")
-    void testFindPopularFilmsWhenLikesHaveTwoFilms() {
+    public void testFindPopularFilmsWhenLikesHaveTwoFilms() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);
@@ -81,7 +81,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test pagination of method findPopularFilms")
-    void testPaginationFindPopularFilmsWhenLikesHaveTwoFilms() {
+    public void testPaginationFindPopularFilmsWhenLikesHaveTwoFilms() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);
@@ -94,7 +94,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test delete like of film")
-    void testDeleteLike() {
+    public void testDeleteLike() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);

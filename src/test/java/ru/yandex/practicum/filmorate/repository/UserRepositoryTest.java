@@ -21,16 +21,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserRepositoryTest {
-    User user1;
-    User user2;
-    User user3;
-    User user4;
-
+    private User user1;
+    private User user2;
+    private User user3;
+    private User user4;
     @Autowired
     private UserRepository userRepository;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         user1 = User.builder().id(1L).email("example@gmail.ru").login("231ffdsf32").name("Test1 Test1")
                 .birthday(LocalDate.of(1990, 5, 1)).build();
         user2 = User.builder().id(2L).email("mail@mail.ru").login("FFad23fdas").name("Test2 Tes2")
@@ -43,7 +42,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Test CRUD of UserRepository, expected ok")
-    void testCreateReadDeleteUserRepository() {
+    public void testCreateReadDeleteUserRepository() {
         userRepository.save(user1);
         Iterable<User> usersBeforeUpdate = userRepository.findAll();
         Assertions.assertThat(usersBeforeUpdate).extracting(User::getLogin).containsOnly("231ffdsf32");
@@ -58,7 +57,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Test SQL native query find all friends of user")
-    void testFindAllFriendsUser() {
+    public void testFindAllFriendsUser() {
         user1.addFriend(user2);
         user1.addFriend(user3);
         userRepository.saveAll(List.of(user1,user2, user3));
@@ -68,7 +67,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Test SQL native query find all common friends of two users")
-    void testFindCommonUsersFriends() {
+    public void testFindCommonUsersFriends() {
         user1.addFriend(user2);
         user1.addFriend(user3);
         userRepository.saveAll(List.of(user1,user2, user3));
@@ -80,7 +79,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Test absent common friends of two users, expected throw IndexOutOfBoundsException")
-    void testAbsenceOfCommonUsersFriends() {
+    public void testAbsenceOfCommonUsersFriends() {
         user1.addFriend(user2);
         user1.addFriend(user3);
         userRepository.saveAll(List.of(user1,user2, user3));
@@ -92,7 +91,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Test absent common friends of two users, expected throw IndexOutOfBoundsException")
-    void testDeleteFriend() {
+    public void testDeleteFriend() {
         user1.addFriend(user2);
         user1.addFriend(user3);
         userRepository.saveAll(List.of(user1,user2, user3));

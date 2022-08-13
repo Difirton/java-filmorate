@@ -21,11 +21,9 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 class FilmServiceTest {
-    Film film;
-
+    private Film film;
     @MockBean
     private FilmRepository mockRepository;
-
     @Autowired
     private FilmService filmService;
 

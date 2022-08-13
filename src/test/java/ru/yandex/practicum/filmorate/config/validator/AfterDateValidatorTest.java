@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class AfterDateValidatorTest {
     private final Validator validator;
-
     @Autowired
     public AfterDateValidatorTest(Validator validator) {
         this.validator = validator;

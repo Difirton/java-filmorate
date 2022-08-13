@@ -34,10 +34,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 class UserControllerTest {
     private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
-
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private UserRepository mockRepository;
 
