@@ -41,6 +41,10 @@ public class Film {
     private Integer duration;
 
     @Builder.Default
+    @PositiveOrZero
+    private Integer rate = 0;
+
+    @Builder.Default
     @ManyToMany
     @JoinTable(
             name = "users_likes_films",
@@ -51,11 +55,13 @@ public class Film {
     private List<User> usersLikes = new ArrayList<>();
 
     public void addUserLike(User user) {
+        this.rate++;
         usersLikes.add(user);
         user.getLikesFilms().add(this);
     }
 
     public void removeUserLike(User user) {
+        this.rate--;
         usersLikes.remove(user);
         user.getLikesFilms().remove(this);
     }

@@ -75,8 +75,8 @@ class FilmRepositoryTest {
         film2.addUserLike(user1);
         filmRepository.saveAll(List.of(film1, film2, film3));
         userRepository.saveAll(List.of(user1, user2, user3, user4));
-        List<Film> popularFilms = filmRepository.findPopularFilms(2);
-        Assertions.assertThat(popularFilms).isEqualTo(List.of(film1, film2));
+        List<Film> popularFilms = filmRepository.findPopularFilmsByRate(2);
+        Assertions.assertThat(popularFilms).isEqualTo(List.of(film2, film1));
     }
 
     @Test
@@ -88,7 +88,7 @@ class FilmRepositoryTest {
         film2.addUserLike(user1);
         filmRepository.saveAll(List.of(film1, film2, film3));
         userRepository.saveAll(List.of(user1, user2, user3, user4));
-        List<Film> popularFilms = filmRepository.findPopularFilms(1);
+        List<Film> popularFilms = filmRepository.findPopularFilmsByRate(1);
         Assertions.assertThat(popularFilms).isEqualTo(List.of(film2));
     }
 
@@ -104,7 +104,8 @@ class FilmRepositoryTest {
         film1.removeUserLike(user1);
         filmRepository.save(film1);
         userRepository.save(user1);
-        List<Film> popularFilms = filmRepository.findPopularFilms(10);
-        Assertions.assertThat(popularFilms).isEqualTo(List.of(film2));
+        List<Film> popularFilms = filmRepository.findPopularFilmsByRate(10);
+        Assertions.assertThat(popularFilms).isEqualTo(List.of(film2, film1, film3));
+        Assertions.assertThat(film1.getRate() == 0);
     }
 }

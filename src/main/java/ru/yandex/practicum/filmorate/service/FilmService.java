@@ -65,11 +65,6 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        List<Film> popularFilms = filmRepository.findPopularFilms(count);
-        if (popularFilms.isEmpty()) {
-            return filmRepository.findAll();
-        } else {
-            return popularFilms;
-        }
+        return filmRepository.findPopularFilmsByRate(count);
     }
 }
