@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 class UserControllerTest {
     private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
+    private User user;
     @Autowired
     private MockMvc mockMvc;
     @MockBean
@@ -40,7 +41,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        User user = User.builder()
+        user = User.builder()
                 .id(1L)
                 .email("mail@mail.ru")
                 .login("dolore")
@@ -155,5 +156,38 @@ class UserControllerTest {
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
         verify(mockService, times(1)).removeUserById(1L);
+    }
+
+    @Test
+    @DisplayName("Method PUT /users/1/friends/2, expected host answer OK")
+    public void testAddUserFriend_OK_200() throws Exception {
+        User friend = User.builder()
+                .id(2L)
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1981, 11, 15))
+                .build();
+        user.addFriend(friend);
+        when(mockService.addFriend(1L, 2L)).thenReturn(user);
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Method DELETE /users/1/friends/2, expected host answer OK")
+    public void testDeleteUserFriend_OK_200() throws Exception {
+        User friend = User.builder()
+                .id(2L)
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1981, 11, 15))
+                .build();
+        user.addFriend(friend);
+        user.removeFriend(friend);
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(status().isOk());
     }
 }

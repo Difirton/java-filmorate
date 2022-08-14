@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
@@ -50,9 +51,7 @@ public class User {
     private List<User> friends = new ArrayList<>();
 
     @Builder.Default
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id")
+    @JsonIgnore
     @ManyToMany(mappedBy = "friends", cascade = CascadeType.ALL)
     private List<User> users = new ArrayList<>();
 
