@@ -45,8 +45,14 @@ public class User {
             property = "id")
     @JoinTable(
             name = "user_friends",
-            joinColumns = {@JoinColumn(name = "friend_id", referencedColumnName = "id", nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)}
+            joinColumns = {@JoinColumn(name = "friend_id",
+                    foreignKey = @ForeignKey(name = "FK_FRIEND_ID"),
+                    referencedColumnName = "id",
+                    nullable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "user_id",
+                    foreignKey = @ForeignKey(name = "FK_USER_ID"),
+                    referencedColumnName = "id",
+                    nullable = false)}
     )
     private List<User> friends = new ArrayList<>();
 

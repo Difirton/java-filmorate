@@ -48,8 +48,12 @@ public class Film {
     @ManyToMany
     @JoinTable(
             name = "users_likes_films",
-            joinColumns = @JoinColumn(name = "film_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            joinColumns = @JoinColumn(name = "film_id",
+                    foreignKey = @ForeignKey(name = "FK_FILM_ID"),
+                    nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "user_id",
+                    foreignKey = @ForeignKey(name = "FK_USER_ID"),
+                    nullable = false)
     )
     @Column(name = "user_likes")
     private List<User> usersLikes = new ArrayList<>();
