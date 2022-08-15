@@ -45,6 +45,7 @@ public class User {
             property = "id")
     @JoinTable(
             name = "user_friends",
+            uniqueConstraints = @UniqueConstraint(name = "UNQ_USER_FRIEND", columnNames = {"USER_ID", "FRIEND_ID"}),
             joinColumns = {@JoinColumn(name = "friend_id",
                     foreignKey = @ForeignKey(name = "FK_FRIEND_ID"),
                     referencedColumnName = "id",

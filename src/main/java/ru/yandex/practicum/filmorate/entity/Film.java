@@ -48,6 +48,7 @@ public class Film {
     @ManyToMany
     @JoinTable(
             name = "users_likes_films",
+            uniqueConstraints = @UniqueConstraint(name = "UNQ_FILM_ID_USER_ID", columnNames = {"film_id", "user_id"}),
             joinColumns = @JoinColumn(name = "film_id",
                     foreignKey = @ForeignKey(name = "FK_FILM_ID"),
                     nullable = false),
