@@ -21,11 +21,9 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 class UserServiceTest {
-    User user;
-
+    private User user;
     @MockBean
     private UserRepository mockRepository;
-
     @Autowired
     private UserService userService;
 

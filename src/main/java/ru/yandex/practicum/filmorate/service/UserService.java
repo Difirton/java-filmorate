@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.error.UserNotFoundException;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
@@ -51,5 +52,30 @@ public class UserService {
 
     public void removeUserById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Transactional
+    public User addFriend(Long userId, Long friendId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
+        user.addFriend(friend);
+        userRepository.saveAll(List.of(user, friend));
+        return user;
+    }
+
+    @Transactional
+    public void removeFriend(Long userId, Long friendId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
+        user.removeFriend(friend);
+        userRepository.saveAll(List.of(user, friend));
+    }
+
+    public List<User> getUserFriends(Long id) {
+        return userRepository.findAllFriendsUser(id);
+    }
+
+    public List<User> getCommonUsersFriends(Long id, Long otherId) {
+        return userRepository.findCommonUsersFriends(id, otherId);
     }
 }

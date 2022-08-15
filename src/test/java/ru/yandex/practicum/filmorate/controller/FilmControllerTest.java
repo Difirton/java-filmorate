@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,12 +15,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.Film;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,27 +35,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 class FilmControllerTest {
     private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
-
+    Film film;
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
-    private FilmRepository mockRepository;
+    private FilmService mockService;
 
     @BeforeEach
     public void setUp() {
-        Film film = Film.builder()
+        film = Film.builder()
                 .id(1L)
                 .name("name film 1")
                 .description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25))
                 .duration(100)
                 .build();
-        when(mockRepository.findById(1L)).thenReturn(Optional.of(film));
+        when(mockService.getFilmById(1L)).thenReturn(film);
     }
 
     @Test
-    @DisplayName("Method GET /films/1, expected host answer OK")
+    @DisplayName("Request GET /films/1, expected host answer OK")
     public void testFindFilmById_OK_200() throws Exception {
         mockMvc.perform(get("/films/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -64,11 +64,11 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.description", is("description film 1")))
                 .andExpect(jsonPath("$.releaseDate", is("1967-03-25")))
                 .andExpect(jsonPath("$.duration", is(100)));
-        verify(mockRepository, times(1)).findById(1L);
+        verify(mockService, times(1)).getFilmById(1L);
     }
 
     @Test
-    @DisplayName("Method POST /films, expected host answer CREATED")
+    @DisplayName("Request POST /films, expected host answer CREATED")
     public void testPostNewFilm_CREATED_201() throws Exception {
         Film newFilm = Film.builder()
                 .id(2L)
@@ -77,8 +77,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(2000, 10, 5))
                 .duration(300)
                 .build();
-        when(mockRepository.save(any(Film.class))).thenReturn(newFilm);
-
+        when(mockService.createFilm(any(Film.class))).thenReturn(newFilm);
         mockMvc.perform(post("/films")
                         .content(jsonMapper.writeValueAsString(newFilm))
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
@@ -88,11 +87,11 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.description", is("description film 2")))
                 .andExpect(jsonPath("$.releaseDate", is("2000-10-05")))
                 .andExpect(jsonPath("$.duration", is(300)));
-        verify(mockRepository, times(1)).save(any(Film.class));
+        verify(mockService, times(1)).createFilm(any(Film.class));
     }
 
     @Test
-    @DisplayName("Method GET /films, expected host answer OK")
+    @DisplayName("Request GET /films, expected host answer OK")
     public void testFindAllFilms_OK_200() throws Exception {
         List<Film> films = Arrays.asList(
                 Film.builder()
@@ -109,7 +108,7 @@ class FilmControllerTest {
                         .releaseDate(LocalDate.of(2000, 10, 5))
                         .duration(300)
                         .build());
-        when(mockRepository.findAll()).thenReturn(films);
+        when(mockService.getAllFilms()).thenReturn(films);
         mockMvc.perform(get("/films"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -124,11 +123,11 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$[1].description", is("description film 2")))
                 .andExpect(jsonPath("$[1].releaseDate", is("2000-10-05")))
                 .andExpect(jsonPath("$[1].duration", is(300)));
-        verify(mockRepository, times(1)).findAll();
+        verify(mockService, times(1)).getAllFilms();
     }
 
     @Test
-    @DisplayName("Method PUT /films/1, expected host answer OK")
+    @DisplayName("Request PUT /films/1, expected host answer OK")
     public void testUpdateFilm_OK_200() throws Exception {
         Film updateFilm = Film.builder()
                 .id(1L)
@@ -137,8 +136,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(2000, 10, 5))
                 .duration(300)
                 .build();
-        when(mockRepository.save(any(Film.class))).thenReturn(updateFilm);
-
+        when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
         mockMvc.perform(put("/films/1")
                         .content(jsonMapper.writeValueAsString(updateFilm))
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
@@ -152,12 +150,12 @@ class FilmControllerTest {
     }
 
     @Test
-    @DisplayName("Method DELETE /films/1, expected host answer OK")
+    @DisplayName("Request DELETE /films/1, expected host answer OK")
     public void testDeleteFilm_OK_200() throws Exception {
-        doNothing().when(mockRepository).deleteById(1L);
+        doNothing().when(mockService).removeFilmById(1L);
         mockMvc.perform(delete("/films/1"))
                 .andExpect(status().isOk());
-        verify(mockRepository, times(1)).deleteById(1L);
+        verify(mockService, times(1)).removeFilmById(1L);
     }
 
     @Test
@@ -170,10 +168,38 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(1000, 10, 5))
                 .duration(300)
                 .build();
-        when(mockRepository.save(any(Film.class))).thenReturn(updateFilm);
+        when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
         mockMvc.perform(put("/films/1")
                         .content(jsonMapper.writeValueAsString(updateFilm))
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Request PUT /films/{id}/like/{userId}, expected host answer OK")
+    public void testPutLikeFilm() throws Exception {
+        film.addUserLike(User.builder().build());
+        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
+        mockMvc.perform(put("/films/1/like/1")
+                        .content(jsonMapper.writeValueAsString(film))
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.rate", is(1)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Request DELETE /films/{id}/like/{userId}, expected host answer OK")
+    public void testDeleteLikeFilm() throws Exception {
+        User user = User.builder().build();
+        film.addUserLike(user);
+        film.removeUserLike(user);
+        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
+        mockMvc.perform(put("/films/1/like/1")
+                        .content(jsonMapper.writeValueAsString(film))
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.rate", is(0)))
+                .andExpect(status().isOk());
     }
 }

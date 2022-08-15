@@ -15,8 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = "users")
-@ToString(exclude = "users")
+@EqualsAndHashCode(exclude = "usersLikes")
+@ToString(exclude = "usersLikes")
 @Builder
 @Entity
 @Table(name = "films")
@@ -41,11 +41,28 @@ public class Film {
     private Integer duration;
 
     @Builder.Default
+    @PositiveOrZero
+    private Integer rate = 0;
+
+    @Builder.Default
     @ManyToMany
     @JoinTable(
-            name = "users_films",
+            name = "users_likes_films",
             joinColumns = @JoinColumn(name = "film_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> users = new ArrayList<>();
+    @Column(name = "user_likes")
+    private List<User> usersLikes = new ArrayList<>();
+
+    public void addUserLike(User user) {
+        this.rate++;
+        usersLikes.add(user);
+        user.getLikesFilms().add(this);
+    }
+
+    public void removeUserLike(User user) {
+        this.rate--;
+        usersLikes.remove(user);
+        user.getLikesFilms().remove(this);
+    }
 }
