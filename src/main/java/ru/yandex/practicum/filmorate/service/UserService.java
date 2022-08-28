@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.entity.UserFriend;
 import ru.yandex.practicum.filmorate.error.UserNotFoundException;
+import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.List;
@@ -12,10 +14,12 @@ import java.util.List;
 @Service
 public class UserService {
     private UserRepository userRepository;
+    private UserFriendRepository userFriendRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserFriendRepository userFriendRepository) {
         this.userRepository = userRepository;
+        this.userFriendRepository = userFriendRepository;
     }
 
     public User createUser(User user) {
@@ -58,8 +62,17 @@ public class UserService {
     public User addFriend(Long userId, Long friendId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
+        UserFriend userFriend = UserFriend.builder()
+                .user(user)
+                .friend(friend)
+                .approved(true).build();
+        UserFriend friendUser = UserFriend.builder()
+                .user(friend)
+                .friend(user)
+                .approved(true).build();
+        userFriendRepository.saveAll(List.of(userFriend, friendUser));
+        friend.addFriend(user);
         user.addFriend(friend);
-        userRepository.saveAll(List.of(user, friend));
         return user;
     }
 
@@ -68,6 +81,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         user.removeFriend(friend);
+        friend.removeFriend(user);
         userRepository.saveAll(List.of(user, friend));
     }
 

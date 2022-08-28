@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
@@ -14,7 +13,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"email", "login"})
-@ToString(exclude = {"likesFilms", "users", "friends"})
+@ToString(exclude = {"likesFilms", "friends"})
 @Builder
 @Entity
 @Table(name = "users")
@@ -39,35 +38,17 @@ public class User {
     private LocalDate birthday;
 
     @Builder.Default
-    @ManyToMany(cascade = CascadeType.ALL)
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
-    @JoinTable(
-            name = "user_friends",
-            uniqueConstraints = @UniqueConstraint(name = "UNQ_USER_FRIEND", columnNames = {"USER_ID", "FRIEND_ID"}),
-            joinColumns = {@JoinColumn(name = "friend_id",
-                    foreignKey = @ForeignKey(name = "FK_FRIEND_ID"),
-                    referencedColumnName = "id",
-                    nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "user_id",
-                    foreignKey = @ForeignKey(name = "FK_USER_ID"),
-                    referencedColumnName = "id",
-                    nullable = false)}
-    )
-    private List<User> friends = new ArrayList<>();
+    @OneToMany(mappedBy = "friend", cascade = CascadeType.REMOVE)
+    private List<UserFriend> friends = new ArrayList<>();
 
     @Builder.Default
-    @JsonIgnore
-    @ManyToMany(mappedBy = "friends", cascade = CascadeType.ALL)
-    private List<User> users = new ArrayList<>();
-
-    @Builder.Default
-    @ManyToMany(mappedBy = "usersLikes")
+    @ManyToMany(mappedBy = "usersLikes", cascade = CascadeType.REMOVE)
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
-    @Column(name = "likes_films")
     private List<Film> likesFilms = new ArrayList<>();
 
     public void addLikeFilm(Film film) {
@@ -81,12 +62,17 @@ public class User {
     }
 
     public void addFriend(User user) {
-        friends.add(user);
-        user.getFriends().add(this);
+        UserFriend newFriend = UserFriend.builder()
+                .user(this)
+                .friend(user)
+                .approved(true).build();
+        friends.add(newFriend);
     }
 
     public void removeFriend(User user) {
-        friends.remove(user);
-        user.getFriends().remove(this);
+        UserFriend removedFriend = UserFriend.builder()
+                .user(this)
+                .friend(user).build();
+        friends.remove(removedFriend);
     }
 }

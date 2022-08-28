@@ -14,13 +14,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.entity.UserFriend;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.equalToObject;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.is;
@@ -126,6 +127,25 @@ class UserControllerTest {
         verify(mockService, times(1)).getAllUsers();
     }
 
+
+    @Test
+    @DisplayName("Request PUT /users/1/friends/2, expected host answer OK")
+    public void testAddUserFriend_OK_200() throws Exception {
+        User friend = User.builder()
+                .id(2L)
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1981, 11, 15))
+                .build();
+        user.addFriend(friend);
+        when(mockService.addFriend(1L, 2L)).thenReturn(user);
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.friends", hasSize(1)))
+                .andExpect(status().isOk());
+    }
+
     @Test
     @DisplayName("Request PUT /users/1, expected host answer OK")
     public void testUpdateUser_OK_200() throws Exception {
@@ -157,24 +177,6 @@ class UserControllerTest {
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
         verify(mockService, times(1)).removeUserById(1L);
-    }
-
-    @Test
-    @DisplayName("Request PUT /users/1/friends/2, expected host answer OK")
-    public void testAddUserFriend_OK_200() throws Exception {
-        User friend = User.builder()
-                .id(2L)
-                .email("mail@mail.ru")
-                .login("dolore")
-                .name("Nick Name")
-                .birthday(LocalDate.of(1981, 11, 15))
-                .build();
-        user.addFriend(friend);
-        when(mockService.addFriend(1L, 2L)).thenReturn(user);
-        mockMvc.perform(put("/users/1/friends/2"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.friends", hasSize(1)))
-                .andExpect(status().isOk());
     }
 
     @Test
@@ -212,7 +214,9 @@ class UserControllerTest {
                 .build();
         user.addFriend(friend1);
         user.addFriend(friend2);
-        when(mockService.getUserFriends(1L)).thenReturn(user.getFriends());
+        when(mockService.getUserFriends(1L)).thenReturn(user.getFriends().stream()
+                                                                    .map(UserFriend::getFriend)
+                                                                    .collect(Collectors.toList()));
         mockMvc.perform(get("/users/1/friends"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
