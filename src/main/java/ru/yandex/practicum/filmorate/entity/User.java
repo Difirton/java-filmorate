@@ -38,10 +38,10 @@ public class User {
     private LocalDate birthday;
 
     @Builder.Default
-    @OneToMany(mappedBy = "friend", cascade = CascadeType.REMOVE)
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
+    @OneToMany(mappedBy = "friend", cascade = CascadeType.REMOVE)
     private List<UserFriend> friends = new ArrayList<>();
 
     @Builder.Default
