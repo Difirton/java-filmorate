@@ -39,4 +39,4 @@ While in the directory on the command line, type:
 
 ## Database dependency diagram
 
-![](images/diagram.jpg)
+![diagram](./images/diagram.jpg)

@@ -127,6 +127,25 @@ class UserControllerTest {
         verify(mockService, times(1)).getAllUsers();
     }
 
+
+    @Test
+    @DisplayName("Request PUT /users/1/friends/2, expected host answer OK")
+    public void testAddUserFriend_OK_200() throws Exception {
+        User friend = User.builder()
+                .id(2L)
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1981, 11, 15))
+                .build();
+        user.addFriend(friend);
+        when(mockService.addFriend(1L, 2L)).thenReturn(user);
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.friends", hasSize(1)))
+                .andExpect(status().isOk());
+    }
+
     @Test
     @DisplayName("Request PUT /users/1, expected host answer OK")
     public void testUpdateUser_OK_200() throws Exception {
@@ -158,24 +177,6 @@ class UserControllerTest {
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
         verify(mockService, times(1)).removeUserById(1L);
-    }
-
-    @Test
-    @DisplayName("Request PUT /users/1/friends/2, expected host answer OK")
-    public void testAddUserFriend_OK_200() throws Exception {
-        User friend = User.builder()
-                .id(2L)
-                .email("mail@mail.ru")
-                .login("dolore")
-                .name("Nick Name")
-                .birthday(LocalDate.of(1981, 11, 15))
-                .build();
-        user.addFriend(friend);
-        when(mockService.addFriend(1L, 2L)).thenReturn(user);
-        mockMvc.perform(put("/users/1/friends/2"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.friends", hasSize(1)))
-                .andExpect(status().isOk());
     }
 
     @Test

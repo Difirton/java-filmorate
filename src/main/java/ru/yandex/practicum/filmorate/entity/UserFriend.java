@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,11 +21,17 @@ public class UserFriend {
     private Long id;
 
     @NotNull
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "id")
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
     private User user;
 
     @NotNull
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "id")
     @ManyToOne
     @JoinColumn(name = "friend_id", nullable = false, foreignKey= @ForeignKey(name = "fk_friend_id"))
     private User friend;
