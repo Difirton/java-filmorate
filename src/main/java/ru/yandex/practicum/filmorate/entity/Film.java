@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.filmorate.config.validator.AfterDate;
@@ -15,8 +17,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = "usersLikes")
-@ToString(exclude = "usersLikes")
+@EqualsAndHashCode(exclude = {"usersLikes", "genres"})
+@ToString(exclude = {"usersLikes", "genres"})
 @Builder
 @Entity
 @Table(name = "films")
@@ -48,16 +50,21 @@ public class Film {
     @ManyToMany
     @JoinTable(
             name = "users_likes_films",
-            uniqueConstraints = @UniqueConstraint(name = "UNQ_FILM_ID_USER_ID", columnNames = {"film_id", "user_id"}),
-            joinColumns = @JoinColumn(name = "film_id",
-                    foreignKey = @ForeignKey(name = "FK_FILM_ID"),
-                    nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "user_id",
+            joinColumns = @JoinColumn(name = "user_id",
                     foreignKey = @ForeignKey(name = "FK_USER_ID"),
+                    nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "film_id",
+                    foreignKey = @ForeignKey(name = "FK_FILM_ID"),
                     nullable = false)
     )
-    @Column(name = "user_likes")
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "id")
     private List<User> usersLikes = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany
+    private List<Genre> genres = new ArrayList<>();
 
     public void addUserLike(User user) {
         this.rate++;

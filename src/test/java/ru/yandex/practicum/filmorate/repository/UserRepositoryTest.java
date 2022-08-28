@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.entity.UserFriend;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,8 +26,13 @@ class UserRepositoryTest {
     private User user2;
     private User user3;
     private User user4;
+    private UserFriend user1friend2;
+    private UserFriend user1Friend3;
+    private UserFriend user3Friend4;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserFriendRepository userFriendRepository;
 
     @BeforeEach
     public void setUp() {
@@ -38,6 +44,9 @@ class UserRepositoryTest {
                 .birthday(LocalDate.of(1995, 8, 20)).build();
         user4 = User.builder().id(4L).email("example@yandex.com").login("64GGfafaf22").name("Test4 Tes4")
                 .birthday(LocalDate.of(1965, 9, 23)).build();
+        user1friend2 = UserFriend.builder().user(user1).friend(user2).approved(true).build();
+        user1Friend3 = UserFriend.builder().user(user1).friend(user3).approved(true).build();
+        user3Friend4 = UserFriend.builder().user(user4).friend(user3).approved(true).build();
     }
 
     @Test
@@ -58,9 +67,13 @@ class UserRepositoryTest {
     @Test
     @DisplayName("Test SQL native query find all friends of user")
     public void testFindAllFriendsUser() {
-        user1.addFriend(user2);
-        user1.addFriend(user3);
         userRepository.saveAll(List.of(user1,user2, user3));
+        user1.addFriend(user2);
+        user2.addFriend(user1);
+        user1.addFriend(user3);
+        user3.addFriend(user1);
+        userRepository.saveAll(List.of(user1,user2, user3));
+        userFriendRepository.saveAll(List.of(user1friend2, user1Friend3));
         List<User> friendsOfUser1 = userRepository.findAllFriendsUser(1L);
         Assertions.assertThat(friendsOfUser1).isEqualTo(List.of(user2, user3));
     }
@@ -69,10 +82,15 @@ class UserRepositoryTest {
     @DisplayName("Test SQL native query find all common friends of two users")
     public void testFindCommonUsersFriends() {
         user1.addFriend(user2);
+        user2.addFriend(user1);
         user1.addFriend(user3);
-        userRepository.saveAll(List.of(user1,user2, user3));
+        user3.addFriend(user1);
+        userRepository.saveAll(List.of(user1,user2, user3, user4));
+        userFriendRepository.saveAll(List.of(user1friend2, user1Friend3));
         user4.addFriend(user3);
+        user3.addFriend(user4);
         userRepository.save(user4);
+        userFriendRepository.save(user3Friend4);
         List<User> commonFriendsOfUsers1and2 = userRepository.findCommonUsersFriends(1L, 4L);
         Assertions.assertThat(commonFriendsOfUsers1and2).isEqualTo(List.of(user3));
     }
@@ -80,22 +98,32 @@ class UserRepositoryTest {
     @Test
     @DisplayName("Test absent common friends of two users, expected throw IndexOutOfBoundsException")
     public void testAbsenceOfCommonUsersFriends() {
+        userRepository.saveAll(List.of(user1,user2, user3));
         user1.addFriend(user2);
+        user2.addFriend(user1);
         user1.addFriend(user3);
+        user3.addFriend(user1);
         userRepository.saveAll(List.of(user1,user2, user3));
         user4.addFriend(user1);
+        user1.addFriend(user4);
         userRepository.save(user4);
         List<User> emptyCommonFriendsOfUsers1and2 = userRepository.findCommonUsersFriends(1L, 4L);
+        System.out.println(emptyCommonFriendsOfUsers1and2);
         assertThrows(IndexOutOfBoundsException.class, () -> emptyCommonFriendsOfUsers1and2.get(0));
     }
 
     @Test
     @DisplayName("Test absent common friends of two users, expected throw IndexOutOfBoundsException")
     public void testDeleteFriend() {
-        user1.addFriend(user2);
-        user1.addFriend(user3);
         userRepository.saveAll(List.of(user1,user2, user3));
+        user1.addFriend(user2);
+        user2.addFriend(user1);
+        user1.addFriend(user3);
+        user3.addFriend(user1);
+        userFriendRepository.saveAll(List.of(user1friend2, user1Friend3));
         user1.removeFriend(user2);
+        user2.removeFriend(user1);
+        userFriendRepository.delete(user1friend2);
         userRepository.saveAll(List.of(user1,user2));
         List<User> user1FriendsAfterDelete = userRepository.findAllFriendsUser(1L);
         Assertions.assertThat(user1FriendsAfterDelete).isEqualTo(List.of(user3));

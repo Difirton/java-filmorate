@@ -14,13 +14,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.entity.UserFriend;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.equalToObject;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.is;
@@ -212,7 +213,9 @@ class UserControllerTest {
                 .build();
         user.addFriend(friend1);
         user.addFriend(friend2);
-        when(mockService.getUserFriends(1L)).thenReturn(user.getFriends());
+        when(mockService.getUserFriends(1L)).thenReturn(user.getFriends().stream()
+                                                                    .map(UserFriend::getFriend)
+                                                                    .collect(Collectors.toList()));
         mockMvc.perform(get("/users/1/friends"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))

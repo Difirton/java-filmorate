@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query(value = "SELECT DISTINCT * FROM users WHERE id IN" +
+    @Query(value = "SELECT * FROM users WHERE id IN" +
             "(SELECT friend_id FROM user_friends WHERE user_id = ?1)", nativeQuery = true)
     List<User> findAllFriendsUser(Long id);
 
-    @Query(value = "SELECT DISTINCT * FROM users WHERE id IN (SELECT friend_id FROM" +
+    @Query(value = "SELECT * FROM users WHERE id IN (SELECT friend_id FROM" +
             "(Select friend_id FROM user_friends WHERE user_id = ?1) INNER JOIN" +
             "(Select friend_id FROM user_friends WHERE user_id = ?2) USING (friend_id))", nativeQuery = true)
     List<User> findCommonUsersFriends(Long id, Long otherId);
