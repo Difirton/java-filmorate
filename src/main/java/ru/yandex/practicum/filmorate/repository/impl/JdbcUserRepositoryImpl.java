@@ -29,11 +29,6 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public int count() {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
-    }
-
-    @Override
     public User save(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {

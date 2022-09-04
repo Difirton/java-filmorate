@@ -32,8 +32,9 @@ public class JdbcGenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    public int update(Genre genre) {
-        return this.jdbcTemplate.update("UPDATE genres SET title = ? WHERE id = ?", genre.getTitle(), genre.getId());
+    public Genre update(Genre genre) {
+        this.jdbcTemplate.update("UPDATE genres SET title = ? WHERE id = ?", genre.getTitle(), genre.getId());
+        return genre;
     }
 
     @Override

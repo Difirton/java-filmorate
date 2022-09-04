@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
@@ -51,16 +52,27 @@ public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
     }
 
     @Override
-    public int update(UserFriend userFriend) {
-        return this.jdbcTemplate.update(
+    public UserFriend update(UserFriend userFriend) {
+        this.jdbcTemplate.update(
                 "UPDATE user_friends SET user_id = ?, friend_id = ?, approved = ? WHERE id = ?",
                 userFriend.getUser().getId(), userFriend.getFriend().getId(), userFriend.isApproved(),
                 userFriend.getId());
+        return userFriend;
     }
 
     @Override
     public int deleteById(Long id) {
         return this.jdbcTemplate.update("DELETE user_friends WHERE id = ?", id);
+    }
+
+    @Override
+    public List<UserFriend> findAll() {
+        return null;
+    }
+
+    @Override
+    public Optional<UserFriend> findById(Long id) {
+        return Optional.empty();
     }
 
     @Override

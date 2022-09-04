@@ -23,15 +23,16 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public RatingMPA save(RatingMPA ratingMPA) {
-        jdbcTemplate.update("INSERT INTO rating_mpa (title) VALUES (?)",
+        this.jdbcTemplate.update("INSERT INTO rating_mpa (title) VALUES (?)",
                 ratingMPA.getTitle());
         return ratingMPA;
     }
 
     @Override
-    public int update(RatingMPA ratingMPA) {
-        return jdbcTemplate.update("UPDATE rating_mpa SET title = ? WHERE id = ?",
+    public RatingMPA update(RatingMPA ratingMPA) {
+        this.jdbcTemplate.update("UPDATE rating_mpa SET title = ? WHERE id = ?",
                 ratingMPA.getTitle(), ratingMPA.getId());
+        return ratingMPA;
     }
 
     @Override
@@ -41,7 +42,7 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public List<RatingMPA> findAll() {
-        return jdbcTemplate.query("SELECT * FROM rating_mpa ORDER BY id",
+        return this.jdbcTemplate.query("SELECT * FROM rating_mpa ORDER BY id",
                 (resultSet, rowNum) -> RatingMPA.builder()
                         .id(resultSet.getLong("id"))
                         .title(resultSet.getString("title")).build());
@@ -49,7 +50,7 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public Optional<RatingMPA> findById(Long id) {
-        return jdbcTemplate.queryForObject(
+        return this.jdbcTemplate.queryForObject(
                 "SELECT * FROM rating_mpa WHERE id = ?",
                 (resultSet, rowNum) -> Optional.of(RatingMPA.builder()
                         .id(resultSet.getLong("id"))
@@ -58,7 +59,7 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public int[] saveAll(List<RatingMPA> ratingsMPA) {
-        return jdbcTemplate.batchUpdate("INSERT INTO rating_mpa (title) VALUES (?)",
+        return this.jdbcTemplate.batchUpdate("INSERT INTO rating_mpa (title) VALUES (?)",
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                         preparedStatement.setString(1, ratingsMPA.get(i).getTitle());
