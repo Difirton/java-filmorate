@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
@@ -35,6 +36,7 @@ class FilmServiceTest {
                 .description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25))
                 .duration(100)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .build();
         when(mockRepository.findById(1L)).thenReturn(Optional.of(film));
     }
@@ -47,8 +49,9 @@ class FilmServiceTest {
                 .description("updated film Desc")
                 .releaseDate(LocalDate.of(2000, 10, 5))
                 .duration(300)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .build();
-        when(mockRepository.save(any(Film.class))).thenReturn(film);
+        when(mockRepository.update(any(Film.class))).thenReturn(film);
         Film filmAfterUpdate = filmService.updateFilm(1L, updatedFilm);
         String actualName = filmAfterUpdate.getName();
         String expectedName = "updated film";

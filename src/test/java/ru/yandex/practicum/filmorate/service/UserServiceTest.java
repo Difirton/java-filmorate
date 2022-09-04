@@ -65,7 +65,7 @@ class UserServiceTest {
                 .name("Serious Sam")
                 .birthday(LocalDate.of(1981, 5, 10))
                 .build();
-        when(mockRepository.save(any(User.class))).thenReturn(user);
+        when(mockRepository.update(any(User.class))).thenReturn(user);
         User userAfterUpdate = userService.updateUser(1L, updatedUser);
         String actualEmail = userAfterUpdate.getEmail();
         String expectedEmail = "22mail@mail.ru";

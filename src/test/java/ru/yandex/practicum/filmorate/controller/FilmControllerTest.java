@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -48,6 +48,7 @@ class FilmControllerTest {
                 .name("name film 1")
                 .description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25))
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .duration(100)
                 .build();
         when(mockService.getFilmById(1L)).thenReturn(film);
@@ -75,6 +76,7 @@ class FilmControllerTest {
                 .name("name film 2")
                 .description("description film 2")
                 .releaseDate(LocalDate.of(2000, 10, 5))
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .duration(300)
                 .build();
         when(mockService.createFilm(any(Film.class))).thenReturn(newFilm);
@@ -100,6 +102,7 @@ class FilmControllerTest {
                         .description("description film 1")
                         .releaseDate(LocalDate.of(1967, 3, 25))
                         .duration(100)
+                        .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                         .build(),
                 Film.builder()
                         .id(2L)
@@ -107,6 +110,7 @@ class FilmControllerTest {
                         .description("description film 2")
                         .releaseDate(LocalDate.of(2000, 10, 5))
                         .duration(300)
+                        .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                         .build());
         when(mockService.getAllFilms()).thenReturn(films);
         mockMvc.perform(get("/films"))
@@ -134,6 +138,7 @@ class FilmControllerTest {
                 .name("update name")
                 .description("update description")
                 .releaseDate(LocalDate.of(2000, 10, 5))
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .duration(300)
                 .build();
         when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
@@ -167,6 +172,7 @@ class FilmControllerTest {
                 .description("update description")
                 .releaseDate(LocalDate.of(1000, 10, 5))
                 .duration(300)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .build();
         when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
         mockMvc.perform(put("/films/1")

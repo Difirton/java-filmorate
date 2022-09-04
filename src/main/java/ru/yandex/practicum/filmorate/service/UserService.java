@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.entity.UserFriend;
 import ru.yandex.practicum.filmorate.error.UserNotFoundException;
 import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.repository.impl.JdbcUserRepositoryImpl;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class UserService {
                         u.setName(newUser.getName());
                     }
                     u.setBirthday(newUser.getBirthday());
-                    return userRepository.save(u);
+                    return userRepository.update(u);
                 })
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
@@ -66,12 +67,7 @@ public class UserService {
                 .user(user)
                 .friend(friend)
                 .approved(true).build();
-        UserFriend friendUser = UserFriend.builder()
-                .user(friend)
-                .friend(user)
-                .approved(true).build();
-        userFriendRepository.saveAll(List.of(userFriend, friendUser));
-        friend.addFriend(user);
+        userFriendRepository.save(userFriend);
         user.addFriend(friend);
         return user;
     }
@@ -80,9 +76,7 @@ public class UserService {
     public void removeFriend(Long userId, Long friendId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
-        user.removeFriend(friend);
-        friend.removeFriend(user);
-        userRepository.saveAll(List.of(user, friend));
+        userFriendRepository.delete(UserFriend.builder().user(user).friend(friend).build());
     }
 
     public List<User> getUserFriends(Long id) {

@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.filmorate.config.validator.AfterDate;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
@@ -17,14 +17,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"usersLikes", "genres"})
-@ToString(exclude = {"usersLikes", "genres"})
+@EqualsAndHashCode(exclude = {"usersLikes", "genres", "ratingMPA"})
+@ToString(exclude = {"usersLikes", "genres", "ratingMPA"})
 @Builder
-@Entity
-@Table(name = "films")
 public class Film {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull(message = "Film name should not be empty")
@@ -32,11 +28,9 @@ public class Film {
     private String name;
 
     @Length(max = 200, message = "Should be less than 200 characters")
-    @Column(length = 200)
     private String description;
 
     @AfterDate(day = 28, month = 12, year = 1895, message = "Release date should be not earlier than december 28, 1895")
-    @Column(name = "release_date")
     private LocalDate releaseDate;
 
     @PositiveOrZero
@@ -46,24 +40,17 @@ public class Film {
     @PositiveOrZero
     private Integer rate = 0;
 
+    @NotNull
+    @JsonProperty(value = "mpa")
+    private RatingMPA ratingMPA;
+
     @Builder.Default
-    @ManyToMany
-    @JoinTable(
-            name = "users_likes_films",
-            joinColumns = @JoinColumn(name = "user_id",
-                    foreignKey = @ForeignKey(name = "FK_USER_ID"),
-                    nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "film_id",
-                    foreignKey = @ForeignKey(name = "FK_FILM_ID"),
-                    nullable = false)
-    )
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
     private List<User> usersLikes = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany
     private List<Genre> genres = new ArrayList<>();
 
     public void addUserLike(User user) {

@@ -1,8 +1,24 @@
 package ru.yandex.practicum.filmorate.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.entity.UserFriend;
 
-public interface UserFriendRepository extends JpaRepository<UserFriend, Long> {
+import java.util.List;
 
+public interface UserFriendRepository {
+
+    UserFriend save(UserFriend userFriend);
+
+    UserFriend save(User user, User friend);
+
+    UserFriend save(User user, User friend, boolean isApproved);
+
+    int update(UserFriend userFriend);
+
+    int deleteById(Long id);
+
+    int[] saveAll(List<UserFriend> usersFriends);
+    int delete(UserFriend userFriend);
+
+    int[][] updateAll(List<UserFriend> usersFriends);
 }

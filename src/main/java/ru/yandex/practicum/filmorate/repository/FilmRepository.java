@@ -1,13 +1,25 @@
 package ru.yandex.practicum.filmorate.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import ru.yandex.practicum.filmorate.entity.Film;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface FilmRepository extends JpaRepository<Film, Long> {
+public interface FilmRepository {
 
-    @Query(value = "SELECT * FROM films ORDER BY rate DESC LIMIT ?1", nativeQuery = true)
+    Film save(Film film);
+
+    Film update(Film film);
+
+    int deleteById(Long id);
+
+    List<Film> findAll();
+
+    Optional<Film> findById(Long id);
+
     List<Film> findPopularFilmsByRate(Integer count);
+
+    int[] saveAll(List<Film> film1);
+
+    int[][] updateAll(List<Film> films);
 }

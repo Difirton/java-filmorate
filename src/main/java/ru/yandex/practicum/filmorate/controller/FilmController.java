@@ -44,7 +44,7 @@ public class FilmController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public Film findOneFilm(@PathVariable("id") Long id) {
+    public Film findFilm(@PathVariable("id") Long id) {
         return filmService.getFilmById(id);
     }
 
