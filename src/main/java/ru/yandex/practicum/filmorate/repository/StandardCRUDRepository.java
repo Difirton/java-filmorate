@@ -16,5 +16,4 @@ public interface StandardCRUDRepository<M> {
     Optional<M> findById(Long id);
 
     int[] saveAll(List<M> m);
-
 }

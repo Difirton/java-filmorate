@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -39,7 +40,9 @@ public class FilmService {
                     f.setReleaseDate(newFilm.getReleaseDate());
                     f.setDuration(newFilm.getDuration());
                     f.setRatingMPA(newFilm.getRatingMPA());
-                    f.setGenres(newFilm.getGenres());
+                    f.setGenres(newFilm.getGenres().stream()
+                            .distinct()
+                            .collect(Collectors.toList()));
                     return filmRepository.update(f);
                 })
                 .orElseThrow(() -> new FilmNotFoundException(id));

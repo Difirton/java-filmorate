@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.entity.UserFriend;
 
 import java.util.List;
 
-public interface UserFriendRepository extends StandardCRUDRepository<UserFriend>{
+public interface UserFriendRepository extends StandardCRUDRepository<UserFriend> {
 
     UserFriend save(User user, User friend);
 

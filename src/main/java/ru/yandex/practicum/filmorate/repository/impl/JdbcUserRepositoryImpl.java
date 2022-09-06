@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.repository.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -19,19 +19,19 @@ import java.util.Optional;
 
 @Repository
 public class JdbcUserRepositoryImpl implements UserRepository {
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcOperations jdbcOperations;
     private final UserRepositoryMapper userMapper;
 
     @Autowired
-    public JdbcUserRepositoryImpl(JdbcTemplate jdbcTemplate, UserRepositoryMapper userMapper) {
-        this.jdbcTemplate = jdbcTemplate;
+    public JdbcUserRepositoryImpl(JdbcOperations jdbcOperations, UserRepositoryMapper userMapper) {
+        this.jdbcOperations = jdbcOperations;
         this.userMapper = userMapper;
     }
 
     @Override
     public User save(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
+        jdbcOperations.update(connection -> {
             PreparedStatement ps = connection
                     .prepareStatement("INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)",
                             Statement.RETURN_GENERATED_KEYS);
@@ -47,31 +47,31 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
     @Override
     public User update(User user) {
-        jdbcTemplate.update("UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
+        jdbcOperations.update("UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return user;
     }
 
     @Override
     public int deleteById(Long id) {
-        return jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
+        return jdbcOperations.update("DELETE FROM users WHERE id = ?", id);
     }
 
     @Override
     public List<User> findAll() {
-        return jdbcTemplate.query("SELECT * FROM users", userMapper);
+        return jdbcOperations.query("SELECT * FROM users", userMapper);
     }
 
     @Override
     public List<User> findAllFriendsUser(Long id) {
-        return jdbcTemplate.query(
+        return jdbcOperations.query(
                 "SELECT * FROM users WHERE id IN (SELECT friend_id FROM user_friends WHERE user_id = ?)",
                 userMapper, id);
     }
 
     @Override
     public List<User> findCommonUsersFriends(Long id, Long otherId) {
-        return jdbcTemplate.query(
+        return jdbcOperations.query(
                 "SELECT * FROM users WHERE id IN (SELECT * FROM " +
                         "(SELECT friend_id FROM user_friends WHERE user_id = ?) INNER JOIN" +
                         "(SELECT friend_id FROM user_friends WHERE user_id = ?) USING (friend_id))",
@@ -80,13 +80,13 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findById(Long id) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject(
+        return Optional.ofNullable(jdbcOperations.queryForObject(
                 "SELECT * FROM users where id = ?", userMapper, id));
     }
 
     @Override
     public int[] saveAll(List<User> users) {
-        return this.jdbcTemplate.batchUpdate("INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)",
+        return this.jdbcOperations.batchUpdate("INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)",
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                         preparedStatement.setString(1, users.get(i).getEmail());
@@ -102,7 +102,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
     @Override
     public int[][] updateAll(List<User> users) {
-        return jdbcTemplate.batchUpdate(
+        return jdbcOperations.batchUpdate(
                 "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
                 users, users.size(),
                 (preparedStatement, user) -> {
