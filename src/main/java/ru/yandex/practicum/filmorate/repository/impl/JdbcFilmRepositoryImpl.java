@@ -29,6 +29,16 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     private final FilmRepositoryLazyMapper lazyFilmMapper;
     private static final String SQL_INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)";
     private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?";
+    private static final String SQL_INSERT_FILMS_ALL_ARGS = "INSERT INTO films (name, description, release_date, " +
+            "duration, rate, rating_mpa_id) VALUES (?,?,?,?,?,?)";
+    private static final String SQL_UPDATE_FILMS_ALL_ARGS = "UPDATE films SET name = ?, description = ?, " +
+            "release_date = ?, duration = ?, rate = ?, rating_mpa_id = ? WHERE id = ?";
+    private static final String SQL_SELECT_GENRES_ID_BY_FILM_ID = "SELECT genre_id FROM film_genres WHERE film_id = ?";
+    private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM films WHERE id = ?";
+    private static final String SQL_SELECT_ALL_FILMS_WITHOUT_RATING = "SELECT * FROM films";
+    private static final String SQL_SELECT_ALL_FILMS_WITH_RATING = "SELECT * FROM films " +
+            "LEFT JOIN RATING_MPA RM ON FILMS.RATING_MPA_ID = RM.ID WHERE FILMS.ID = ?";
+    private static final String SQL_SELECT_POPULAR_FILMS = "SELECT * FROM films ORDER BY rate DESC LIMIT ?";
 
     @Autowired
     public JdbcFilmRepositoryImpl(JdbcOperations jdbcOperations, FilmRepositoryEagerMapper eagerFilmMapper,
@@ -39,13 +49,12 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     }
 
     @Override
+    @Transactional
     public Film save(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         this.jdbcOperations.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(
-                            "INSERT INTO films (name, description, release_date, duration, rate, rating_mpa_id) VALUES (?,?,?,?,?,?)",
-                            Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT_FILMS_ALL_ARGS,
+                    Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, film.getName());
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
@@ -65,11 +74,9 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     @Override
     @Transactional
     public Film update(Film film) {
-        this.jdbcOperations.update(
-                "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, rate = ?, rating_mpa_id = ? WHERE id = ?",
-                film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRate(), film.getRatingMPA().getId(),
-                film.getId());
-        List<Long> genresIdBeforeUpdate =  this.jdbcOperations.query("SELECT genre_id FROM film_genres WHERE film_id = ?",
+        this.jdbcOperations.update(SQL_UPDATE_FILMS_ALL_ARGS, film.getName(), film.getDescription(),
+                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getRatingMPA().getId(), film.getId());
+        List<Long> genresIdBeforeUpdate =  this.jdbcOperations.query(SQL_SELECT_GENRES_ID_BY_FILM_ID,
                 (rs, rowNum) -> rs.getLong("genre_id"), film.getId());
         List<Long> genresIdAfterUpdate = film.getGenres().stream()
                 .map(Genre::getId)
@@ -85,9 +92,9 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
         return film;
     }
 
-    private int[] updateFilmGenres(Long filmId, List<Long> genresId, String sqlRequiredOperation) {
+    private void updateFilmGenres(Long filmId, List<Long> genresId, String sqlRequiredOperation) {
         if (!genresId.isEmpty()) {
-            return this.jdbcOperations.batchUpdate(sqlRequiredOperation,
+            this.jdbcOperations.batchUpdate(sqlRequiredOperation,
                     new BatchPreparedStatementSetter() {
                         public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                             preparedStatement.setLong(1, filmId);
@@ -98,37 +105,33 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
                         }
                     });
         }
-        else return new int[]{0};
     }
 
     @Override
     public int deleteById(Long id) {
-        return this.jdbcOperations.update("DELETE FROM films WHERE id = ?", id);
+        return this.jdbcOperations.update(SQL_DELETE_FILM_BY_ID, id);
     }
 
     @Override
     public List<Film> findAll() {
-        return this.jdbcOperations.query("SELECT * FROM films", lazyFilmMapper);
+        return this.jdbcOperations.query(SQL_SELECT_ALL_FILMS_WITHOUT_RATING, lazyFilmMapper);
     }
 
     @Override
     public Optional<Film> findById(Long id) {
-        return Optional.ofNullable(this.jdbcOperations.queryForObject(
-                "SELECT * FROM films " +
-                        "LEFT JOIN RATING_MPA RM ON FILMS.RATING_MPA_ID = RM.ID WHERE FILMS.ID = ?", eagerFilmMapper, id));
+        return Optional.ofNullable(this.jdbcOperations.queryForObject(SQL_SELECT_ALL_FILMS_WITH_RATING,
+                eagerFilmMapper, id));
     }
 
     @Override
     public List<Film> findPopularFilmsByRate(Integer count) {
-        return this.jdbcOperations.query(
-                "SELECT * FROM films  ORDER BY rate DESC LIMIT ?", lazyFilmMapper, count);
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
     }
 
     @Override
     @Transactional
     public int[] saveAll(List<Film> films) {
-        return this.jdbcOperations.batchUpdate(
-                "INSERT INTO films (name, description, release_date, duration, rate, rating_mpa_id) VALUES (?,?,?,?,?,?)",
+        return this.jdbcOperations.batchUpdate(SQL_INSERT_FILMS_ALL_ARGS,
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                         preparedStatement.setString(1, films.get(i).getName());
@@ -146,8 +149,7 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
 
     @Override
     public int[][] updateAll(List<Film> films) {
-        return jdbcOperations.batchUpdate(
-                "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, rate = ? WHERE id = ?",
+        return jdbcOperations.batchUpdate(SQL_UPDATE_FILMS_ALL_ARGS,
                 films, films.size(),
                 (preparedStatement, film) -> {
                     preparedStatement.setString(1, film.getName());
@@ -155,7 +157,8 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
                     preparedStatement.setDate(3, Date.valueOf(film.getReleaseDate()));
                     preparedStatement.setInt(4, film.getDuration());
                     preparedStatement.setInt(5, film.getRate());
-                    preparedStatement.setLong(6, film.getId());
+                    preparedStatement.setLong(6, film.getRatingMPA().getId());
+                    preparedStatement.setLong(7, film.getId());
                 });
     }
 }

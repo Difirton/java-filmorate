@@ -15,6 +15,11 @@ import java.util.Optional;
 @Repository
 public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
     private final JdbcOperations jdbcOperations;
+    private static final String SQL_INSERT_TITLE = "INSERT INTO rating_mpa (title) VALUES (?)";
+    private static final String SQL_UPDATE_TITLE = "UPDATE rating_mpa SET title = ? WHERE id = ?";
+    private static final String SQL_DELETE_BY_ID = "DELETE FROM rating_mpa WHERE id = ?";
+    private static final String SQL_SELECT_ALL = "SELECT * FROM rating_mpa ORDER BY id";
+    private static final String SQL_SELECT_BY_ID = "SELECT * FROM rating_mpa WHERE id = ?";
 
     @Autowired
     public JdbcMpaRepositoryImpl(JdbcOperations jdbcOperations) {
@@ -23,26 +28,24 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public RatingMPA save(RatingMPA ratingMPA) {
-        this.jdbcOperations.update("INSERT INTO rating_mpa (title) VALUES (?)",
-                ratingMPA.getTitle());
+        this.jdbcOperations.update(SQL_INSERT_TITLE, ratingMPA.getTitle());
         return ratingMPA;
     }
 
     @Override
     public RatingMPA update(RatingMPA ratingMPA) {
-        this.jdbcOperations.update("UPDATE rating_mpa SET title = ? WHERE id = ?",
-                ratingMPA.getTitle(), ratingMPA.getId());
+        this.jdbcOperations.update(SQL_UPDATE_TITLE, ratingMPA.getTitle(), ratingMPA.getId());
         return ratingMPA;
     }
 
     @Override
     public int deleteById(Long id) {
-        return jdbcOperations.update("DELETE FROM rating_mpa WHERE id = ?", id);
+        return jdbcOperations.update(SQL_DELETE_BY_ID, id);
     }
 
     @Override
     public List<RatingMPA> findAll() {
-        return this.jdbcOperations.query("SELECT * FROM rating_mpa ORDER BY id",
+        return this.jdbcOperations.query(SQL_SELECT_ALL,
                 (resultSet, rowNum) -> RatingMPA.builder()
                         .id(resultSet.getLong("id"))
                         .title(resultSet.getString("title")).build());
@@ -50,8 +53,7 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public Optional<RatingMPA> findById(Long id) {
-        return this.jdbcOperations.queryForObject(
-                "SELECT * FROM rating_mpa WHERE id = ?",
+        return this.jdbcOperations.queryForObject(SQL_SELECT_BY_ID,
                 (resultSet, rowNum) -> Optional.of(RatingMPA.builder()
                         .id(resultSet.getLong("id"))
                         .title(resultSet.getString("title")).build()), id);
@@ -59,7 +61,7 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public int[] saveAll(List<RatingMPA> ratingsMPA) {
-        return this.jdbcOperations.batchUpdate("INSERT INTO rating_mpa (title) VALUES (?)",
+        return this.jdbcOperations.batchUpdate(SQL_INSERT_TITLE,
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                         preparedStatement.setString(1, ratingsMPA.get(i).getTitle());

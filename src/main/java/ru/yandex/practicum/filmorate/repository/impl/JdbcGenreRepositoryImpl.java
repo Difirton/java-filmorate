@@ -17,6 +17,13 @@ import java.util.Optional;
 public class JdbcGenreRepositoryImpl implements GenreRepository {
     private final JdbcOperations jdbcOperations;
     private final GenreRepositoryMapper genreMapper;
+    private static final String SQL_INSERT_TITLE = "INSERT INTO genres (title) VALUES (?)";
+    private static final String SQL_UPDATE_TITLE_BY_ID = "UPDATE genres SET title = ? WHERE id = ?";
+    private static final String SQL_DELETE_BY_ID = "DELETE FROM genres WHERE id = ?";
+    private static final String SQL_SELECT_ALL = "SELECT * FROM genres ORDER BY id";
+    private static final String SQL_SELECT_BY_ID = "SELECT * FROM genres WHERE id = ?";
+    private static final String SQL_SELECT_GENRES_BY_FILM_ID = "SELECT G.id, G.title FROM genres AS G " +
+            "INNER JOIN film_genres AS FG ON G.id = FG.genre_id WHERE FG.film_id = ?";
 
     @Autowired
     public JdbcGenreRepositoryImpl(JdbcOperations jdbcOperations, GenreRepositoryMapper genreMapper) {
@@ -26,36 +33,34 @@ public class JdbcGenreRepositoryImpl implements GenreRepository {
 
     @Override
     public Genre save(Genre genre) {
-        this.jdbcOperations.update("INSERT INTO genres (title) VALUES (?)",
-                genre.getTitle());
+        this.jdbcOperations.update(SQL_INSERT_TITLE, genre.getTitle());
         return genre;
     }
 
     @Override
     public Genre update(Genre genre) {
-        this.jdbcOperations.update("UPDATE genres SET title = ? WHERE id = ?", genre.getTitle(), genre.getId());
+        this.jdbcOperations.update(SQL_UPDATE_TITLE_BY_ID, genre.getTitle(), genre.getId());
         return genre;
     }
 
     @Override
     public int deleteById(Long id) {
-        return this.jdbcOperations.update("DELETE FROM genres WHERE id = ?", id);
+        return this.jdbcOperations.update(SQL_DELETE_BY_ID, id);
     }
 
     @Override
     public List<Genre> findAll() {
-        return this.jdbcOperations.query("SELECT * FROM genres ORDER BY id", genreMapper);
+        return this.jdbcOperations.query(SQL_SELECT_ALL, genreMapper);
     }
 
     @Override
     public Optional<Genre> findById(Long id) {
-        return Optional.ofNullable(this.jdbcOperations.queryForObject(
-                "SELECT * FROM genres WHERE id = ?", genreMapper, id));
+        return Optional.ofNullable(this.jdbcOperations.queryForObject(SQL_SELECT_BY_ID, genreMapper, id));
     }
 
     @Override
     public int[] saveAll(List<Genre> genres) {
-        return this.jdbcOperations.batchUpdate("INSERT INTO genres (title) VALUES (?)",
+        return this.jdbcOperations.batchUpdate(SQL_INSERT_TITLE,
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                         preparedStatement.setString(1, genres.get(i).getTitle());
@@ -68,7 +73,6 @@ public class JdbcGenreRepositoryImpl implements GenreRepository {
 
     @Override
     public List<Genre> findGenresByFilmId(Long filmId) {
-        return this.jdbcOperations.query("SELECT G.id, G.title FROM genres AS G " +
-                "INNER JOIN film_genres AS FG ON G.id = FG.genre_id WHERE FG.film_id = ?", genreMapper, filmId);
+        return this.jdbcOperations.query(SQL_SELECT_GENRES_BY_FILM_ID, genreMapper, filmId);
     }
 }

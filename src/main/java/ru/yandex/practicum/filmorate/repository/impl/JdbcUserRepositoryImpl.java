@@ -21,6 +21,18 @@ import java.util.Optional;
 public class JdbcUserRepositoryImpl implements UserRepository {
     private final JdbcOperations jdbcOperations;
     private final UserRepositoryMapper userMapper;
+    private static final String SQL_INSERT_ALL_FIELDS = "INSERT INTO users (email, login, name, birthday) " +
+            "VALUES (?,?,?,?)";
+    private static final String SQL_UPDATE_ALL_FIELDS = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? " +
+            "WHERE id = ?";
+    private static final String SQL_DELETE_BY_ID = "DELETE FROM users WHERE id = ?";
+    private static final String SQL_SELECT_ALL = "SELECT * FROM users";
+    private static final String SQL_SELECT_ALL_USERS_FRIENDS = "SELECT * FROM users WHERE id IN " +
+            "(SELECT friend_id FROM user_friends WHERE user_id = ?)";
+    private static final String SQL_SELECT_COMMON_FRIENDS = "SELECT * FROM users WHERE id IN (SELECT * FROM " +
+                    "(SELECT friend_id FROM user_friends WHERE user_id = ?) INNER JOIN" +
+                    "(SELECT friend_id FROM user_friends WHERE user_id = ?) USING (friend_id))";
+    private static final String SQL_SELECT_BY_ID = "SELECT * FROM users where id = ?";
 
     @Autowired
     public JdbcUserRepositoryImpl(JdbcOperations jdbcOperations, UserRepositoryMapper userMapper) {
@@ -32,9 +44,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     public User save(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcOperations.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement("INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)",
-                            Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT_ALL_FIELDS, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
             ps.setString(3, user.getName());
@@ -47,46 +57,39 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
     @Override
     public User update(User user) {
-        jdbcOperations.update("UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
+        jdbcOperations.update(SQL_UPDATE_ALL_FIELDS,
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return user;
     }
 
     @Override
     public int deleteById(Long id) {
-        return jdbcOperations.update("DELETE FROM users WHERE id = ?", id);
+        return jdbcOperations.update(SQL_DELETE_BY_ID, id);
     }
 
     @Override
     public List<User> findAll() {
-        return jdbcOperations.query("SELECT * FROM users", userMapper);
+        return jdbcOperations.query(SQL_SELECT_ALL, userMapper);
     }
 
     @Override
     public List<User> findAllFriendsUser(Long id) {
-        return jdbcOperations.query(
-                "SELECT * FROM users WHERE id IN (SELECT friend_id FROM user_friends WHERE user_id = ?)",
-                userMapper, id);
+        return jdbcOperations.query(SQL_SELECT_ALL_USERS_FRIENDS, userMapper, id);
     }
 
     @Override
     public List<User> findCommonUsersFriends(Long id, Long otherId) {
-        return jdbcOperations.query(
-                "SELECT * FROM users WHERE id IN (SELECT * FROM " +
-                        "(SELECT friend_id FROM user_friends WHERE user_id = ?) INNER JOIN" +
-                        "(SELECT friend_id FROM user_friends WHERE user_id = ?) USING (friend_id))",
-                userMapper, id, otherId);
+        return jdbcOperations.query(SQL_SELECT_COMMON_FRIENDS, userMapper, id, otherId);
     }
 
     @Override
     public Optional<User> findById(Long id) {
-        return Optional.ofNullable(jdbcOperations.queryForObject(
-                "SELECT * FROM users where id = ?", userMapper, id));
+        return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_BY_ID, userMapper, id));
     }
 
     @Override
     public int[] saveAll(List<User> users) {
-        return this.jdbcOperations.batchUpdate("INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)",
+        return this.jdbcOperations.batchUpdate(SQL_INSERT_ALL_FIELDS,
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                         preparedStatement.setString(1, users.get(i).getEmail());
@@ -102,8 +105,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
     @Override
     public int[][] updateAll(List<User> users) {
-        return jdbcOperations.batchUpdate(
-                "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
+        return jdbcOperations.batchUpdate(SQL_UPDATE_ALL_FIELDS,
                 users, users.size(),
                 (preparedStatement, user) -> {
                     preparedStatement.setString(1, user.getEmail());
