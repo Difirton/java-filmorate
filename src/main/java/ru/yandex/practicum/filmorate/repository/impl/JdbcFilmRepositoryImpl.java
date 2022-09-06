@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.repository.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -28,6 +27,8 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     private final JdbcOperations jdbcOperations;
     private final FilmRepositoryEagerMapper eagerFilmMapper;
     private final FilmRepositoryLazyMapper lazyFilmMapper;
+    private static final String SQL_INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)";
+    private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?";
 
     @Autowired
     public JdbcFilmRepositoryImpl(JdbcOperations jdbcOperations, FilmRepositoryEagerMapper eagerFilmMapper,
@@ -57,25 +58,8 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
         List<Long> batchIdToInsert = film.getGenres().stream()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
-        this.insertFilmGenres(film.getId(), batchIdToInsert);
+        this.updateFilmGenres(film.getId(), batchIdToInsert, SQL_INSERT_FILM_GENRES);
         return film;
-    }
-
-    private int[] insertFilmGenres(Long filmId, List<Long> genresId) {
-        if (!genresId.isEmpty()) {
-            return this.jdbcOperations.batchUpdate(
-                    "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)",
-                    new BatchPreparedStatementSetter() {
-                        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-                            preparedStatement.setLong(1, filmId);
-                            preparedStatement.setLong(2, genresId.get(i));
-                        }
-                        public int getBatchSize() {
-                            return genresId.size();
-                        }
-                    });
-        }
-        else return new int[]{0};
     }
 
     @Override
@@ -90,21 +74,20 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
         List<Long> genresIdAfterUpdate = film.getGenres().stream()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
-        List<Long> batchIdToDelete = genresIdBeforeUpdate.stream()
+        List<Long> genresIdToDelete = genresIdBeforeUpdate.stream()
                 .filter(id -> !genresIdAfterUpdate.contains(id))
                 .collect(Collectors.toList());
-        List<Long> batchIdToInsert = genresIdAfterUpdate.stream()
+        List<Long> genresIdToInsert = genresIdAfterUpdate.stream()
                 .filter(id -> !genresIdBeforeUpdate.contains(id))
                 .collect(Collectors.toList());
-        this.insertFilmGenres(film.getId(), batchIdToInsert);
-        this.deleteFilmGenres(film.getId(), batchIdToDelete);
+        this.updateFilmGenres(film.getId(), genresIdToInsert, SQL_INSERT_FILM_GENRES);
+        this.updateFilmGenres(film.getId(), genresIdToDelete, SQL_DELETE_FILM_GENRES);
         return film;
     }
 
-    private void deleteFilmGenres(Long filmId, List<Long> genresId) {
+    private int[] updateFilmGenres(Long filmId, List<Long> genresId, String sqlRequiredOperation) {
         if (!genresId.isEmpty()) {
-            this.jdbcOperations.batchUpdate(
-                    "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?",
+            return this.jdbcOperations.batchUpdate(sqlRequiredOperation,
                     new BatchPreparedStatementSetter() {
                         public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                             preparedStatement.setLong(1, filmId);
@@ -115,6 +98,7 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
                         }
                     });
         }
+        else return new int[]{0};
     }
 
     @Override
