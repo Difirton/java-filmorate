@@ -34,7 +34,7 @@ class FilmRepositoryTest {
     private UserRepository userRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         film1 = Film.builder().id(1L).name("name film 1").description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25)).duration(100)
                 .ratingMPA(RatingMPA.builder().id(1L).title("G").build()).build();
@@ -58,7 +58,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test CRUD of FilmRepository, expected ok")
-    public void testCreateReadDeleteFilmRepository() {
+    void testCreateReadDeleteFilmRepository() {
         Iterable<Film> filmsBeforeUpdate = filmRepository.findAll();
         Assertions.assertThat(filmsBeforeUpdate).extracting(Film::getName).contains("name film 1");
         Film filmToUpdate = filmRepository.findById(1L).get();
@@ -70,7 +70,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test find 2 popular films")
-    public void testFindPopularFilmsWhenLikesHaveTwoFilms() {
+    void testFindPopularFilmsWhenLikesHaveTwoFilms() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);
@@ -83,7 +83,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test pagination of method findPopularFilms")
-    public void testPaginationFindPopularFilmsWhenLikesHaveTwoFilms() {
+    void testPaginationFindPopularFilmsWhenLikesHaveTwoFilms() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);
@@ -96,7 +96,7 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test delete like of film")
-    public void testDeleteLike() {
+    void testDeleteLike() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);

@@ -9,10 +9,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
+import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,17 +27,20 @@ class FilmServiceTest {
     private Film film;
     @MockBean
     private FilmRepository mockRepository;
+    @MockBean
+    private UserService mockUserService;
     @Autowired
     private FilmService filmService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         film = Film.builder()
                 .id(1L)
                 .name("name film 1")
                 .description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25))
                 .duration(100)
+                .rate(4)
                 .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .build();
         when(mockRepository.findById(1L)).thenReturn(Optional.of(film));
@@ -43,7 +48,7 @@ class FilmServiceTest {
 
     @Test
     @DisplayName("Update all fields Film, expected ok")
-    public void testUpdateAllFieldsFilm() {
+    void testUpdateAllFieldsFilm() {
         Film updatedFilm = Film.builder()
                 .name("updated film")
                 .description("updated film Desc")
@@ -69,13 +74,48 @@ class FilmServiceTest {
 
     @Test
     @DisplayName("Test throw not found film exception, when update not exist film")
-    public void testThrowNotFoundFilmWhenUpdate() {
+    void testThrowNotFoundFilmWhenUpdate() {
         assertThrows(FilmNotFoundException.class, () -> filmService.updateFilm(2L, film));
     }
 
     @Test
     @DisplayName("Test throw not found film exception, when get not exist film")
-    public void testThrowNotFoundFilmWhenGet() {
+    void testThrowNotFoundFilmWhenGet() {
         assertThrows(FilmNotFoundException.class, () -> filmService.getFilmById(2L));
+    }
+
+    @Test
+    @DisplayName("Test create new Film")
+    void testCreateFilm() {
+        when(mockRepository.save(film)).thenReturn(film);
+        assertEquals(filmService.createFilm(film), film);
+    }
+
+    @Test
+    @DisplayName("Test get all films")
+    void testGetAllFilms() {
+        Film film2 = Film.builder()
+                .id(2L)
+                .name("name film 2")
+                .description("description film 2")
+                .releaseDate(LocalDate.of(1999, 3, 25))
+                .duration(1000)
+                .ratingMPA(RatingMPA.builder().id(2L).title("T").build())
+                .build();
+        when(mockRepository.findAll()).thenReturn(List.of(film, film2));
+        assertEquals(filmService.getAllFilms(), List.of(film, film2));
+    }
+
+    @Test
+    @DisplayName("Test add like to film")
+    void testAddLikeFilm() {
+        when(mockUserService.getUserById(1L)).thenReturn(User.builder()
+                .id(1L)
+                .login("test")
+                .email("test@mail.ru")
+                .name("test").build());
+        when(mockRepository.update(film)).thenReturn(film);
+        Film updatedFilm = filmService.addLikeFilm(1L, 1L);
+        assertEquals(updatedFilm.getRate(), 5);
     }
 }

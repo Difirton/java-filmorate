@@ -63,8 +63,7 @@ public class FilmService {
     public Film addLikeFilm(Long id, Long userId) {
         Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
         film.addUserLike(userService.getUserById(userId));
-        filmRepository.update(film);
-        return film;
+        return filmRepository.update(film);
     }
 
     @Transactional

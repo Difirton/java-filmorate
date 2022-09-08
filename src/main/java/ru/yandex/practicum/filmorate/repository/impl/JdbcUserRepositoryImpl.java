@@ -73,19 +73,10 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findAllFriendsUser(Long id) {
-        return jdbcOperations.query(SQL_SELECT_ALL_USERS_FRIENDS, userMapper, id);
-    }
-
-    @Override
-    public List<User> findCommonUsersFriends(Long id, Long otherId) {
-        return jdbcOperations.query(SQL_SELECT_COMMON_FRIENDS, userMapper, id, otherId);
-    }
-
-    @Override
     public Optional<User> findById(Long id) {
         return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_BY_ID, userMapper, id));
     }
+
 
     @Override
     public int[] saveAll(List<User> users) {
@@ -101,6 +92,16 @@ public class JdbcUserRepositoryImpl implements UserRepository {
                         return users.size();
                     }
                 });
+    }
+
+    @Override
+    public List<User> findAllFriendsUser(Long id) {
+        return jdbcOperations.query(SQL_SELECT_ALL_USERS_FRIENDS, userMapper, id);
+    }
+
+    @Override
+    public List<User> findCommonUsersFriends(Long id, Long otherId) {
+        return jdbcOperations.query(SQL_SELECT_COMMON_FRIENDS, userMapper, id, otherId);
     }
 
     @Override

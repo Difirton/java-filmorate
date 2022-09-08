@@ -35,14 +35,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 class FilmControllerTest {
     private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
-    Film film;
+    private Film film;
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private FilmService mockService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         film = Film.builder()
                 .id(1L)
                 .name("name film 1")
@@ -56,7 +56,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request GET /films/1, expected host answer OK")
-    public void testFindFilmById_OK_200() throws Exception {
+    void testFindFilmById_OK_200() throws Exception {
         mockMvc.perform(get("/films/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request POST /films, expected host answer CREATED")
-    public void testPostNewFilm_CREATED_201() throws Exception {
+    void testPostNewFilm_CREATED_201() throws Exception {
         Film newFilm = Film.builder()
                 .id(2L)
                 .name("name film 2")
@@ -94,7 +94,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request GET /films, expected host answer OK")
-    public void testFindAllFilms_OK_200() throws Exception {
+    void testFindAllFilms_OK_200() throws Exception {
         List<Film> films = Arrays.asList(
                 Film.builder()
                         .id(1L)
@@ -132,7 +132,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request PUT /films/1, expected host answer OK")
-    public void testUpdateFilm_OK_200() throws Exception {
+    void testUpdateFilm_OK_200() throws Exception {
         Film updateFilm = Film.builder()
                 .id(1L)
                 .name("update name")
@@ -156,7 +156,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request DELETE /films/1, expected host answer OK")
-    public void testDeleteFilm_OK_200() throws Exception {
+    void testDeleteFilm_OK_200() throws Exception {
         doNothing().when(mockService).removeFilmById(1L);
         mockMvc.perform(delete("/films/1"))
                 .andExpect(status().isOk());
@@ -165,7 +165,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Test custom validation, expected host answer BAD REQUEST")
-    public void testUpdateFilmWithNotValidDate_BAD_REQUEST_400() throws Exception {
+    void testUpdateFilmWithNotValidDate_BAD_REQUEST_400() throws Exception {
         Film updateFilm = Film.builder()
                 .id(1L)
                 .name("update name")
@@ -183,7 +183,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request PUT /films/{id}/like/{userId}, expected host answer OK")
-    public void testPutLikeFilm() throws Exception {
+    void testPutLikeFilm() throws Exception {
         film.addUserLike(User.builder().build());
         when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
         mockMvc.perform(put("/films/1/like/1")
@@ -196,7 +196,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request DELETE /films/{id}/like/{userId}, expected host answer OK")
-    public void testDeleteLikeFilm() throws Exception {
+    void testDeleteLikeFilm() throws Exception {
         User user = User.builder().build();
         film.addUserLike(user);
         film.removeUserLike(user);

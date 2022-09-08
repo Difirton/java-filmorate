@@ -92,21 +92,6 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
         return film;
     }
 
-    private void updateFilmGenres(Long filmId, List<Long> genresId, String sqlRequiredOperation) {
-        if (!genresId.isEmpty()) {
-            this.jdbcOperations.batchUpdate(sqlRequiredOperation,
-                    new BatchPreparedStatementSetter() {
-                        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-                            preparedStatement.setLong(1, filmId);
-                            preparedStatement.setLong(2, genresId.get(i));
-                        }
-                        public int getBatchSize() {
-                            return genresId.size();
-                        }
-                    });
-        }
-    }
-
     @Override
     public int deleteById(Long id) {
         return this.jdbcOperations.update(SQL_DELETE_FILM_BY_ID, id);
@@ -121,11 +106,6 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     public Optional<Film> findById(Long id) {
         return Optional.ofNullable(this.jdbcOperations.queryForObject(SQL_SELECT_ALL_FILMS_WITH_RATING,
                 eagerFilmMapper, id));
-    }
-
-    @Override
-    public List<Film> findPopularFilmsByRate(Integer count) {
-        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
     }
 
     @Override
@@ -147,18 +127,38 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
                 });
     }
 
+    private void updateFilmGenres(Long filmId, List<Long> genresId, String sqlRequiredOperation) {
+        if (!genresId.isEmpty()) {
+            this.jdbcOperations.batchUpdate(sqlRequiredOperation,
+                    new BatchPreparedStatementSetter() {
+                        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                            preparedStatement.setLong(1, filmId);
+                            preparedStatement.setLong(2, genresId.get(i));
+                        }
+                        public int getBatchSize() {
+                            return genresId.size();
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRate(Integer count) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
+    }
+
     @Override
     public int[][] updateAll(List<Film> films) {
         return jdbcOperations.batchUpdate(SQL_UPDATE_FILMS_ALL_ARGS,
                 films, films.size(),
-                (preparedStatement, film) -> {
-                    preparedStatement.setString(1, film.getName());
-                    preparedStatement.setString(2, film.getDescription());
-                    preparedStatement.setDate(3, Date.valueOf(film.getReleaseDate()));
-                    preparedStatement.setInt(4, film.getDuration());
-                    preparedStatement.setInt(5, film.getRate());
-                    preparedStatement.setLong(6, film.getRatingMPA().getId());
-                    preparedStatement.setLong(7, film.getId());
+                (ps, film) -> {
+                    ps.setString(1, film.getName());
+                    ps.setString(2, film.getDescription());
+                    ps.setDate(3, Date.valueOf(film.getReleaseDate()));
+                    ps.setInt(4, film.getDuration());
+                    ps.setInt(5, film.getRate());
+                    ps.setLong(6, film.getRatingMPA().getId());
+                    ps.setLong(7, film.getId());
                 });
     }
 }

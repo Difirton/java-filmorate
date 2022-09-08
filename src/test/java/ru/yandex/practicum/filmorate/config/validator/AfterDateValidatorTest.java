@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class AfterDateValidatorTest {
     private final Validator validator;
     @Autowired
-    public AfterDateValidatorTest(Validator validator) {
+    private AfterDateValidatorTest(Validator validator) {
         this.validator = validator;
     }
 
     @Test
     @DisplayName("Test custom validation with valid date: after 28.12.1895")
-    public void testWithValidDate() {
+    void testWithValidDate() {
         Film film = Film.builder()
                 .id(1L)
                 .name("name film 1")
@@ -37,7 +37,7 @@ class AfterDateValidatorTest {
 
     @Test
     @DisplayName("Test custom validation with not valid date: before 28.12.1895")
-    public void testWithNotValidDate() {
+    void testWithNotValidDate() {
         Film film = Film.builder()
                 .id(1L)
                 .name("name film 1")

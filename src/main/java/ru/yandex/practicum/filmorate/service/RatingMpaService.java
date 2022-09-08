@@ -9,19 +9,19 @@ import ru.yandex.practicum.filmorate.repository.RatingMpaRepository;
 import java.util.List;
 
 @Service
-public class MpaService {
+public class RatingMpaService {
     private final RatingMpaRepository ratingMpaRepository;
 
     @Autowired
-    public MpaService(RatingMpaRepository ratingMpaRepository) {
+    public RatingMpaService(RatingMpaRepository ratingMpaRepository) {
         this.ratingMpaRepository = ratingMpaRepository;
     }
 
-    public List<RatingMPA> getAllGenres() {
+    public List<RatingMPA> getAllRatingsMpa() {
         return ratingMpaRepository.findAll();
     }
 
-    public RatingMPA getGenreById(Long id) {
+    public RatingMPA getRatingsMpaById(Long id) {
         return ratingMpaRepository.findById(id).orElseThrow(() -> new RatingMpaNotFoundException(id));
     }
 }

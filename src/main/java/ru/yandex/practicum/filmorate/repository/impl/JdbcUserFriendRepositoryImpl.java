@@ -43,19 +43,20 @@ public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
     }
 
     @Override
-    @Transactional
     public UserFriend save(User user, User friend) {
-        this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, user.getId(), friend.getId(), true);
-        this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, friend.getId(), user.getId(), false);
+        this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, user.getId(), friend.getId(), false);
         return UserFriend.builder().user(user).friend(friend).approved(false).build();
     }
 
     @Override
-    @Transactional
     public UserFriend save(User user, User friend, boolean isApproved) {
         this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, user.getId(), friend.getId(), isApproved);
-        this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, friend.getId(), user.getId(), isApproved);
         return UserFriend.builder().user(user).friend(friend).approved(isApproved).build();
+    }
+
+    @Override
+    public int deleteById(Long id) {
+        return this.jdbcOperations.update(SQL_DELETE_BY_ID, id);
     }
 
     @Override
@@ -66,12 +67,6 @@ public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
     }
 
     @Override
-    public int deleteById(Long id) {
-        return this.jdbcOperations.update(SQL_DELETE_BY_ID, id);
-    }
-
-    @Override
-    @Transactional
     public int delete(UserFriend userFriend) {
         return this.jdbcOperations.update(SQL_DELETE_BY_USER_ID_AND_FRIEND_ID,
                 userFriend.getUser().getId(), userFriend.getFriend().getId());
@@ -88,6 +83,7 @@ public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
     }
 
     @Override
+    @Transactional
     public int[] saveAll(List<UserFriend> usersFriends) {
         return this.jdbcOperations.batchUpdate(SQL_INSERT_ALL_FIELDS,
                 new BatchPreparedStatementSetter() {

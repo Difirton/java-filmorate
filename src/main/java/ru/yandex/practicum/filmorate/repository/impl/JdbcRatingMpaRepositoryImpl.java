@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
+public class JdbcRatingMpaRepositoryImpl implements RatingMpaRepository {
     private final JdbcOperations jdbcOperations;
     private static final String SQL_INSERT_TITLE = "INSERT INTO rating_mpa (title) VALUES (?)";
     private static final String SQL_UPDATE_TITLE = "UPDATE rating_mpa SET title = ? WHERE id = ?";
@@ -22,7 +22,7 @@ public class JdbcMpaRepositoryImpl implements RatingMpaRepository {
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM rating_mpa WHERE id = ?";
 
     @Autowired
-    public JdbcMpaRepositoryImpl(JdbcOperations jdbcOperations) {
+    public JdbcRatingMpaRepositoryImpl(JdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
     }
 

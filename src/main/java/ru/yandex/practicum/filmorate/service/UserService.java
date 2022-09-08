@@ -63,11 +63,7 @@ public class UserService {
     public User addFriend(Long userId, Long friendId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
-        UserFriend userFriend = UserFriend.builder()
-                .user(user)
-                .friend(friend)
-                .approved(true).build();
-        userFriendRepository.save(userFriend);
+        userFriendRepository.save(user, friend);
         user.addFriend(friend);
         return user;
     }
