@@ -4,6 +4,16 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
+/**
+ * Validates a date that it is in the past according to the specified parameters.
+ * When creating, you must specify the day, month and year after which
+ * the validated date must be.
+ * Supported type {@link java.time.LocalDate}.
+ *
+ * @author Dmitriy Kruglov
+ *
+ * @see AfterDate
+ */
 public class AfterDateValidator implements ConstraintValidator<AfterDate, LocalDate> {
     private int day;
     private int month;
