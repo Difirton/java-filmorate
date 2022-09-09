@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class JdbcUserRepositoryImpl implements UserRepository {
     private final JdbcOperations jdbcOperations;
     private final UserRepositoryMapper userMapper;
@@ -33,12 +34,6 @@ public class JdbcUserRepositoryImpl implements UserRepository {
                     "(SELECT friend_id FROM user_friends WHERE user_id = ?) INNER JOIN" +
                     "(SELECT friend_id FROM user_friends WHERE user_id = ?) USING (friend_id))";
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM users where id = ?";
-
-    @Autowired
-    public JdbcUserRepositoryImpl(JdbcOperations jdbcOperations, UserRepositoryMapper userMapper) {
-        this.jdbcOperations = jdbcOperations;
-        this.userMapper = userMapper;
-    }
 
     @Override
     public User save(User user) {

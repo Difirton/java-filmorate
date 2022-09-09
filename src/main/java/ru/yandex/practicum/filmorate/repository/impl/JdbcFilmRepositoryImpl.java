@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -13,16 +14,14 @@ import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
+@RequiredArgsConstructor
 public class JdbcFilmRepositoryImpl implements FilmRepository {
     private final JdbcOperations jdbcOperations;
     private final FilmRepositoryEagerMapper eagerFilmMapper;
@@ -40,35 +39,35 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
             "LEFT JOIN RATING_MPA RM ON FILMS.RATING_MPA_ID = RM.ID WHERE FILMS.ID = ?";
     private static final String SQL_SELECT_POPULAR_FILMS = "SELECT * FROM films ORDER BY rate DESC LIMIT ?";
 
-    @Autowired
-    public JdbcFilmRepositoryImpl(JdbcOperations jdbcOperations, FilmRepositoryEagerMapper eagerFilmMapper,
-                                  FilmRepositoryLazyMapper lazyFilmMapper) {
-        this.jdbcOperations = jdbcOperations;
-        this.eagerFilmMapper = eagerFilmMapper;
-        this.lazyFilmMapper = lazyFilmMapper;
-    }
-
     @Override
     @Transactional
     public Film save(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        this.jdbcOperations.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(SQL_INSERT_FILMS_ALL_ARGS,
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, film.getName());
-            ps.setString(2, film.getDescription());
-            ps.setDate(3, Date.valueOf(film.getReleaseDate()));
-            ps.setInt(4, film.getDuration());
-            ps.setInt(5, film.getRate());
-            ps.setLong(6, film.getRatingMPA().getId());
-            return ps;
-        }, keyHolder);
+        this.jdbcOperations.update(this.createPreparedStatement(film), keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         List<Long> batchIdToInsert = film.getGenres().stream()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
         this.updateFilmGenres(film.getId(), batchIdToInsert, SQL_INSERT_FILM_GENRES);
         return film;
+    }
+
+    private PreparedStatementCreator createPreparedStatement(Film film) {
+        return connection -> {
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT_FILMS_ALL_ARGS,
+                    Statement.RETURN_GENERATED_KEYS);
+            this.mapFilmInStatement(film, ps);
+            return ps;
+        };
+    }
+
+    private void mapFilmInStatement(Film film, PreparedStatement ps) throws SQLException {
+        ps.setString(1, film.getName());
+        ps.setString(2, film.getDescription());
+        ps.setDate(3, Date.valueOf(film.getReleaseDate()));
+        ps.setInt(4, film.getDuration());
+        ps.setInt(5, film.getRate());
+        ps.setLong(6, film.getRatingMPA().getId());
     }
 
     @Override
@@ -113,13 +112,13 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     public int[] saveAll(List<Film> films) {
         return this.jdbcOperations.batchUpdate(SQL_INSERT_FILMS_ALL_ARGS,
                 new BatchPreparedStatementSetter() {
-                    public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-                        preparedStatement.setString(1, films.get(i).getName());
-                        preparedStatement.setString(2, films.get(i).getDescription());
-                        preparedStatement.setDate(3, Date.valueOf(films.get(i).getReleaseDate()));
-                        preparedStatement.setInt(4, films.get(i).getDuration());
-                        preparedStatement.setInt(5, films.get(i).getRate());
-                        preparedStatement.setLong(6, films.get(i).getRatingMPA().getId());
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setString(1, films.get(i).getName());
+                        ps.setString(2, films.get(i).getDescription());
+                        ps.setDate(3, Date.valueOf(films.get(i).getReleaseDate()));
+                        ps.setInt(4, films.get(i).getDuration());
+                        ps.setInt(5, films.get(i).getRate());
+                        ps.setLong(6, films.get(i).getRatingMPA().getId());
                     }
                     public int getBatchSize() {
                         return films.size();
@@ -152,12 +151,7 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
         return jdbcOperations.batchUpdate(SQL_UPDATE_FILMS_ALL_ARGS,
                 films, films.size(),
                 (ps, film) -> {
-                    ps.setString(1, film.getName());
-                    ps.setString(2, film.getDescription());
-                    ps.setDate(3, Date.valueOf(film.getReleaseDate()));
-                    ps.setInt(4, film.getDuration());
-                    ps.setInt(5, film.getRate());
-                    ps.setLong(6, film.getRatingMPA().getId());
+                    mapFilmInStatement(film, ps);
                     ps.setLong(7, film.getId());
                 });
     }

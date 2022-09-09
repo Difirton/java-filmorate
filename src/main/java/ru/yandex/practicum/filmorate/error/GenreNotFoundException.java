@@ -7,6 +7,6 @@ public class GenreNotFoundException extends RuntimeException {
 
     public GenreNotFoundException(Long id) {
         super("Genre id not found : " + id);
-        log.warn("Genre id not found : {}", id);
+        log.error("Genre id not found : {}", id);
     }
 }

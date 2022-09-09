@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.stereotype.Repository;
@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
     private final JdbcOperations jdbcOperations;
     private final UserFriendRepositoryLazyMapper userFriendRepositoryLazyMapper;
@@ -29,12 +30,6 @@ public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
     private static final String SQL_SELECT_ALL = "SELECT * FROM user_friends";
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM user_friends WHERE id = ?";
 
-    @Autowired
-    public JdbcUserFriendRepositoryImpl(JdbcOperations jdbcOperations, UserFriendRepositoryLazyMapper userFriendRepositoryLazyMapper) {
-        this.jdbcOperations = jdbcOperations;
-        this.userFriendRepositoryLazyMapper = userFriendRepositoryLazyMapper;
-    }
-
     @Override
     public UserFriend save(UserFriend userFriend) {
         this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS,
@@ -45,13 +40,21 @@ public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
     @Override
     public UserFriend save(User user, User friend) {
         this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, user.getId(), friend.getId(), false);
-        return UserFriend.builder().user(user).friend(friend).approved(false).build();
+        return UserFriend.builder()
+                .user(user)
+                .friend(friend)
+                .approved(false)
+                .build();
     }
 
     @Override
     public UserFriend save(User user, User friend, boolean isApproved) {
         this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, user.getId(), friend.getId(), isApproved);
-        return UserFriend.builder().user(user).friend(friend).approved(isApproved).build();
+        return UserFriend.builder()
+                .user(user)
+                .friend(friend)
+                .approved(isApproved)
+                .build();
     }
 
     @Override

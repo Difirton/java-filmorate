@@ -13,9 +13,15 @@ public class UserFriendRepositoryLazyMapper implements RowMapper<UserFriend> {
 
     @Override
     public UserFriend mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return UserFriend.builder().id(rs.getLong("id"))
-                .user(User.builder().id(rs.getLong("user_id")).build())
-                .friend(User.builder().id(rs.getLong("friend_id")).build())
-                .approved(rs.getBoolean("approved")).build();
+        return UserFriend.builder()
+                .id(rs.getLong("id"))
+                .user(User.builder()
+                        .id(rs.getLong("user_id"))
+                        .build())
+                .friend(User.builder()
+                        .id(rs.getLong("friend_id"))
+                        .build())
+                .approved(rs.getBoolean("approved"))
+                .build();
     }
 }

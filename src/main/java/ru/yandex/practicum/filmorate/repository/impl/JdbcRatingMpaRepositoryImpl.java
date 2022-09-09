@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.stereotype.Repository;
@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class JdbcRatingMpaRepositoryImpl implements RatingMpaRepository {
     private final JdbcOperations jdbcOperations;
     private static final String SQL_INSERT_TITLE = "INSERT INTO rating_mpa (title) VALUES (?)";
@@ -20,11 +21,6 @@ public class JdbcRatingMpaRepositoryImpl implements RatingMpaRepository {
     private static final String SQL_DELETE_BY_ID = "DELETE FROM rating_mpa WHERE id = ?";
     private static final String SQL_SELECT_ALL = "SELECT * FROM rating_mpa ORDER BY id";
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM rating_mpa WHERE id = ?";
-
-    @Autowired
-    public JdbcRatingMpaRepositoryImpl(JdbcOperations jdbcOperations) {
-        this.jdbcOperations = jdbcOperations;
-    }
 
     @Override
     public RatingMPA save(RatingMPA ratingMPA) {

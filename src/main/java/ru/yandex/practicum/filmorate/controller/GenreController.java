@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.entity.Genre;
@@ -9,14 +9,10 @@ import ru.yandex.practicum.filmorate.service.GenreService;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/genres")
 public class GenreController {
     private final GenreService genreService;
-
-    @Autowired
-    public GenreController(GenreService genreService) {
-        this.genreService = genreService;
-    }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AfterDateValidatorTest {
     private final Validator validator;
     @Autowired
-    private AfterDateValidatorTest(Validator validator) {
+    public AfterDateValidatorTest(Validator validator) {
         this.validator = validator;
     }
 

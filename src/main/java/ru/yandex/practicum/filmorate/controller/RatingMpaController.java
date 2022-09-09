@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
@@ -9,14 +9,10 @@ import ru.yandex.practicum.filmorate.service.RatingMpaService;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/mpa")
 public class RatingMpaController {
     private final RatingMpaService ratingMpaService;
-
-    @Autowired
-    public RatingMpaController(RatingMpaService ratingMpaService) {
-        this.ratingMpaService = ratingMpaService;
-    }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping

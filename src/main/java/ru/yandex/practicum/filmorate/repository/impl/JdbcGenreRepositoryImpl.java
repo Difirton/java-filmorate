@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.stereotype.Repository;
@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class JdbcGenreRepositoryImpl implements GenreRepository {
     private final JdbcOperations jdbcOperations;
     private final GenreRepositoryMapper genreMapper;
@@ -24,12 +25,6 @@ public class JdbcGenreRepositoryImpl implements GenreRepository {
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM genres WHERE id = ?";
     private static final String SQL_SELECT_GENRES_BY_FILM_ID = "SELECT G.id, G.title FROM genres AS G " +
             "INNER JOIN film_genres AS FG ON G.id = FG.genre_id WHERE FG.film_id = ?";
-
-    @Autowired
-    public JdbcGenreRepositoryImpl(JdbcOperations jdbcOperations, GenreRepositoryMapper genreMapper) {
-        this.jdbcOperations = jdbcOperations;
-        this.genreMapper = genreMapper;
-    }
 
     @Override
     public Genre save(Genre genre) {

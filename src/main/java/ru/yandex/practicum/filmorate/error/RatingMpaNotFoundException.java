@@ -7,6 +7,6 @@ public class RatingMpaNotFoundException extends RuntimeException {
 
     public RatingMpaNotFoundException(Long id) {
         super("Genre id not found : " + id);
-        log.warn("Genre id not found : {}", id);
+        log.error("Genre id not found : {}", id);
     }
 }

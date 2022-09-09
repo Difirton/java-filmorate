@@ -7,6 +7,6 @@ public class FilmNotFoundException extends RuntimeException {
 
     public FilmNotFoundException(Long id) {
         super("Film id not found : " + id);
-        log.warn("Film id not found : {}", id);
+        log.error("Film id not found : {}", id);
     }
 }
