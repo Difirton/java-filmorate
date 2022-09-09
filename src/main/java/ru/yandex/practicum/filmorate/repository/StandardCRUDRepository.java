@@ -10,26 +10,26 @@ import java.util.Optional;
  *
  * @author Dmitriy Kruglov
  */
-public interface StandardCRUDRepository<M> {
+public interface StandardCRUDRepository<T> {
 
     /**
      * Accepts an object to save in the database.
-     * @param m the object to save in the database
+     * @param t the object to save in the database
      * @return the object that was passed to the method
      * after insert in field identifier.
      */
-    M save(M m);
+    T save(T t);
 
     /**
      * Accepts an object to update it in the database.
-     * @param m the object to update in the database
+     * @param t the object to update in the database
      * @return the object with the identifier set if it was not present
      * when the object was passed to the method
      * @apiNote the object is returned unchanged,
      * the information in the database is changed without checking
      * for the presence of a tuple in the database
      */
-    M update(M m);
+    T update(T t);
 
     /**
      * Accepts an object identifier in the database and removes
@@ -43,7 +43,7 @@ public interface StandardCRUDRepository<M> {
      * Returns a List of all objects stored in the database
      * @return a List of objects that match the specified element type
      */
-    List<M> findAll();
+    List<T> findAll();
 
     /**
      * Accepts an object identifier in the database and return
@@ -53,13 +53,13 @@ public interface StandardCRUDRepository<M> {
      * ({@link Optional} can not be {@code null}
      * if the given {@code id} is incorrect returned empty {@link Optional})
      */
-    Optional<M> findById(Long id);
+    Optional<T> findById(Long id);
 
     /**
      * Accepts a list of objects that match the specified element type
      * and stores all objects from the list in the database
-     * @param m a List of objects that match the specified element type
+     * @param t a List of objects that match the specified element type
      * @return an array containing the numbers of rows affected by each update in the batch
      */
-    int[] saveAll(List<M> m);
+    int[] saveAll(List<T> t);
 }
