@@ -42,7 +42,7 @@ class UserControllerTest {
     private UserService mockService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         user = User.builder()
                 .id(1L)
                 .email("mail@mail.ru")
@@ -55,7 +55,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request GET /users/1, expected host answer OK")
-    public void testFindUsrById_OK_200() throws Exception {
+    void testFindUsrById_OK_200() throws Exception {
         mockMvc.perform(get("/users/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

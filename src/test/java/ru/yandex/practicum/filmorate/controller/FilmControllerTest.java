@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -35,19 +35,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 class FilmControllerTest {
     private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
-    Film film;
+    private Film film;
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private FilmService mockService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         film = Film.builder()
                 .id(1L)
                 .name("name film 1")
                 .description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25))
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .duration(100)
                 .build();
         when(mockService.getFilmById(1L)).thenReturn(film);
@@ -55,7 +56,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request GET /films/1, expected host answer OK")
-    public void testFindFilmById_OK_200() throws Exception {
+    void testFindFilmById_OK_200() throws Exception {
         mockMvc.perform(get("/films/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -69,12 +70,13 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request POST /films, expected host answer CREATED")
-    public void testPostNewFilm_CREATED_201() throws Exception {
+    void testPostNewFilm_CREATED_201() throws Exception {
         Film newFilm = Film.builder()
                 .id(2L)
                 .name("name film 2")
                 .description("description film 2")
                 .releaseDate(LocalDate.of(2000, 10, 5))
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .duration(300)
                 .build();
         when(mockService.createFilm(any(Film.class))).thenReturn(newFilm);
@@ -92,7 +94,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request GET /films, expected host answer OK")
-    public void testFindAllFilms_OK_200() throws Exception {
+    void testFindAllFilms_OK_200() throws Exception {
         List<Film> films = Arrays.asList(
                 Film.builder()
                         .id(1L)
@@ -100,6 +102,7 @@ class FilmControllerTest {
                         .description("description film 1")
                         .releaseDate(LocalDate.of(1967, 3, 25))
                         .duration(100)
+                        .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                         .build(),
                 Film.builder()
                         .id(2L)
@@ -107,6 +110,7 @@ class FilmControllerTest {
                         .description("description film 2")
                         .releaseDate(LocalDate.of(2000, 10, 5))
                         .duration(300)
+                        .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                         .build());
         when(mockService.getAllFilms()).thenReturn(films);
         mockMvc.perform(get("/films"))
@@ -128,12 +132,13 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request PUT /films/1, expected host answer OK")
-    public void testUpdateFilm_OK_200() throws Exception {
+    void testUpdateFilm_OK_200() throws Exception {
         Film updateFilm = Film.builder()
                 .id(1L)
                 .name("update name")
                 .description("update description")
                 .releaseDate(LocalDate.of(2000, 10, 5))
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .duration(300)
                 .build();
         when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
@@ -151,7 +156,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request DELETE /films/1, expected host answer OK")
-    public void testDeleteFilm_OK_200() throws Exception {
+    void testDeleteFilm_OK_200() throws Exception {
         doNothing().when(mockService).removeFilmById(1L);
         mockMvc.perform(delete("/films/1"))
                 .andExpect(status().isOk());
@@ -160,13 +165,14 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Test custom validation, expected host answer BAD REQUEST")
-    public void testUpdateFilmWithNotValidDate_BAD_REQUEST_400() throws Exception {
+    void testUpdateFilmWithNotValidDate_BAD_REQUEST_400() throws Exception {
         Film updateFilm = Film.builder()
                 .id(1L)
                 .name("update name")
                 .description("update description")
                 .releaseDate(LocalDate.of(1000, 10, 5))
                 .duration(300)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .build();
         when(mockService.updateFilm(1L, updateFilm)).thenReturn(updateFilm);
         mockMvc.perform(put("/films/1")
@@ -177,7 +183,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request PUT /films/{id}/like/{userId}, expected host answer OK")
-    public void testPutLikeFilm() throws Exception {
+    void testPutLikeFilm() throws Exception {
         film.addUserLike(User.builder().build());
         when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
         mockMvc.perform(put("/films/1/like/1")
@@ -190,7 +196,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request DELETE /films/{id}/like/{userId}, expected host answer OK")
-    public void testDeleteLikeFilm() throws Exception {
+    void testDeleteLikeFilm() throws Exception {
         User user = User.builder().build();
         film.addUserLike(user);
         film.removeUserLike(user);

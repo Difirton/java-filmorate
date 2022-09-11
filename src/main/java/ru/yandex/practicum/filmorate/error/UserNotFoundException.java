@@ -7,6 +7,6 @@ public class UserNotFoundException extends RuntimeException {
 
     public UserNotFoundException(Long id) {
         super("User id not found : " + id);
-        log.warn("User id not found : {}", id);
+        log.error("User id not found : {}", id);
     }
 }

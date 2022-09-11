@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.entity.Film;
@@ -13,14 +13,10 @@ import java.util.Optional;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
@@ -44,7 +40,7 @@ public class FilmController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public Film findOneFilm(@PathVariable("id") Long id) {
+    public Film findFilm(@PathVariable("id") Long id) {
         return filmService.getFilmById(id);
     }
 

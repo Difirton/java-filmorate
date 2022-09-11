@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.entity.RatingMPA;
 
 import javax.validation.*;
 import java.time.LocalDate;
@@ -21,13 +22,14 @@ class AfterDateValidatorTest {
 
     @Test
     @DisplayName("Test custom validation with valid date: after 28.12.1895")
-    public void testWithValidDate() {
+    void testWithValidDate() {
         Film film = Film.builder()
                 .id(1L)
                 .name("name film 1")
                 .description("description film 1")
                 .releaseDate(LocalDate.of(1967, 3, 25))
                 .duration(100)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertTrue(violations.isEmpty());
@@ -35,13 +37,14 @@ class AfterDateValidatorTest {
 
     @Test
     @DisplayName("Test custom validation with not valid date: before 28.12.1895")
-    public void testWithNotValidDate() {
+    void testWithNotValidDate() {
         Film film = Film.builder()
                 .id(1L)
                 .name("name film 1")
                 .description("description film 1")
                 .releaseDate(LocalDate.of(1267, 3, 25))
                 .duration(100)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());

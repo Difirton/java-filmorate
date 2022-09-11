@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
 
 import java.time.LocalDate;
@@ -33,13 +34,16 @@ class FilmRepositoryTest {
     private UserRepository userRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         film1 = Film.builder().id(1L).name("name film 1").description("description film 1")
-                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).build();
+                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build()).build();
         film2 = Film.builder().id(2L).name("name film 2").description("description film 2")
-                .releaseDate(LocalDate.of(1997, 5, 1)).duration(300).build();
+                .releaseDate(LocalDate.of(1997, 5, 1)).duration(300)
+                .ratingMPA(RatingMPA.builder().id(1L).title("G").build()).build();
         film3 = Film.builder().id(3L).name("name film 3").description("description film 3")
-                .releaseDate(LocalDate.of(2007, 10, 12)).duration(200).build();
+                .releaseDate(LocalDate.of(2007, 10, 12)).duration(200)
+                .ratingMPA(RatingMPA.builder().id(2L).title("PG").build()).build();
         filmRepository.saveAll(List.of(film1, film2, film3));
         user1 = User.builder().id(1L).email("example@gmail.ru").login("231ffdsf32").name("Test1 Test1")
                 .birthday(LocalDate.of(1990, 5, 1)).build();
@@ -54,56 +58,54 @@ class FilmRepositoryTest {
 
     @Test
     @DisplayName("Test CRUD of FilmRepository, expected ok")
-    public void testCreateReadDeleteFilmRepository() {
+    void testCreateReadDeleteFilmRepository() {
         Iterable<Film> filmsBeforeUpdate = filmRepository.findAll();
         Assertions.assertThat(filmsBeforeUpdate).extracting(Film::getName).contains("name film 1");
         Film filmToUpdate = filmRepository.findById(1L).get();
         filmToUpdate.setName("updated");
-        filmRepository.save(filmToUpdate);
+        filmRepository.update(filmToUpdate);
         Film filmAfterUpdate = filmRepository.findById(1L).get();
         Assertions.assertThat(filmAfterUpdate).extracting(Film::getName).isEqualTo("updated");
-        filmRepository.deleteAll();
-        Assertions.assertThat(filmRepository.findAll()).isEmpty();
     }
 
     @Test
     @DisplayName("Test find 2 popular films")
-    public void testFindPopularFilmsWhenLikesHaveTwoFilms() {
+    void testFindPopularFilmsWhenLikesHaveTwoFilms() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);
         film2.addUserLike(user1);
-        filmRepository.saveAll(List.of(film1, film2, film3));
-        userRepository.saveAll(List.of(user1, user2, user3, user4));
+        filmRepository.updateAll(List.of(film1, film2, film3));
+        userRepository.updateAll(List.of(user1, user2, user3, user4));
         List<Film> popularFilms = filmRepository.findPopularFilmsByRate(2);
         Assertions.assertThat(popularFilms).isEqualTo(List.of(film2, film1));
     }
 
     @Test
     @DisplayName("Test pagination of method findPopularFilms")
-    public void testPaginationFindPopularFilmsWhenLikesHaveTwoFilms() {
+    void testPaginationFindPopularFilmsWhenLikesHaveTwoFilms() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);
         film2.addUserLike(user1);
-        filmRepository.saveAll(List.of(film1, film2, film3));
-        userRepository.saveAll(List.of(user1, user2, user3, user4));
+        filmRepository.updateAll(List.of(film1, film2, film3));
+        userRepository.updateAll(List.of(user1, user2, user3, user4));
         List<Film> popularFilms = filmRepository.findPopularFilmsByRate(1);
         Assertions.assertThat(popularFilms).isEqualTo(List.of(film2));
     }
 
     @Test
     @DisplayName("Test delete like of film")
-    public void testDeleteLike() {
+    void testDeleteLike() {
         film1.addUserLike(user1);
         film2.addUserLike(user2);
         film2.addUserLike(user3);
         film2.addUserLike(user1);
-        filmRepository.saveAll(List.of(film1, film2, film3));
-        userRepository.saveAll(List.of(user1, user2, user3, user4));
+        filmRepository.updateAll(List.of(film1, film2, film3));
+        userRepository.updateAll(List.of(user1, user2, user3, user4));
         film1.removeUserLike(user1);
-        filmRepository.save(film1);
-        userRepository.save(user1);
+        filmRepository.update(film1);
+        userRepository.update(user1);
         List<Film> popularFilms = filmRepository.findPopularFilmsByRate(10);
         Assertions.assertThat(popularFilms).isEqualTo(List.of(film2, film1, film3));
         Assertions.assertThat(film1.getRate() == 0);
