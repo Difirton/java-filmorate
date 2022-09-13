@@ -1,3 +1,8 @@
 language: java
-sudo: false
-script: mvn clean verify
+jdk:
+  - openjdk11
+
+script: ./mvnw clean install
+
+notifications:
+  email: difirton@gmail.com
