@@ -18,6 +18,7 @@
 		<h2-driver.version>2.1.214</h2-driver.version>
 		<jackson-datatype.version>2.13.3</jackson-datatype.version>
 		<junit-platform-launcher.version>1.9.0</junit-platform-launcher.version>
+		<sonar.coverage.jacoco.xmlReportPaths>../app-it/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -76,10 +77,11 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.7</version>
+				<version>0.8.4</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -87,15 +89,22 @@
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>report</id>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.eluder.coveralls</groupId>
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
 				<configuration>
 					<repoToken>7Jliy2dcQS9uZPdtFhM8Gf0em40YzURfW</repoToken>
-					<jacocoReports>${project.reporting.outputDirectory}/jacoco/jacoco.xml</jacocoReports>
+					<jacocoReports>${project.reporting.outputDirectory}/site/jacoco/jacoco.xml</jacocoReports>
 				</configuration>
 			</plugin>
 		</plugins>
