@@ -15,7 +15,6 @@ While in the directory on the command line, type:
 
 `java -jar target/filmorate-0.0.1-SNAPSHOT.jar`
 
-
 ## Rest service layer
 
 - (GET) http://localhost:8080/films (get list of all films)
