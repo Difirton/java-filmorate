@@ -79,18 +79,12 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.4</version>
+				<version>0.8.7</version>
 				<executions>
 					<execution>
+						<id>prepare-agent</id>
 						<goals>
 							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -100,7 +94,8 @@
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
 				<configuration>
-					<repoToken>ByNGeNNoyNdJwyEknuVv4YaVZxmHlVfWe</repoToken>
+					<repoToken>7Jliy2dcQS9uZPdtFhM8Gf0em40YzURfW</repoToken>
+					<jacocoReports>${project.reporting.outputDirectory}/jacoco/jacoco.xml</jacocoReports>
 				</configuration>
 			</plugin>
 		</plugins>

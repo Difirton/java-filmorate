@@ -1,7 +1,5 @@
 # Repository Filmorate project
 
-[![Coverage Status](https://coveralls.io/repos/github/Difirton/java-filmorate/badge.svg?branch=main)](https://coveralls.io/github/Difirton/java-filmorate?branch=main)
-
 ## Quick start
 ### Requirements
 
