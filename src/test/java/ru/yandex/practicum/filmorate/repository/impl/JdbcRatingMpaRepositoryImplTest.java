@@ -35,6 +35,7 @@ public class JdbcRatingMpaRepositoryImplTest {
     @DisplayName("Test save in RatingMpaRepository")
     void testSave() {
         RatingMPA returnedMPA = ratingMpaRepository.save(newRating);
+        assertEquals(returnedMPA.getId(), 6);
         assertEquals(returnedMPA.getTitle(), "newR");
         RatingMPA ratingAfterSaveInDB = ratingMpaRepository.findById(6L).get();
         assertEquals(ratingAfterSaveInDB.getTitle(), "newR");

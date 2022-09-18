@@ -35,6 +35,7 @@ class JdbcGenreRepositoryImplTest {
     @DisplayName("Test save in GenreRepository")
     void testSave() {
         Genre returnedGenre = genreRepository.save(newGenre);
+        assertEquals(newGenre.getId(), 7);
         assertEquals(returnedGenre.getTitle(), "newGenre");
         Genre genreAfterSaveInDB = genreRepository.findById(7L).get();
         assertEquals(genreAfterSaveInDB.getTitle(), "newGenre");

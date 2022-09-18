@@ -44,6 +44,7 @@ class JdbcUserFriendRepositoryImplTest {
     @DisplayName("Test save userFriend in UserFriendRepository")
     void testSave() {
         UserFriend returnedUserFriend = userFriendRepository.save(newUserFriend1To2);
+        assertEquals(returnedUserFriend.getId(), 1);
         assertEquals(returnedUserFriend.getUser().getId(), 1L);
         UserFriend userFriendAfterSaveInDB = userFriendRepository.findById(1L).get();
         assertEquals(userFriendAfterSaveInDB.getFriend().getId(), 2L);

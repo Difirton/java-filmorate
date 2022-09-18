@@ -3,16 +3,21 @@ package ru.yandex.practicum.filmorate.repository.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.config.mapper.UserFriendRepositoryLazyMapper;
+import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.entity.UserFriend;
 import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -32,8 +37,15 @@ public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
 
     @Override
     public UserFriend save(UserFriend userFriend) {
-        this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS,
-                userFriend.getUser().getId(), userFriend.getFriend().getId(), userFriend.isApproved());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        this.jdbcOperations.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT_ALL_FIELDS, Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, userFriend.getUser().getId());
+            ps.setLong(2, userFriend.getFriend().getId());
+            ps.setBoolean(3, userFriend.isApproved());
+            return ps;
+            }, keyHolder);
+        userFriend.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return userFriend;
     }
 

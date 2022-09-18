@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -38,7 +39,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     @Override
     public User save(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcOperations.update(connection -> {
+        this.jdbcOperations.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(SQL_INSERT_ALL_FIELDS, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
@@ -46,7 +47,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
             ps.setDate(4, Date.valueOf(user.getBirthday()));
             return ps;
         }, keyHolder);
-        user.setId(keyHolder.getKey().longValue());
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return user;
     }
 

@@ -3,13 +3,17 @@ package ru.yandex.practicum.filmorate.repository.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.repository.RatingMpaRepository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -24,7 +28,13 @@ public class JdbcRatingMpaRepositoryImpl implements RatingMpaRepository {
 
     @Override
     public RatingMPA save(RatingMPA ratingMPA) {
-        this.jdbcOperations.update(SQL_INSERT_TITLE, ratingMPA.getTitle());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        this.jdbcOperations.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT_TITLE, Statement.RETURN_GENERATED_KEYS);
+                    ps.setString(1, ratingMPA.getTitle());
+                    return ps;
+                    }, keyHolder);
+        ratingMPA.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return ratingMPA;
     }
 
