@@ -14,6 +14,7 @@
 	<name>filmorate</name>
 	<description>Film rating web application.</description>
 	<properties>
+		<spring.boot.version>2.7.2</spring.boot.version>
 		<java.version>11</java.version>
 		<h2-driver.version>2.1.214</h2-driver.version>
 		<jackson-datatype.version>2.13.3</jackson-datatype.version>
@@ -35,26 +36,31 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>${h2-driver.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 			<version>${jackson-datatype.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-launcher</artifactId>
@@ -68,6 +74,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
 				<configuration>
 					<excludes>
 						<exclude>
