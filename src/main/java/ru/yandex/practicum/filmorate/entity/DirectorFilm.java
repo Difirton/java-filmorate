@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RatingMPA {
-    private Long id;
-
-    @JsonProperty(value = "name")
-    private String title;
+public class DirectorFilm {
+    private Long directorId;
+    private Long filmId;
 }

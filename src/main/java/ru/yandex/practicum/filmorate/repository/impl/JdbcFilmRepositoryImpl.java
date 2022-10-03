@@ -4,20 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.config.mapper.DirectorRepositoryMapper;
 import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryEagerMapper;
 import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryLazyMapper;
-import ru.yandex.practicum.filmorate.entity.Film;
-import ru.yandex.practicum.filmorate.entity.Genre;
+import ru.yandex.practicum.filmorate.config.mapper.GenreRepositoryMapper;
+import ru.yandex.practicum.filmorate.entity.*;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.sql.*;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -26,6 +28,9 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     private final JdbcOperations jdbcOperations;
     private final FilmRepositoryEagerMapper eagerFilmMapper;
     private final FilmRepositoryLazyMapper lazyFilmMapper;
+    private final NamedParameterJdbcOperations namedJdbcTemplate;
+    private final DirectorRepositoryMapper directorMapper;
+    private final GenreRepositoryMapper genreMapper;
     private static final String SQL_INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)";
     private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?";
     private static final String SQL_INSERT_FILMS_ALL_ARGS = "INSERT INTO films (name, description, release_date, " +
@@ -36,19 +41,42 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM films WHERE id = ?";
     private static final String SQL_SELECT_ALL_FILMS_WITHOUT_RATING = "SELECT * FROM films";
     private static final String SQL_SELECT_ALL_FILMS_WITH_RATING = "SELECT * FROM films " +
-            "LEFT JOIN RATING_MPA RM ON FILMS.RATING_MPA_ID = RM.ID WHERE FILMS.ID = ?";
+            "LEFT JOIN rating_mpa rm ON films.rating_mpa_id = rm.id WHERE films.id = ?";
     private static final String SQL_SELECT_POPULAR_FILMS = "SELECT * FROM films ORDER BY rate DESC LIMIT ?";
+    private static final String SQL_SELECT_LIKES_USERS_ID_BY_FILM_ID = "SELECT user_id FROM users_likes_films " +
+            "WHERE film_id = ?";
+    private static final String SQL_INSERT_USERS_LIKES = "INSERT INTO users_likes_films (film_id, user_id) VALUES (?,?)";
+    private static final String SQL_DELETE_USERS_LIKES = "DELETE FROM users_likes_films " +
+            "WHERE film_id = ? AND user_id = ?";
+    private static final String SQL_SELECT_ALL_USERS_LIKES = "SELECT user_id FROM users_likes_films WHERE film_id = ?";
+    private static final String SQL_INSERT_DIRECTORS_FILMS = "INSERT INTO directors_films (film_id, director_id) " +
+            "VALUES (?,?)";
+    private static final String SQL_DELETE_DIRECTORS_FILMS = "DELETE FROM directors_films " +
+            "WHERE film_id = ? AND director_id = ?";
+    private static final String SQL_SELECT_DIRECTORS_FILMS = "SELECT director_id FROM directors_films WHERE film_id = ?";
+    private static final String SQL_SELECT_ALL_DIRECTORS_FILM = "SELECT director_id, name FROM directors_films AS df " +
+            "INNER JOIN directors as d ON d.id = df.director_id WHERE film_id = ?";
+    private static final String SQL_SELECT_FILMS_BY_DIRECTOR_ID = "SELECT * FROM films " +
+            "INNER JOIN directors_films df ON films.id = df.film_id WHERE df.director_id = ? ";
+    private static final String SQL_SELECT_DIRECTORS_BY_FILM_ID = "SELECT id, name FROM directors AS d " +
+            "JOIN directors_films AS df ON d.id = df.director_id WHERE film_id = ?";
+    private static final String SQL_SELECT_GENRES_BY_FILM_ID = "SELECT id, title FROM genres AS g " +
+            "JOIN film_genres AS fg ON g.id = fg.genre_id WHERE film_id = ?";
+    private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
 
     @Override
-    @Transactional
     public Film save(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         this.jdbcOperations.update(this.createPreparedStatement(film), keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-        List<Long> batchIdToInsert = film.getGenres().stream()
+        List<Long> batchGenresIdToInsert = film.getGenres().stream()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
-        this.updateFilmGenres(film.getId(), batchIdToInsert, SQL_INSERT_FILM_GENRES);
+        this.updateFilmCollection(film.getId(), batchGenresIdToInsert, SQL_INSERT_FILM_GENRES);
+        List<Long> batchDirectorsIdToInsert = film.getDirectors().stream()
+                .map(Director::getId)
+                .collect(Collectors.toList());
+        this.updateFilmCollection(film.getId(), batchDirectorsIdToInsert, SQL_INSERT_DIRECTORS_FILMS);
         return film;
     }
 
@@ -71,10 +99,16 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     }
 
     @Override
-    @Transactional
     public Film update(Film film) {
         this.jdbcOperations.update(SQL_UPDATE_FILMS_ALL_ARGS, film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getRate(), film.getRatingMPA().getId(), film.getId());
+        this.checkFilmGenre(film);
+        this.checkFilmLikes(film);
+        this.checkFilmDirectors(film);
+        return film;
+    }
+
+    private void checkFilmGenre(Film film) {
         List<Long> genresIdBeforeUpdate =  this.jdbcOperations.query(SQL_SELECT_GENRES_ID_BY_FILM_ID,
                 (rs, rowNum) -> rs.getLong("genre_id"), film.getId());
         List<Long> genresIdAfterUpdate = film.getGenres().stream()
@@ -86,9 +120,56 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
         List<Long> genresIdToInsert = genresIdAfterUpdate.stream()
                 .filter(id -> !genresIdBeforeUpdate.contains(id))
                 .collect(Collectors.toList());
-        this.updateFilmGenres(film.getId(), genresIdToInsert, SQL_INSERT_FILM_GENRES);
-        this.updateFilmGenres(film.getId(), genresIdToDelete, SQL_DELETE_FILM_GENRES);
-        return film;
+        this.updateFilmCollection(film.getId(), genresIdToInsert, SQL_INSERT_FILM_GENRES);
+        this.updateFilmCollection(film.getId(), genresIdToDelete, SQL_DELETE_FILM_GENRES);
+    }
+
+    private void checkFilmLikes(Film film) {
+        List<Long> usersIdBeforeUpdate =  this.jdbcOperations.query(SQL_SELECT_LIKES_USERS_ID_BY_FILM_ID,
+                (rs, rowNum) -> rs.getLong("user_id"), film.getId());
+        List<Long> usersIdAfterUpdate = film.getUsersLikes().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        List<Long> usersIdToDelete = usersIdBeforeUpdate.stream()
+                .filter(id -> !usersIdAfterUpdate.contains(id))
+                .collect(Collectors.toList());
+        List<Long> usersIdToInsert = usersIdAfterUpdate.stream()
+                .filter(id -> !usersIdBeforeUpdate.contains(id))
+                .collect(Collectors.toList());
+        this.updateFilmCollection(film.getId(), usersIdToInsert, SQL_INSERT_USERS_LIKES);
+        this.updateFilmCollection(film.getId(), usersIdToDelete, SQL_DELETE_USERS_LIKES);
+    }
+
+    private void checkFilmDirectors(Film film) {
+        List<Long> usersIdBeforeUpdate =  this.jdbcOperations.query(SQL_SELECT_DIRECTORS_FILMS,
+                (rs, rowNum) -> rs.getLong("director_id"), film.getId());
+        List<Long> usersIdAfterUpdate = film.getDirectors().stream()
+                .map(Director::getId)
+                .collect(Collectors.toList());
+        List<Long> usersIdToDelete = usersIdBeforeUpdate.stream()
+                .filter(id -> !usersIdAfterUpdate.contains(id))
+                .collect(Collectors.toList());
+        List<Long> usersIdToInsert = usersIdAfterUpdate.stream()
+                .filter(id -> !usersIdBeforeUpdate.contains(id))
+                .collect(Collectors.toList());
+        this.updateFilmCollection(film.getId(), usersIdToInsert, SQL_INSERT_DIRECTORS_FILMS);
+        this.updateFilmCollection(film.getId(), usersIdToDelete, SQL_DELETE_DIRECTORS_FILMS);
+    }
+
+
+    private void updateFilmCollection(Long filmId, List<Long> elementCollectionId, String sqlRequiredOperation) {
+        if (!elementCollectionId.isEmpty()) {
+            this.jdbcOperations.batchUpdate(sqlRequiredOperation,
+                    new BatchPreparedStatementSetter() {
+                        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                            preparedStatement.setLong(1, filmId);
+                            preparedStatement.setLong(2, elementCollectionId.get(i));
+                        }
+                        public int getBatchSize() {
+                            return elementCollectionId.size();
+                        }
+                    });
+        }
     }
 
     @Override
@@ -98,19 +179,42 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
 
     @Override
     public List<Film> findAll() {
-        return this.jdbcOperations.query(SQL_SELECT_ALL_FILMS_WITHOUT_RATING, lazyFilmMapper);
+        List<Film> allFilms = this.jdbcOperations.query(SQL_SELECT_ALL_FILMS_WITHOUT_RATING, lazyFilmMapper);
+        this.setDirectorsInEachFilms(allFilms);
+        return allFilms;
+    }
+
+    private void setDirectorsInEachFilms(List<Film> films) {
+        for (Film film : films) {
+            List<Director> directors = this.jdbcOperations.query(SQL_SELECT_DIRECTORS_BY_FILM_ID,
+                    directorMapper, film.getId());
+            film.setDirectors(directors);
+        }
     }
 
     @Override
-    public Optional<Film> findById(Long id) {
-        return Optional.ofNullable(this.jdbcOperations.queryForObject(SQL_SELECT_ALL_FILMS_WITH_RATING,
-                eagerFilmMapper, id));
+    public Optional<Film> findById(Long filmId) {
+        Film film = this.jdbcOperations.queryForObject(SQL_SELECT_ALL_FILMS_WITH_RATING,
+                eagerFilmMapper, filmId);
+        if (film != null) {
+            film.setUsersLikes(this.jdbcOperations.query(SQL_SELECT_ALL_USERS_LIKES,
+                    (rs, rowNum) -> User.builder()
+                            .id(rs.getLong("user_id"))
+                            .build(), filmId));
+            film.setDirectors(this.jdbcOperations.query(SQL_SELECT_ALL_DIRECTORS_FILM,
+                    (rs, rowNum) -> Director.builder()
+                            .id(rs.getLong("director_id"))
+                            .name(rs.getString("name"))
+                            .build(), filmId));
+            return Optional.of(film);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
-    @Transactional
     public int[] saveAll(List<Film> films) {
-        return this.jdbcOperations.batchUpdate(SQL_INSERT_FILMS_ALL_ARGS,
+        int[] result = this.jdbcOperations.batchUpdate(SQL_INSERT_FILMS_ALL_ARGS,
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         ps.setString(1, films.get(i).getName());
@@ -124,21 +228,30 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
                         return films.size();
                     }
                 });
+        this.insertDirectorsFilms(films);
+        return result;
     }
 
-    private void updateFilmGenres(Long filmId, List<Long> genresId, String sqlRequiredOperation) {
-        if (!genresId.isEmpty()) {
-            this.jdbcOperations.batchUpdate(sqlRequiredOperation,
-                    new BatchPreparedStatementSetter() {
-                        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-                            preparedStatement.setLong(1, filmId);
-                            preparedStatement.setLong(2, genresId.get(i));
-                        }
-                        public int getBatchSize() {
-                            return genresId.size();
-                        }
-                    });
-        }
+    private void insertDirectorsFilms(List<Film> films) {
+        List<DirectorFilm> directorsFilms = films.stream()
+                .map(f -> f.getDirectors().stream()
+                        .map(o -> DirectorFilm.builder()
+                                .filmId(f.getId())
+                                .directorId(o.getId())
+                                .build())
+                        .collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        this.jdbcOperations.batchUpdate(SQL_INSERT_DIRECTORS_FILMS,
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, directorsFilms.get(i).getFilmId());
+                        ps.setLong(2, directorsFilms.get(i).getDirectorId());
+                    }
+                    public int getBatchSize() {
+                        return directorsFilms.size();
+                    }
+                });
     }
 
     @Override
@@ -154,5 +267,46 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
                     mapFilmInStatement(film, ps);
                     ps.setLong(7, film.getId());
                 });
+    }
+
+    @Override
+    public List<Film> findFilmsByDirectorId(Long directorId) {
+        return this.jdbcOperations.query(SQL_SELECT_FILMS_BY_DIRECTOR_ID, lazyFilmMapper, directorId);
+    }
+
+    @Override
+    public List<Film> findFilmsByDirectorId(Long directorId, String param) {
+        String sqlResultParametriseQuery;
+        List<Film> films;
+        switch (param) {
+            case "year":
+                sqlResultParametriseQuery = SQL_SELECT_FILMS_BY_DIRECTOR_ID + "ORDER BY release_date";
+                films = this.jdbcOperations.query(sqlResultParametriseQuery, lazyFilmMapper, directorId);
+                this.setDirectorsInEachFilms(films);
+                this.setGenresInEachFilms(films);
+                return films;
+            case "likes":
+                sqlResultParametriseQuery = SQL_SELECT_FILMS_BY_DIRECTOR_ID + "ORDER BY rate DESC";
+                films = this.jdbcOperations.query(sqlResultParametriseQuery, lazyFilmMapper, directorId);
+                this.setDirectorsInEachFilms(films);
+                this.setGenresInEachFilms(films);
+                return films;
+            default:
+                throw new IllegalStateException("Invalid request parameter passed: " + param);
+        }
+    }
+
+    private void setGenresInEachFilms(List<Film> films) {
+        for (Film film : films) {
+            List<Genre> genres = this.jdbcOperations.query(SQL_SELECT_GENRES_BY_FILM_ID,
+                    genreMapper, film.getId());
+            film.setGenres(genres);
+        }
+    }
+
+    @Override
+    public List<Film> findFilmsByIds(List<Long> filmIds) {
+        SqlParameterSource parameters = new MapSqlParameterSource("ids", filmIds);
+        return namedJdbcTemplate.query(NAMED_SQL_SELECT_FILMS_WITH_IDS, parameters, lazyFilmMapper);
     }
 }

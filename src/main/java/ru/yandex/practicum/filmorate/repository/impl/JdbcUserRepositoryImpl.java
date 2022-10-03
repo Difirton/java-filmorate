@@ -73,7 +73,6 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_BY_ID, userMapper, id));
     }
 
-
     @Override
     public int[] saveAll(List<User> users) {
         return this.jdbcOperations.batchUpdate(SQL_INSERT_ALL_FIELDS,
