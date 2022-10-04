@@ -47,7 +47,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
     public void deleteFilm(@PathVariable("id") Long id) {
-        log.info("Request to delete film with {}", id);
+        log.info("Request to delete film with {}, parameters to update: ", id);
         filmService.removeFilmById(id);
     }
 
@@ -76,12 +76,5 @@ public class FilmController {
     @GetMapping("popular")
     public List<Film> getPopularFilms(@RequestParam(name = "count") Optional<Integer> count) {
         return filmService.getPopularFilms(count.orElse(10));
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/director/{directorId}")
-    public List<Film> getDirectorFilmsWithSort(@PathVariable("directorId") Long id,
-                                               @RequestParam(name = "sortBy") Optional<String> param) {
-        return filmService.getDirectorsFilms(id, param.orElse("noParam"));
     }
 }
