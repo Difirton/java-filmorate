@@ -92,6 +92,7 @@ ALTER TABLE genres ADD CONSTRAINT uk_genre_title UNIQUE (title);
 ALTER TABLE user_friends ADD CONSTRAINT uk_user_friend UNIQUE (user_id, friend_id);
 ALTER TABLE users ADD CONSTRAINT uk_user_email UNIQUE (email);
 ALTER TABLE users ADD CONSTRAINT uk_user_login UNIQUE (login);
+ALTER TABLE users_rates_reviews ADD CONSTRAINT uk_user_rate_review UNIQUE (user_id, review_id);
 ALTER TABLE film_genres ADD CONSTRAINT fk_film_genres_film FOREIGN KEY (film_id) REFERENCES films ON DELETE CASCADE;
 ALTER TABLE film_genres ADD CONSTRAINT fk_film_genres_genre FOREIGN KEY (genre_id) REFERENCES genres ON DELETE CASCADE;
 ALTER TABLE user_friends ADD CONSTRAINT fk_friend_id FOREIGN KEY (friend_id) REFERENCES users ON DELETE CASCADE;
