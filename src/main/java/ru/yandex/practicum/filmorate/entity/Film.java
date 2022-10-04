@@ -17,8 +17,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"usersLikes", "genres", "ratingMPA"})
-@ToString(exclude = {"usersLikes", "genres", "ratingMPA"})
+@EqualsAndHashCode(exclude = {"usersLikes", "genres", "ratingMPA", "directors"})
+@ToString(exclude = {"usersLikes", "genres", "ratingMPA", "directors"})
 @Builder
 public class Film {
     private Long id;
@@ -52,6 +52,9 @@ public class Film {
 
     @Builder.Default
     private List<Genre> genres = new ArrayList<>();
+
+    @Builder.Default
+    private List<Director> directors = new ArrayList<>();
 
     public void addUserLike(User user) {
         this.rate++;

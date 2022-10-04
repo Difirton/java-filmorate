@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class RatingMpaControllerTest {
-    private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
     private RatingMPA ratingMPA;
     @Autowired
     private MockMvc mockMvc;
