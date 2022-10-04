@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.entity;
+package ru.yandex.practicum.filmorate.entity.binding;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DirectorFilm {
-    private Long directorId;
+public class FilmGenre {
     private Long filmId;
+    private Long genreId;
 }

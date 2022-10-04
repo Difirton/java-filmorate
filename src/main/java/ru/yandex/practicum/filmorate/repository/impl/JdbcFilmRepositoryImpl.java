@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.config.mapper.DirectorRepositoryMapper;
 import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryEagerMapper;
 import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryLazyMapper;
-import ru.yandex.practicum.filmorate.config.mapper.GenreRepositoryMapper;
 import ru.yandex.practicum.filmorate.entity.*;
+import ru.yandex.practicum.filmorate.entity.binding.DirectorFilm;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.sql.*;
@@ -30,7 +30,6 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     private final FilmRepositoryLazyMapper lazyFilmMapper;
     private final NamedParameterJdbcOperations namedJdbcTemplate;
     private final DirectorRepositoryMapper directorMapper;
-    private final GenreRepositoryMapper genreMapper;
     private static final String SQL_INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)";
     private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?";
     private static final String SQL_INSERT_FILMS_ALL_ARGS = "INSERT INTO films (name, description, release_date, " +
@@ -60,8 +59,6 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
             "INNER JOIN directors_films df ON films.id = df.film_id WHERE df.director_id = ? ";
     private static final String SQL_SELECT_DIRECTORS_BY_FILM_ID = "SELECT id, name FROM directors AS d " +
             "JOIN directors_films AS df ON d.id = df.director_id WHERE film_id = ?";
-    private static final String SQL_SELECT_GENRES_BY_FILM_ID = "SELECT id, title FROM genres AS g " +
-            "JOIN film_genres AS fg ON g.id = fg.genre_id WHERE film_id = ?";
     private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
 
     @Override
@@ -180,16 +177,7 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     @Override
     public List<Film> findAll() {
         List<Film> allFilms = this.jdbcOperations.query(SQL_SELECT_ALL_FILMS_WITHOUT_RATING, lazyFilmMapper);
-        this.setDirectorsInEachFilms(allFilms);
         return allFilms;
-    }
-
-    private void setDirectorsInEachFilms(List<Film> films) {
-        for (Film film : films) {
-            List<Director> directors = this.jdbcOperations.query(SQL_SELECT_DIRECTORS_BY_FILM_ID,
-                    directorMapper, film.getId());
-            film.setDirectors(directors);
-        }
     }
 
     @Override
@@ -277,30 +265,15 @@ public class JdbcFilmRepositoryImpl implements FilmRepository {
     @Override
     public List<Film> findFilmsByDirectorId(Long directorId, String param) {
         String sqlResultParametriseQuery;
-        List<Film> films;
         switch (param) {
             case "year":
                 sqlResultParametriseQuery = SQL_SELECT_FILMS_BY_DIRECTOR_ID + "ORDER BY release_date";
-                films = this.jdbcOperations.query(sqlResultParametriseQuery, lazyFilmMapper, directorId);
-                this.setDirectorsInEachFilms(films);
-                this.setGenresInEachFilms(films);
-                return films;
+                return this.jdbcOperations.query(sqlResultParametriseQuery, lazyFilmMapper, directorId);
             case "likes":
                 sqlResultParametriseQuery = SQL_SELECT_FILMS_BY_DIRECTOR_ID + "ORDER BY rate DESC";
-                films = this.jdbcOperations.query(sqlResultParametriseQuery, lazyFilmMapper, directorId);
-                this.setDirectorsInEachFilms(films);
-                this.setGenresInEachFilms(films);
-                return films;
+                return this.jdbcOperations.query(sqlResultParametriseQuery, lazyFilmMapper, directorId);
             default:
                 throw new IllegalStateException("Invalid request parameter passed: " + param);
-        }
-    }
-
-    private void setGenresInEachFilms(List<Film> films) {
-        for (Film film : films) {
-            List<Genre> genres = this.jdbcOperations.query(SQL_SELECT_GENRES_BY_FILM_ID,
-                    genreMapper, film.getId());
-            film.setGenres(genres);
         }
     }
 

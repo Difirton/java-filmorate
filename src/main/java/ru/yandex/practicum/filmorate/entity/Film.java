@@ -54,9 +54,6 @@ public class Film {
     private List<Genre> genres = new ArrayList<>();
 
     @Builder.Default
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id")
     private List<Director> directors = new ArrayList<>();
 
     public void addUserLike(User user) {
