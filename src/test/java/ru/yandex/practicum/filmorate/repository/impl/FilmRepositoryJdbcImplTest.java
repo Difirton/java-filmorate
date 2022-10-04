@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class JdbcFilmRepositoryImplTest {
+class FilmRepositoryJdbcImplTest {
     private Film film1;
     private Film film2;
     private Film film3;

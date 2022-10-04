@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcDirectorRepositoryImpl implements DirectorRepository {
+public class DirectorRepositoryJdbcImpl implements DirectorRepository {
     private final JdbcOperations jdbcOperations;
     private final DirectorRepositoryMapper directorMapper;
     private final String SQL_INSERT_NAME = "INSERT INTO directors (name) VALUES (?)";

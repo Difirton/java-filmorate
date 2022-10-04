@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcUserFriendRepositoryImpl implements UserFriendRepository {
+public class UserFriendRepositoryJdbcImpl implements UserFriendRepository {
     private final JdbcOperations jdbcOperations;
     private final UserFriendRepositoryLazyMapper userFriendRepositoryLazyMapper;
     private static final String SQL_INSERT_ALL_FIELDS = "INSERT INTO user_friends (user_id, friend_id, approved) " +

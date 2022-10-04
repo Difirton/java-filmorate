@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class JdbcDirectorRepositoryImplTest {
+class DirectorRepositoryJdbcImplTest {
 
     private Director newDirector;
     private Director secondDirector;

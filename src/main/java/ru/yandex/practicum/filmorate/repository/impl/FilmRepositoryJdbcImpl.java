@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcFilmRepositoryImpl implements FilmRepository {
+public class FilmRepositoryJdbcImpl implements FilmRepository {
     private final JdbcOperations jdbcOperations;
     private final FilmRepositoryEagerMapper eagerFilmMapper;
     private final FilmRepositoryLazyMapper lazyFilmMapper;

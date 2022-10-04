@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcRatingMpaRepositoryImpl implements RatingMpaRepository {
+public class RatingMpaRepositoryJdbcImpl implements RatingMpaRepository {
     private final JdbcOperations jdbcOperations;
     private static final String SQL_INSERT_TITLE = "INSERT INTO rating_mpa (title) VALUES (?)";
     private static final String SQL_UPDATE_TITLE = "UPDATE rating_mpa SET title = ? WHERE id = ?";

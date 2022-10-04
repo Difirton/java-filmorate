@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcUserRepositoryImpl implements UserRepository {
+public class UserRepositoryJdbcImpl implements UserRepository {
     private final JdbcOperations jdbcOperations;
     private final UserRepositoryMapper userMapper;
     private static final String SQL_INSERT_ALL_FIELDS = "INSERT INTO users (email, login, name, birthday) " +

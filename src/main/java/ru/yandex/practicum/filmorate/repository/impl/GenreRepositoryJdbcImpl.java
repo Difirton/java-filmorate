@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcGenreRepositoryImpl implements GenreRepository {
+public class GenreRepositoryJdbcImpl implements GenreRepository {
     private final JdbcOperations jdbcOperations;
     private final GenreRepositoryMapper genreMapper;
     private static final String SQL_INSERT_TITLE = "INSERT INTO genres (title) VALUES (?)";

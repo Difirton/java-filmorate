@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class JdbcUserRepositoryImplTest {
+class UserRepositoryJdbcImplTest {
     private User newUser;
     private User secondUser;
     private User thirdUser;

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcDirectorFilmRepositoryImpl implements DirectorFilmRepository {
+public class DirectorFilmRepositoryJdbcImpl implements DirectorFilmRepository {
     private final JdbcOperations jdbcOperations;
     private final String SQL_SELECT_ALL = "SELECT * FROM directors_films";
 
