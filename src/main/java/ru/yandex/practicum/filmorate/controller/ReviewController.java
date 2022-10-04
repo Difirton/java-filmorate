@@ -55,4 +55,28 @@ public class ReviewController {
             return reviewService.getAllReviews(count.orElse(10));
         }
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{id}/like/{userId}")
+    public Review addLike(@PathVariable(name = "id") Long reviewId, @PathVariable(name = "userId") Long userId) {
+        return reviewService.addLike(reviewId, userId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{id}/dislike/{userId}")
+    public Review addDisike(@PathVariable(name = "id") Long reviewId, @PathVariable(name = "userId") Long userId) {
+        return reviewService.addDislike(reviewId, userId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{id}/like/{userId}")
+    public Review deleteLike(@PathVariable(name = "id") Long reviewId, @PathVariable(name = "userId") Long userId) {
+        return reviewService.removeLike(reviewId, userId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{id}/dislike/{userId}")
+    public Review deleteDisike(@PathVariable(name = "id") Long reviewId, @PathVariable(name = "userId") Long userId) {
+        return reviewService.removeDislike(reviewId, userId);
+    }
 }
