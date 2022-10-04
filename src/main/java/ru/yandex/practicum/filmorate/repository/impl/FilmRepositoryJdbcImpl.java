@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.config.mapper.DirectorRepositoryMapper;
 import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryEagerMapper;
 import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryLazyMapper;
+import ru.yandex.practicum.filmorate.config.mapper.GenreRepositoryMapper;
 import ru.yandex.practicum.filmorate.entity.*;
 import ru.yandex.practicum.filmorate.entity.binding.DirectorFilm;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
@@ -29,6 +30,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private final FilmRepositoryEagerMapper eagerFilmMapper;
     private final FilmRepositoryLazyMapper lazyFilmMapper;
     private final NamedParameterJdbcOperations namedJdbcTemplate;
+    private final GenreRepositoryMapper genreMapper;
     private final DirectorRepositoryMapper directorMapper;
     private static final String SQL_INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)";
     private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?";
@@ -53,12 +55,12 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String SQL_DELETE_DIRECTORS_FILMS = "DELETE FROM directors_films " +
             "WHERE film_id = ? AND director_id = ?";
     private static final String SQL_SELECT_DIRECTORS_FILMS = "SELECT director_id FROM directors_films WHERE film_id = ?";
-    private static final String SQL_SELECT_ALL_DIRECTORS_FILM = "SELECT director_id, name FROM directors_films AS df " +
+    private static final String SQL_SELECT_ALL_DIRECTORS_FILM = "SELECT id, name FROM directors_films AS df " +
             "INNER JOIN directors as d ON d.id = df.director_id WHERE film_id = ?";
+    private static final String SQL_SELECT_ALL_GENRES_FILM = "SELECT id, title FROM genres AS g " +
+            "INNER JOIN film_genres AS fg ON fg.genre_id = g.id WHERE film_id = ?";
     private static final String SQL_SELECT_FILMS_BY_DIRECTOR_ID = "SELECT * FROM films " +
             "INNER JOIN directors_films df ON films.id = df.film_id WHERE df.director_id = ? ";
-    private static final String SQL_SELECT_DIRECTORS_BY_FILM_ID = "SELECT id, name FROM directors AS d " +
-            "JOIN directors_films AS df ON d.id = df.director_id WHERE film_id = ?";
     private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
 
     @Override
@@ -154,16 +156,16 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     }
 
 
-    private void updateFilmCollection(Long filmId, List<Long> elementCollectionId, String sqlRequiredOperation) {
-        if (!elementCollectionId.isEmpty()) {
+    private void updateFilmCollection(Long filmId, List<Long> elementsCollectionId, String sqlRequiredOperation) {
+        if (!elementsCollectionId.isEmpty()) {
             this.jdbcOperations.batchUpdate(sqlRequiredOperation,
                     new BatchPreparedStatementSetter() {
                         public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                             preparedStatement.setLong(1, filmId);
-                            preparedStatement.setLong(2, elementCollectionId.get(i));
+                            preparedStatement.setLong(2, elementsCollectionId.get(i));
                         }
                         public int getBatchSize() {
-                            return elementCollectionId.size();
+                            return elementsCollectionId.size();
                         }
                     });
         }
@@ -176,8 +178,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
 
     @Override
     public List<Film> findAll() {
-        List<Film> allFilms = this.jdbcOperations.query(SQL_SELECT_ALL_FILMS_WITHOUT_RATING, lazyFilmMapper);
-        return allFilms;
+        return this.jdbcOperations.query(SQL_SELECT_ALL_FILMS_WITHOUT_RATING, lazyFilmMapper);
     }
 
     @Override
@@ -189,11 +190,8 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
                     (rs, rowNum) -> User.builder()
                             .id(rs.getLong("user_id"))
                             .build(), filmId));
-            film.setDirectors(this.jdbcOperations.query(SQL_SELECT_ALL_DIRECTORS_FILM,
-                    (rs, rowNum) -> Director.builder()
-                            .id(rs.getLong("director_id"))
-                            .name(rs.getString("name"))
-                            .build(), filmId));
+            film.setDirectors(this.jdbcOperations.query(SQL_SELECT_ALL_DIRECTORS_FILM, directorMapper, filmId));
+            film.setGenres(this.jdbcOperations.query(SQL_SELECT_ALL_GENRES_FILM, genreMapper, filmId));
             return Optional.of(film);
         } else {
             return Optional.empty();
@@ -278,8 +276,8 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     }
 
     @Override
-    public List<Film> findFilmsByIds(List<Long> filmIds) {
-        SqlParameterSource parameters = new MapSqlParameterSource("ids", filmIds);
+    public List<Film> findFilmsByIds(List<Long> filmsIds) {
+        SqlParameterSource parameters = new MapSqlParameterSource("ids", filmsIds);
         return namedJdbcTemplate.query(NAMED_SQL_SELECT_FILMS_WITH_IDS, parameters, lazyFilmMapper);
     }
 }
