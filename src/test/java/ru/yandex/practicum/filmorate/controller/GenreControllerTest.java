@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class GenreControllerTest {
+    private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
     private Genre genre;
     @Autowired
     private MockMvc mockMvc;
