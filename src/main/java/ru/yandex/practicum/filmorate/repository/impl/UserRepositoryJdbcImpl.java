@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcUserRepositoryImpl implements UserRepository {
+public class UserRepositoryJdbcImpl implements UserRepository {
     private final JdbcOperations jdbcOperations;
     private final UserRepositoryMapper userMapper;
     private static final String SQL_INSERT_ALL_FIELDS = "INSERT INTO users (email, login, name, birthday) " +
@@ -72,7 +72,6 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     public Optional<User> findById(Long id) {
         return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_BY_ID, userMapper, id));
     }
-
 
     @Override
     public int[] saveAll(List<User> users) {

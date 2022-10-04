@@ -8,14 +8,13 @@ import ru.yandex.practicum.filmorate.entity.UserFriend;
 import ru.yandex.practicum.filmorate.error.UserNotFoundException;
 import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
-import ru.yandex.practicum.filmorate.repository.impl.JdbcUserRepositoryImpl;
 
 import java.util.List;
 
 @Service
 public class UserService {
-    private UserRepository userRepository;
-    private UserFriendRepository userFriendRepository;
+    private final UserRepository userRepository;
+    private final UserFriendRepository userFriendRepository;
 
     @Autowired
     public UserService(UserRepository userRepository, UserFriendRepository userFriendRepository) {
@@ -23,6 +22,7 @@ public class UserService {
         this.userFriendRepository = userFriendRepository;
     }
 
+    @Transactional
     public User createUser(User user) {
         if (user.getName() == null || user.getName().equals("")) {
             user.setName(user.getLogin());
@@ -34,6 +34,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     public User updateUser(Long id, User newUser) {
         return userRepository.findById(id)
                 .map(u -> {

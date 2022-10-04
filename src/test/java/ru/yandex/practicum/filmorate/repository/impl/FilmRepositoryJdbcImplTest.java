@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import ru.yandex.practicum.filmorate.entity.Director;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class JdbcFilmRepositoryImplTest {
+class FilmRepositoryJdbcImplTest {
     private Film film1;
     private Film film2;
     private Film film3;
@@ -133,5 +134,101 @@ class JdbcFilmRepositoryImplTest {
         film2.setReleaseDate(LocalDate.of(1900, 1, 1));
         film3.setRatingMPA(RatingMPA.builder().id(4L).build());
         filmRepository.updateAll(List.of(film1, film2, film3));
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_saveFilmsWithDirector.sql")
+    @DisplayName("Test film with director")
+    void testSaveFilmWithDirector() {
+        film1.setDirectors(List.of(Director.builder()
+                .id(1L)
+                .build()));
+        filmRepository.save(film1);
+        assertEquals(filmRepository.findById(1L).get().getDirectors().get(0).getName(), "director 1");
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_saveFilmsWithDirector.sql")
+    @DisplayName("Test film with two directors")
+    void testSaveFilmWithTwoDirectors() {
+        film1.setDirectors(List.of(Director.builder()
+                .id(1L)
+                .build(),
+                Director.builder()
+                .id(2L)
+                .build()));
+        film3.setDirectors(List.of(Director.builder()
+                        .id(2L)
+                        .build()));
+        filmRepository.saveAll(List.of(film1, film2, film3));
+        assertEquals(filmRepository.findById(1L).get().getDirectors().get(0).getName(), "director 1");
+        assertEquals(filmRepository.findById(1L).get().getDirectors().get(1).getName(), "director 2");
+        assertEquals(filmRepository.findById(3L).get().getDirectors().get(0).getName(), "director 2");
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @DisplayName("Test find list of films by director id without parameters of sort")
+    void testFindFilmsByDirectorId() {
+        List<Film> filmsDirector1 = filmRepository.findFilmsByDirectorId(1L);
+        List<Film> filmsDirector2 = filmRepository.findFilmsByDirectorId(2L);
+        assertEquals(filmsDirector1.get(0).getName(), "test name 1");
+        assertEquals(filmsDirector2.get(0).getName(), "test name 1");
+        assertEquals(filmsDirector1.get(1).getName(), "test name 2");
+        assertEquals(filmsDirector2.get(1).getName(), "test name 3");
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @DisplayName("Test search for list of films by director id sorted by year")
+    void testFindFilmsByDirectorIdWithParamYear() {
+        List<Film> sortedFilmsDirector1 = filmRepository.findFilmsByDirectorId(1L, "year");
+        List<Film> sortedFilmsDirector2 = filmRepository.findFilmsByDirectorId(2L, "year");
+        assertEquals(sortedFilmsDirector1.get(0).getName(), "test name 1");
+        assertEquals(sortedFilmsDirector1.get(1).getName(), "test name 2");
+        assertEquals(sortedFilmsDirector2.get(0).getName(), "test name 1");
+        assertEquals(sortedFilmsDirector2.get(1).getName(), "test name 3");
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @DisplayName("Test search for list of films by director id sorted by likes")
+    void testFindFilmsByDirectorIdWithParamLikes() {
+        List<Film> sortedFilmsDirector1 = filmRepository.findFilmsByDirectorId(1L, "likes");
+        List<Film> sortedFilmsDirector2 = filmRepository.findFilmsByDirectorId(2L, "likes");
+        assertEquals(sortedFilmsDirector1.get(0).getName(), "test name 2");
+        assertEquals(sortedFilmsDirector1.get(1).getName(), "test name 1");
+        assertEquals(sortedFilmsDirector2.get(0).getName(), "test name 1");
+        assertEquals(sortedFilmsDirector2.get(1).getName(), "test name 3");
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @DisplayName("Test search for list of films by director id sorted by likes")
+    void testFindFilmsByIdsTwoElements() {
+        List<Long> testData = List.of(2L, 3L);
+        List<Film> result = filmRepository.findFilmsByIds(testData);
+        assertEquals(result.get(0).getName(), "test name 2");
+        assertEquals(result.get(1).getName(), "test name 3");
+        assertTrue(result.size() == 2);
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @DisplayName("Test search for list of films by director id sorted by likes")
+    void testFindFilmsByIdsEmptyList() {
+        List<Long> testData = List.of();
+        List<Film> result = filmRepository.findFilmsByIds(testData);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @DisplayName("Test search for list of films by director id sorted by likes")
+    void testFindFilmsByIdsOneElement() {
+        List<Long> testData = List.of(1L);
+        List<Film> result = filmRepository.findFilmsByIds(testData);
+        assertEquals(result.get(0).getName(), "test name 1");
+        assertTrue(result.size() == 1);
     }
 }

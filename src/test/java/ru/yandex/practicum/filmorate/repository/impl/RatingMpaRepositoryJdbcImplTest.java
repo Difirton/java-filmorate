@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class JdbcRatingMpaRepositoryImplTest {
+public class RatingMpaRepositoryJdbcImplTest {
     private RatingMPA newRating;
     private RatingMPA secondNewRating;
     private RatingMPA thirdNewRating;

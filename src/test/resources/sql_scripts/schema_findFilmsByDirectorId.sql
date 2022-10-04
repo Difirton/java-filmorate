@@ -80,8 +80,23 @@ ALTER TABLE user_friends ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFEREN
 ALTER TABLE users_likes_films ADD CONSTRAINT fk_film_like_id FOREIGN KEY (film_id) REFERENCES films;
 ALTER TABLE users_likes_films ADD CONSTRAINT fk_user_like_id FOREIGN KEY (user_id) REFERENCES users;
 ALTER TABLE films ADD CONSTRAINT fk_rating_mpa_films FOREIGN KEY (rating_mpa_id) REFERENCES rating_mpa;
-ALTER TABLE directors_films ADD CONSTRAINT fk_director_id FOREIGN KEY (director_id) REFERENCES directors ON DELETE CASCADE;
-ALTER TABLE directors_films ADD CONSTRAINT fk_film_id FOREIGN KEY (film_id) REFERENCES films ON DELETE CASCADE;
+ALTER TABLE directors_films ADD CONSTRAINT fk_director_id FOREIGN KEY (director_id) REFERENCES directors;
+ALTER TABLE directors_films ADD CONSTRAINT fk_film_id FOREIGN KEY (film_id) REFERENCES films;
 
 INSERT INTO rating_mpa (title) VALUES ('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
 INSERT INTO genres (title) VALUES ('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик');
+
+INSERT INTO films (DESCRIPTION, DURATION, NAME, RATE, RATING_MPA_ID, RELEASE_DATE)
+VALUES ('test description 1', 10, 'test name 1', 10, 1, '2000-11-15'),
+       ('test description 2', 20, 'test name 2', 20, 2, '2010-10-15'),
+       ('test description 3', 30, 'test name 3', 5, 3, '2020-9-15');
+
+INSERT INTO directors (NAME)
+VALUES ('director 1'),
+       ('director 2');
+
+INSERT INTO directors_films (director_id, film_id)
+VALUES (1, 1),
+       (1, 2),
+       (2, 1),
+       (2, 3);
