@@ -88,6 +88,7 @@ CREATE TABLE users_rates_reviews
     is_positive BOOLEAN NOT NULL
 );
 
+ALTER TABLE film_genres ADD CONSTRAINT uk_film_id_genre_id UNIQUE (film_id, genre_id);
 ALTER TABLE genres ADD CONSTRAINT uk_genre_title UNIQUE (title);
 ALTER TABLE user_friends ADD CONSTRAINT uk_user_friend UNIQUE (user_id, friend_id);
 ALTER TABLE users ADD CONSTRAINT uk_user_email UNIQUE (email);

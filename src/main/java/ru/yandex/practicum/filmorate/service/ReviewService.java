@@ -4,28 +4,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.Review;
+import ru.yandex.practicum.filmorate.entity.ReviewRate;
+import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.error.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.error.UserNotFoundException;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.ReviewRateRepository;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
+    private final ReviewRateRepository reviewRateRepository;
 
     @Autowired
     public ReviewService(ReviewRepository reviewRepository,
                          FilmRepository filmRepository,
-                         UserRepository userRepository) {
+                         UserRepository userRepository,
+                         ReviewRateRepository reviewRateRepository) {
         this.reviewRepository = reviewRepository;
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
+        this.reviewRateRepository = reviewRateRepository;
     }
 
     @Transactional
@@ -36,8 +43,13 @@ public class ReviewService {
     }
 
     public Review getReviewById(Long id) {
-        return reviewRepository.findById(id)
+        Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ReviewNotFoundException(id));
+        review.setUsersRates(reviewRateRepository.getByReviewId(id)
+                .stream()
+                .map(ReviewRate::getUser)
+                .collect(Collectors.toList()));
+        return review;
     }
 
     public List<Review> getAllReviews(Integer count) {
@@ -66,5 +78,37 @@ public class ReviewService {
 
     public void removeReviewById(Long id) {
         reviewRepository.deleteById(id);
+    }
+
+    public Review addLike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        reviewRateRepository.save(user, review, true);
+        review.addLike(user);
+        return review;
+    }
+
+    public Review addDislike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        reviewRateRepository.save(user, review, false);
+        review.addDislike(user);
+        return review;
+    }
+
+    public Review removeLike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        reviewRateRepository.delete(user.getId(), review.getId(), true);
+        review.removeLike(user);
+        return review;
+    }
+
+    public Review removeDislike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        reviewRateRepository.delete(user.getId(), review.getId(), false);
+        review.removeDislike(user);
+        return review;
     }
 }
