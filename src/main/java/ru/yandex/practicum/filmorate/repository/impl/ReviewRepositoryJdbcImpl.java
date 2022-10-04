@@ -8,7 +8,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.config.mapper.ReviewRepositoryMapper;
 import ru.yandex.practicum.filmorate.entity.Review;
-import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 
 import java.sql.PreparedStatement;
@@ -32,7 +31,6 @@ public class ReviewRepositoryJdbcImpl implements ReviewRepository {
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM reviews WHERE id = ?";
     private static final String SQL_SELECT_BY_FILM_ID = "SELECT * FROM reviews WHERE film_id = ? " +
             "ORDER BY useful DESC LIMIT ?";
-    private static final String SQL_SELECT_RATES_BY_REVIEW_ID = "SELECT * FROM users_rates_reviews WHERE review_id = ?";
 
     @Override
     public Review save(Review review) {
@@ -76,16 +74,7 @@ public class ReviewRepositoryJdbcImpl implements ReviewRepository {
 
     @Override
     public Optional<Review> findById(Long id) {
-        Review review = jdbcOperations.queryForObject(SQL_SELECT_BY_ID, reviewMapper, id);
-        if (review != null) {
-            review.setUsersRates(this.jdbcOperations.query(SQL_SELECT_RATES_BY_REVIEW_ID,
-                    (rs, rowNum) -> User.builder()
-                            .id(rs.getLong("user_id"))
-                            .build(), id));
-            return Optional.of(review);
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_BY_ID, reviewMapper, id));
     }
 
     @Override

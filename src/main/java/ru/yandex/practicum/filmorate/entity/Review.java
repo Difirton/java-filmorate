@@ -40,24 +40,4 @@ public class Review {
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
     private List<User> usersRates = new ArrayList<>();
-
-    public void addLike(User user) {
-        this.usersRates.add(user);
-        this.useful++;
-    }
-
-    public void addDislike(User user) {
-        this.usersRates.add(user);
-        this.useful--;
-    }
-
-    public void removeLike(User user) {
-        this.usersRates.remove(user);
-        this.useful--;
-    }
-
-    public void removeDislike(User user) {
-        this.usersRates.remove(user);
-        this.useful++;
-    }
 }
