@@ -63,6 +63,14 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
             "INNER JOIN directors_films df ON films.id = df.film_id WHERE df.director_id = ? ";
     private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
 
+    private static final String SQL_SELECT_FILMS_LIKE_NAME_WITH_ORDER_RATE = "SELECT * FROM films WHERE name ILIKE :query ORDER BY rate DESC";
+    private static final String SQL_SELECT_FILMS_LIKE_DIRECTOR_NAME_WITH_ORDER_RATE = "SELECT * FROM films WHERE id IN " +
+            "(SELECT df.film_id " +
+            "FROM directors_films df " +
+            "INNER JOIN directors d ON d.id = df.director_id " +
+            "WHERE d.name ILIKE :query)" +
+            "ORDER BY rate";
+
     @Override
     public Film save(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -108,7 +116,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     }
 
     private void checkFilmGenre(Film film) {
-        List<Long> genresIdBeforeUpdate =  this.jdbcOperations.query(SQL_SELECT_GENRES_ID_BY_FILM_ID,
+        List<Long> genresIdBeforeUpdate = this.jdbcOperations.query(SQL_SELECT_GENRES_ID_BY_FILM_ID,
                 (rs, rowNum) -> rs.getLong("genre_id"), film.getId());
         List<Long> genresIdAfterUpdate = film.getGenres().stream()
                 .map(Genre::getId)
@@ -124,7 +132,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     }
 
     private void checkFilmLikes(Film film) {
-        List<Long> usersIdBeforeUpdate =  this.jdbcOperations.query(SQL_SELECT_LIKES_USERS_ID_BY_FILM_ID,
+        List<Long> usersIdBeforeUpdate = this.jdbcOperations.query(SQL_SELECT_LIKES_USERS_ID_BY_FILM_ID,
                 (rs, rowNum) -> rs.getLong("user_id"), film.getId());
         List<Long> usersIdAfterUpdate = film.getUsersLikes().stream()
                 .map(User::getId)
@@ -140,7 +148,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     }
 
     private void checkFilmDirectors(Film film) {
-        List<Long> usersIdBeforeUpdate =  this.jdbcOperations.query(SQL_SELECT_DIRECTORS_FILMS,
+        List<Long> usersIdBeforeUpdate = this.jdbcOperations.query(SQL_SELECT_DIRECTORS_FILMS,
                 (rs, rowNum) -> rs.getLong("director_id"), film.getId());
         List<Long> usersIdAfterUpdate = film.getDirectors().stream()
                 .map(Director::getId)
@@ -164,6 +172,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
                             preparedStatement.setLong(1, filmId);
                             preparedStatement.setLong(2, elementsCollectionId.get(i));
                         }
+
                         public int getBatchSize() {
                             return elementsCollectionId.size();
                         }
@@ -210,6 +219,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
                         ps.setInt(5, films.get(i).getRate());
                         ps.setLong(6, films.get(i).getRatingMPA().getId());
                     }
+
                     public int getBatchSize() {
                         return films.size();
                     }
@@ -234,6 +244,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
                         ps.setLong(1, directorsFilms.get(i).getFilmId());
                         ps.setLong(2, directorsFilms.get(i).getDirectorId());
                     }
+
                     public int getBatchSize() {
                         return directorsFilms.size();
                     }
@@ -279,5 +290,17 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     public List<Film> findFilmsByIds(List<Long> filmsIds) {
         SqlParameterSource parameters = new MapSqlParameterSource("ids", filmsIds);
         return namedJdbcTemplate.query(NAMED_SQL_SELECT_FILMS_WITH_IDS, parameters, lazyFilmMapper);
+    }
+
+    @Override
+    public List<Film> searchFilmsByName(String query) {
+        SqlParameterSource parameters = new MapSqlParameterSource("query", "%" + query + "%");
+        return namedJdbcTemplate.query(SQL_SELECT_FILMS_LIKE_NAME_WITH_ORDER_RATE, parameters, lazyFilmMapper);
+    }
+
+    @Override
+    public List<Film> searchFilmsByDirectorName(String query) {
+        SqlParameterSource parameters = new MapSqlParameterSource("query", "%" + query + "%");
+        return namedJdbcTemplate.query(SQL_SELECT_FILMS_LIKE_DIRECTOR_NAME_WITH_ORDER_RATE, parameters, lazyFilmMapper);
     }
 }

@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.error.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,6 +153,25 @@ public class FilmService {
             throw new IllegalArgumentException("Invalid search query films by director's id with parameter: " + param);
         }
         this.addGenresDirectorsInFilms(films);
+        return films;
+    }
+
+    public List<Film> searchFilms(String query, String by) {
+        boolean byFilmName = by.contains("title");
+        boolean byDirectorName = by.contains("director");
+
+        if (!byFilmName && !byDirectorName)
+            throw new IllegalArgumentException("Invalid parameter by: " + by);
+
+        List<Film> films = new ArrayList<>();
+
+        if (byFilmName)
+            films.addAll(filmRepository.searchFilmsByName(query));
+        if (byDirectorName)
+            films.addAll(filmRepository.searchFilmsByDirectorName(query));
+
+        this.addGenresDirectorsInFilms(films);
+        films.sort((x, y) -> y.getRate() - x.getRate());
         return films;
     }
 }

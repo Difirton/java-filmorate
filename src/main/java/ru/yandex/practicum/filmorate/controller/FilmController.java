@@ -34,7 +34,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
     public Film updateFilm(@PathVariable("id") Long id, @Valid @RequestBody Film film) {
-        log.info("Request to update film with id = {}, parameters to update: {}", id ,film.toString());
+        log.info("Request to update film with id = {}, parameters to update: {}", id, film.toString());
         return filmService.updateFilm(id, film);
     }
 
@@ -54,7 +54,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public Film updateFilmRootMapping(@Valid @RequestBody Film film) {
-        log.info("Request to update film with id = {}, parameters to update: {}", film.getId() ,film);
+        log.info("Request to update film with id = {}, parameters to update: {}", film.getId(), film);
         return filmService.updateFilm(film.getId(), film);
     }
 
@@ -83,5 +83,11 @@ public class FilmController {
     public List<Film> getDirectorFilmsWithSort(@PathVariable("directorId") Long id,
                                                @RequestParam(name = "sortBy") Optional<String> param) {
         return filmService.getDirectorsFilms(id, param.orElse("noParam"));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {
+        return filmService.searchFilms(query, by);
     }
 }
