@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
@@ -117,5 +118,12 @@ class FilmServiceTest {
         when(mockRepository.update(film)).thenReturn(film);
         Film updatedFilm = filmService.addLikeFilm(1L, 1L);
         assertEquals(updatedFilm.getRate(), 5);
+    }
+
+    @Test
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_searchFilms.sql"})
+    @DisplayName("Test search films by incorrect filter")
+    void testSearchFilmsThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> filmService.searchFilms("uck", "something_bad"));
     }
 }

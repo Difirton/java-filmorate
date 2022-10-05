@@ -69,7 +69,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
             "FROM directors_films df " +
             "INNER JOIN directors d ON d.id = df.director_id " +
             "WHERE d.name ILIKE :query)" +
-            "ORDER BY rate";
+            "ORDER BY rate DESC";
 
     @Override
     public Film save(Film film) {
