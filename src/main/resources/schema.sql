@@ -70,15 +70,16 @@ CREATE TABLE directors_films
     film_id BIGINT NOT NULL
 );
 
-ALTER TABLE film_genres ADD CONSTRAINT uk_film_id_genre_id UNIQUE (film_id, genre_id);
 ALTER TABLE genres ADD CONSTRAINT uk_genre_title UNIQUE (title);
 ALTER TABLE user_friends ADD CONSTRAINT uk_user_friend UNIQUE (user_id, friend_id);
 ALTER TABLE users ADD CONSTRAINT uk_user_email UNIQUE (email);
 ALTER TABLE users ADD CONSTRAINT uk_user_login UNIQUE (login);
-ALTER TABLE user_friends ADD CONSTRAINT fk_friend_id FOREIGN KEY (friend_id) REFERENCES users;
-ALTER TABLE user_friends ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users;
-ALTER TABLE users_likes_films ADD CONSTRAINT fk_film_like_id FOREIGN KEY (film_id) REFERENCES films;
-ALTER TABLE users_likes_films ADD CONSTRAINT fk_user_like_id FOREIGN KEY (user_id) REFERENCES users;
+ALTER TABLE film_genres ADD CONSTRAINT fk_film_genres_film FOREIGN KEY (film_id) REFERENCES films ON DELETE CASCADE;
+ALTER TABLE film_genres ADD CONSTRAINT fk_film_genres_genre FOREIGN KEY (genre_id) REFERENCES genres ON DELETE CASCADE;
+ALTER TABLE user_friends ADD CONSTRAINT fk_friend_id FOREIGN KEY (friend_id) REFERENCES users ON DELETE CASCADE;
+ALTER TABLE user_friends ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE;
+ALTER TABLE users_likes_films ADD CONSTRAINT fk_film_like_id FOREIGN KEY (film_id) REFERENCES films ON DELETE CASCADE;
+ALTER TABLE users_likes_films ADD CONSTRAINT fk_user_like_id FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE;
 ALTER TABLE films ADD CONSTRAINT fk_rating_mpa_films FOREIGN KEY (rating_mpa_id) REFERENCES rating_mpa;
 ALTER TABLE directors_films ADD CONSTRAINT fk_director_id FOREIGN KEY (director_id) REFERENCES directors ON DELETE CASCADE;
 ALTER TABLE directors_films ADD CONSTRAINT fk_film_id FOREIGN KEY (film_id) REFERENCES films ON DELETE CASCADE;

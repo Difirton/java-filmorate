@@ -38,6 +38,7 @@ public class FilmService {
 
     @Transactional
     public Film createFilm(Film film) {
+        film.setRate(0);
         return filmRepository.save(film);
     }
 
@@ -120,7 +121,23 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return filmRepository.findPopularFilmsByRate(count);
+        List<Film> films = filmRepository.findPopularFilmsByRate(count);
+        List<FilmGenre> filmsGenres = filmGenreRepository.findFilmsGenresByFilmsIds(films.stream()
+                .map(Film::getId)
+                .collect(Collectors.toList()));
+        List<Genre> genres = genreRepository.findGenresByIds(filmsGenres.stream()
+                .map(FilmGenre::getGenreId)
+                .collect(Collectors.toList()));
+        for (Film film : films) {
+            List<Long> genresIds = filmsGenres.parallelStream()
+                    .filter(fg -> fg.getFilmId().equals(film.getId()))
+                    .map(FilmGenre::getGenreId)
+                    .collect(Collectors.toList());
+            film.setGenres(genres.parallelStream()
+                    .filter(g -> genresIds.contains(g.getId()))
+                    .collect(Collectors.toList()));
+        }
+        return films;
     }
 
     public List<Film> getDirectorsFilms(Long directorId, String param) {

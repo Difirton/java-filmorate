@@ -77,6 +77,7 @@ public class UserService {
     }
 
     public List<User> getUserFriends(Long id) {
+        userRepository.findById(id).orElseThrow(() ->new UserNotFoundException(id));
         return userRepository.findAllFriendsUser(id);
     }
 
