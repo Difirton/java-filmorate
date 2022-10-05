@@ -62,6 +62,14 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String SQL_SELECT_FILMS_BY_DIRECTOR_ID = "SELECT * FROM films " +
             "INNER JOIN directors_films df ON films.id = df.film_id WHERE df.director_id = ? ";
     private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE = "SELECT films.* FROM films " +
+            "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
+            "WHERE fg.genre_id = ?1 ORDER BY rate DESC LIMIT ?2";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_YEAR = "SELECT * FROM films " +
+            "WHERE YEAR(release_date) = ?1 ORDER BY rate DESC LIMIT ?2";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR = "SELECT films.* FROM films " +
+            "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
+            "WHERE fg.genre_id = ?1 AND YEAR(release_date) = ?2 ORDER BY rate DESC LIMIT ?3";
 
     @Override
     public Film save(Film film) {
@@ -242,7 +250,21 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
 
     @Override
     public List<Film> findPopularFilmsByRate(Integer count) {
-        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
+        return this.findPopularFilmsByRate(count, 0, 0);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRate(Integer count, Integer genreId, Integer year) {
+        if (genreId != 0 && year != 0) {
+            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR,
+                    lazyFilmMapper, genreId, year, count);
+        } else if (genreId != 0) {
+            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE, lazyFilmMapper, genreId, count);
+        } else if (year != 0){
+            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_YEAR, lazyFilmMapper, year, count);
+        } else {
+            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
+        }
     }
 
     @Override
