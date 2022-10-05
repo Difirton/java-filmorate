@@ -19,7 +19,7 @@ public class ReviewRateRepositoryJdbcImpl implements ReviewRateRepository {
     private static final String SQL_INSERT_ALL_FIELDS = "INSERT INTO users_rates_reviews (user_id, review_id, is_positive) " +
             "VALUES (?, ?, ?)";
     private static final String SQL_DELETE = "DELETE FROM users_rates_reviews " +
-            "WHERE user_id = ? AND review_id = ? AND isPositive = ?";
+            "WHERE user_id = ? AND review_id = ? AND is_positive = ?";
     private static final String SQL_SELECT_BY_REVIEW_ID = "SELECT * FROM users_rates_reviews WHERE review_id = ?";
     private static final String SQL_UPDATE_REVIEW_USEFUL = "UPDATE reviews SET useful = useful + ? WHERE id = ?";
 
