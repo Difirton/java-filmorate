@@ -27,22 +27,6 @@ public class RecommendationRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        filmService.createFilm(Film.builder().id(1L).name("name film 1").description("description film 1")
-                                   .releaseDate(LocalDate.of(1967, 3, 25)).duration(100)
-                                   .ratingMPA(RatingMPA.builder().id(1L).title("G").build()).build());
-        filmService.createFilm(Film.builder().id(2L).name("name film 2").description("description film 2")
-                                   .releaseDate(LocalDate.of(1997, 5, 1)).duration(300)
-                                   .ratingMPA(RatingMPA.builder().id(1L).title("G").build()).build());
-        filmService.createFilm(Film.builder().id(3L).name("name film 3").description("description film 3")
-                                   .releaseDate(LocalDate.of(2007, 10, 12)).duration(200)
-                                   .ratingMPA(RatingMPA.builder().id(2L).title("PG").build()).build());
-
-        userService.createUser(User.builder().id(1L).email("example1@gmail.ru").login("231ffdsf32").name("Test1 Test1")
-                                   .birthday(LocalDate.of(1990, 5, 1)).build());
-        userService.createUser(User.builder().id(2L).email("mail2@mail.ru").login("FFad23fdas").name("Test2 Tes2")
-                                   .birthday(LocalDate.of(1981, 11, 15)).build());
-        userService.createUser(User.builder().id(3L).email("example3@mail.com").login("648448fafaf22").name("Test3 Tes3")
-                                   .birthday(LocalDate.of(1995, 8, 20)).build());
     }
 
     @Test
