@@ -7,9 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import ru.yandex.practicum.filmorate.entity.Film;
-import ru.yandex.practicum.filmorate.entity.RatingMPA;
-import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -20,10 +17,9 @@ import java.util.List;
 @SpringBootTest
 @ActiveProfiles("test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class RecommendationRepositoryTest {
+class RecommendationRepositoryTest {
     private final RecommendationRepository recommendationRepository;
     private final FilmService filmService;
-    private final UserService userService;
 
     @BeforeEach
     void setUp() {

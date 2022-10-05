@@ -63,7 +63,6 @@ public class FilmService {
             film.setDirectors(directors.parallelStream()
                     .filter(d -> directorsIds.contains(d.getId()))
                     .collect(Collectors.toList()));
-
             film.setRatingMPA(ratingsMpa.parallelStream()
                     .filter(r -> Objects.equals(r.getId(), film.getRatingMPA().getId()))
                     .findFirst().orElse(film.getRatingMPA()));
