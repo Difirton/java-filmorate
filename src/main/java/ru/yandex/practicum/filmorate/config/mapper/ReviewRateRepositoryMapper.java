@@ -15,7 +15,6 @@ public class ReviewRateRepositoryMapper implements RowMapper<ReviewRate> {
     @Override
     public ReviewRate mapRow(ResultSet rs, int rowNum) throws SQLException {
         return ReviewRate.builder()
-                .id(rs.getLong("id"))
                 .user(User.builder()
                         .id(rs.getLong("user_id"))
                         .build())
