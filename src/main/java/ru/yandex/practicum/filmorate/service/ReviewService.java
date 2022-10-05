@@ -53,7 +53,12 @@ public class ReviewService {
     }
 
     public List<Review> getAllReviews(Integer count) {
-        return reviewRepository.findAll(count);
+        return reviewRepository.findAll(count).stream()
+                .peek(r -> r.setUsersRates(reviewRateRepository.getByReviewId(r.getId())
+                        .stream()
+                        .map(ReviewRate::getUser)
+                        .collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 
     public List<Review> getReviewsByFilmId(Long filmId, Integer count) {
