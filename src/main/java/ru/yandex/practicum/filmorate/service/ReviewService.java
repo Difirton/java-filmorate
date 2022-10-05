@@ -87,8 +87,8 @@ public class ReviewService {
 
     @Transactional
     public Review addLike(Long reviewId, Long userId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
-        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         reviewRateRepository.save(user, review, true);
         review.addLike(user);
         return review;
@@ -96,8 +96,8 @@ public class ReviewService {
 
     @Transactional
     public Review addDislike(Long reviewId, Long userId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
-        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         reviewRateRepository.save(user, review, false);
         review.addDislike(user);
         return review;
@@ -105,8 +105,8 @@ public class ReviewService {
 
     @Transactional
     public Review removeLike(Long reviewId, Long userId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
-        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         reviewRateRepository.delete(user.getId(), review.getId(), true);
         review.removeLike(user);
         return review;
@@ -114,8 +114,8 @@ public class ReviewService {
 
     @Transactional
     public Review removeDislike(Long reviewId, Long userId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
-        User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         reviewRateRepository.delete(user.getId(), review.getId(), false);
         review.removeDislike(user);
         return review;
