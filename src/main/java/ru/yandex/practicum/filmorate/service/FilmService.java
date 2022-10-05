@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,10 +13,12 @@ import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmRepository filmRepository;
     private final UserService userService;
@@ -23,18 +26,8 @@ public class FilmService {
     private final DirectorRepository directorRepository;
     private final FilmGenreRepository filmGenreRepository;
     private final DirectorFilmRepository directorFilmRepository;
-
-    @Autowired
-    public FilmService(FilmRepository filmRepository, UserService userService, GenreRepository genreRepository,
-                       DirectorRepository directorRepository, FilmGenreRepository filmGenreRepository,
-                       DirectorFilmRepository directorFilmRepository) {
-        this.filmRepository = filmRepository;
-        this.userService = userService;
-        this.genreRepository = genreRepository;
-        this.directorRepository = directorRepository;
-        this.filmGenreRepository = filmGenreRepository;
-        this.directorFilmRepository = directorFilmRepository;
-    }
+    private final RecommendationRepository recommendationRepository;
+    private final RatingMpaRepository ratingMpaRepository;
 
     @Transactional
     public Film createFilm(Film film) {
@@ -53,6 +46,8 @@ public class FilmService {
         List<FilmGenre> filmsGenres = filmGenreRepository.findAll();
         List<DirectorFilm> directorsFilms = directorFilmRepository.findAll();
         List<Director> directors = directorRepository.findAll();
+        List<RatingMPA> ratingsMpa = ratingMpaRepository.findAll();
+
         for (Film film : films) {
             List<Long> genresIds = filmsGenres.parallelStream()
                     .filter(fg -> fg.getFilmId().equals(film.getId()))
@@ -153,5 +148,15 @@ public class FilmService {
         }
         this.addGenresDirectorsInFilms(films);
         return films;
+    }
+
+    public List<Film> findFilmsByIds(List<Long> filmIds) {
+        List<Film> films = filmRepository.findFilmsByIds(filmIds);
+        addGenresDirectorsInFilms(films);
+        return films;
+    }
+
+    public List<Film> getRecommendationsForUser(Long userID) {
+        return this.findFilmsByIds(recommendationRepository.findRecommendationsByUser(userID));
     }
 }
