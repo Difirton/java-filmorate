@@ -85,6 +85,7 @@ public class ReviewService {
         reviewRepository.deleteById(id);
     }
 
+    @Transactional
     public Review addLike(Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
         User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
@@ -93,6 +94,7 @@ public class ReviewService {
         return review;
     }
 
+    @Transactional
     public Review addDislike(Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
         User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
@@ -101,6 +103,7 @@ public class ReviewService {
         return review;
     }
 
+    @Transactional
     public Review removeLike(Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
         User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
@@ -109,6 +112,7 @@ public class ReviewService {
         return review;
     }
 
+    @Transactional
     public Review removeDislike(Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new UserNotFoundException(userId));
         User user = userRepository.findById(userId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
