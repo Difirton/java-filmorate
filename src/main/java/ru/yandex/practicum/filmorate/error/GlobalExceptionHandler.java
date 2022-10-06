@@ -15,7 +15,7 @@ import java.io.IOException;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class, EmptyResultDataAccessException.class,
-            RatingMpaNotFoundException.class, GenreNotFoundException.class})
+            RatingMpaNotFoundException.class, GenreNotFoundException.class, ReviewNotFoundException.class})
     public void handleNotFound(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.NOT_FOUND.value());
     }
