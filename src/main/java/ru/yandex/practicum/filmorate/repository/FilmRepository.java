@@ -10,7 +10,11 @@ public interface FilmRepository extends StandardCRUDRepository<Film> {
 
     List<Film> findPopularFilmsByRate(Integer count);
 
-    List<Film> findPopularFilmsByRate(Integer count, Integer genreID, Integer year);
+    List<Film> findPopularFilmsByRateWithGenreAndYear(Integer count, Integer genreID, Integer year);
+
+    List<Film> findPopularFilmsByRateWithGenre(Integer count, Integer genreId);
+
+    List<Film> findPopularFilmsByRateWithYear(Integer count, Integer year);
 
     int[][] updateAll(List<Film> films);
 
