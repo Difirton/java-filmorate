@@ -162,4 +162,8 @@ public class FilmService {
     public List<Film> getRecommendationsForUser(Long userID) {
         return this.findFilmsByIds(recommendationRepository.findRecommendationsByUser(userID));
     }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return filmRepository.findCommonFilms(userId, friendId);
+    }
 }
