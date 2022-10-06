@@ -171,6 +171,7 @@ public class FilmService {
             films.addAll(filmRepository.searchFilmsByName(query));
         if (byDirectorName)
             films.addAll(filmRepository.searchFilmsByDirectorName(query));
+        films = films.stream().distinct().collect(Collectors.toList());
 
         this.addGenresDirectorsInFilms(films);
         films.sort((x, y) -> y.getRate() - x.getRate());
