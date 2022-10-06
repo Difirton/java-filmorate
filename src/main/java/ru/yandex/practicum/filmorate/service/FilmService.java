@@ -139,6 +139,12 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getPopularFilms(Integer count, Integer genreID, Integer year) {
+        List<Film> films = filmRepository.findPopularFilmsByRate(count, genreID, year);
+        this.addGenresDirectorsInFilms(films);
+        return films;
+    }
+
     public List<Film> getDirectorsFilms(Long directorId, String param) {
         directorRepository.findById(directorId).orElseThrow(() -> new DirectorNotFoundException(directorId));
         List<Film> films;
