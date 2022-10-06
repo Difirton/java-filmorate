@@ -110,4 +110,15 @@ class FilmRepositoryTest {
         Assertions.assertThat(popularFilms).isEqualTo(List.of(film2, film1, film3));
         Assertions.assertThat(film1.getRate() == 0);
     }
+
+    @Test
+    @DisplayName("Test get common films")
+    void testGetCommonFilms() {
+        film1.addUserLike(user1);
+        film1.addUserLike(user2);
+        filmRepository.update(film1);
+        userRepository.updateAll(List.of(user1, user2));
+        List<Film> commonFilms = filmRepository.findCommonFilms(user1.getId(), user2.getId());
+        Assertions.assertThat(commonFilms).isEqualTo(List.of(film1));
+    }
 }
