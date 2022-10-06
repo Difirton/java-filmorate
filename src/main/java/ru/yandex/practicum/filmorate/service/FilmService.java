@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -157,8 +158,9 @@ public class FilmService {
     }
 
     public List<Film> searchFilms(String query, String by) {
-        boolean byFilmName = by.contains("title");
-        boolean byDirectorName = by.contains("director");
+        List<String> byItems = Arrays.asList(by.toLowerCase().split(","));
+        boolean byFilmName = byItems.contains("title");
+        boolean byDirectorName = byItems.contains("director");
 
         if (!byFilmName && !byDirectorName)
             throw new IllegalArgumentException("Invalid parameter by: " + by);
