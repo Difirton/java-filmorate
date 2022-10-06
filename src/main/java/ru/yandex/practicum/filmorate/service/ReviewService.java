@@ -45,7 +45,7 @@ public class ReviewService {
     public Review getReviewById(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ReviewNotFoundException(id));
-        review.setUsersRates(reviewRateRepository.getByReviewId(id)
+        review.setUsersRates(reviewRateRepository.getByReviewIds(List.of(id))
                 .stream()
                 .map(ReviewRate::getUser)
                 .collect(Collectors.toList()));
@@ -53,9 +53,13 @@ public class ReviewService {
     }
 
     public List<Review> getAllReviews(Integer count) {
-        return reviewRepository.findAll(count).stream()
-                .peek(r -> r.setUsersRates(reviewRateRepository.getByReviewId(r.getId())
-                        .stream()
+        List<Review> reviews = reviewRepository.findAll(count);
+        List<ReviewRate> rates = reviewRateRepository.getByReviewIds(reviews.stream()
+                .map(Review::getId)
+                .collect(Collectors.toList()));
+        return reviews.stream()
+                .peek(review -> review.setUsersRates(rates.stream()
+                        .filter(rate -> rate.getReview().getId().equals(review.getId()))
                         .map(ReviewRate::getUser)
                         .collect(Collectors.toList())))
                 .collect(Collectors.toList());

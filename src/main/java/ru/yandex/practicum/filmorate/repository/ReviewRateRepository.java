@@ -12,6 +12,6 @@ public interface ReviewRateRepository {
 
     int delete(Long userId, Long reviewId, boolean isPositive);
 
-    List<ReviewRate> getByReviewId(Long reviewId);
+    List<ReviewRate> getByReviewIds(List<Long> reviewIds);
 
 }

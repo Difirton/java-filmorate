@@ -13,6 +13,8 @@ import ru.yandex.practicum.filmorate.repository.ReviewRateRepository;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -85,7 +87,7 @@ class ReviewRateRepositoryJdbcImplTest {
         reviewRateRepository.save(firstUser, firstReview, true);
         reviewRateRepository.save(secondUser, firstReview, false);
         reviewRateRepository.save(firstUser, secondReview, true);
-        assertEquals(2, reviewRateRepository.getByReviewId(1L).size());
-        assertEquals(1, reviewRateRepository.getByReviewId(2L).size());
+        assertEquals(2, reviewRateRepository.getByReviewIds(List.of(1L)).size());
+        assertEquals(1, reviewRateRepository.getByReviewIds(List.of(2L)).size());
     }
 }
