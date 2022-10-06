@@ -233,7 +233,7 @@ class FilmControllerTest {
     }
 
     @Test
-    @DisplayName("Request GET /films/director/{directorId}?sortBy=likes, expected host answer OK")
+    @DisplayName("Request GET /films/common?userId={userId}&friendId={friendId}, expected host answer OK")
     void testGetCommonFilms_OK_200() throws Exception {
         mockMvc.perform(get("/films/common?userId=1&friendId=2"));
         verify(mockService, times(1)).getCommonFilms(1L, 2L);
