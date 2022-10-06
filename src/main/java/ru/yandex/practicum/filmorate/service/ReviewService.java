@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,21 +53,31 @@ public class ReviewService {
         return review;
     }
 
-    public List<Review> getAllReviews(Integer count) {
+    private List<Review> getAllReviews(Integer count) {
         List<Review> reviews = reviewRepository.findAll(count);
         List<ReviewRate> rates = reviewRateRepository.getByReviewIds(reviews.stream()
                 .map(Review::getId)
                 .collect(Collectors.toList()));
-        return reviews.stream()
-                .peek(review -> review.setUsersRates(rates.stream()
-                        .filter(rate -> rate.getReview().getId().equals(review.getId()))
-                        .map(ReviewRate::getUser)
-                        .collect(Collectors.toList())))
-                .collect(Collectors.toList());
+
+        for (Review review : reviews) {
+            review.setUsersRates(rates.stream()
+                    .filter(rate -> rate.getReview().getId().equals(review.getId()))
+                    .map(ReviewRate::getUser)
+                    .collect(Collectors.toList()));
+        }
+        return reviews;
     }
 
-    public List<Review> getReviewsByFilmId(Long filmId, Integer count) {
+    private List<Review> getReviewsByFilmId(Long filmId, Integer count) {
         return reviewRepository.findReviewsByFilmId(filmId, count);
+    }
+
+    public List<Review> getReviews(Optional<Long> filmId, Optional<Integer> count) {
+        if (filmId.isPresent()) {
+            return this.getReviewsByFilmId(filmId.get(), count.orElse(10));
+        } else {
+            return this.getAllReviews(count.orElse(10));
+        }
     }
 
     @Transactional

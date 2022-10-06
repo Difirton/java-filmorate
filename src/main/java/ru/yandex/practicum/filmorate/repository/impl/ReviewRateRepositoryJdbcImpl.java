@@ -27,7 +27,6 @@ public class ReviewRateRepositoryJdbcImpl implements ReviewRateRepository {
     private static final String SQL_SELECT_BY_REVIEW_ID = "SELECT * FROM users_rates_reviews WHERE review_id in (:ids)";
     private static final String SQL_UPDATE_REVIEW_USEFUL = "UPDATE reviews SET useful = useful + ? WHERE id = ?";
 
-
     @Override
     public ReviewRate save(User user, Review review, boolean isPositive) {
         this.jdbcOperations.update(SQL_INSERT_ALL_FIELDS, user.getId(), review.getId(), isPositive);

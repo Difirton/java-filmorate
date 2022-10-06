@@ -49,11 +49,7 @@ public class ReviewController {
     @GetMapping
     public List<Review> getReviewByFilmId(@RequestParam(name = "count") Optional<Integer> count,
                                           @RequestParam(name = "filmId") Optional<Long> filmId) {
-        if (filmId.isPresent()) {
-            return reviewService.getReviewsByFilmId(filmId.get(), count.orElse(10));
-        } else {
-            return reviewService.getAllReviews(count.orElse(10));
-        }
+        return reviewService.getReviews(filmId, count);
     }
 
     @ResponseStatus(HttpStatus.OK)
