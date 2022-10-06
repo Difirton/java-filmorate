@@ -77,7 +77,7 @@ public class FilmController {
     public List<Film> getPopularFilms(@RequestParam(name = "count") Optional<Integer> count,
                                       @RequestParam(name = "genreId") Optional<Integer> genreId,
                                       @RequestParam(name = "year") Optional<Integer> year) {
-        return filmService.getPopularFilms(count.orElse(10), genreId.orElse(0), year.orElse(0));
+        return filmService.getPopularFilms(count, genreId, year);
     }
 
     @ResponseStatus(HttpStatus.OK)

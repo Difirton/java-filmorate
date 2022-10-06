@@ -250,21 +250,22 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
 
     @Override
     public List<Film> findPopularFilmsByRate(Integer count) {
-        return this.findPopularFilmsByRate(count, 0, 0);
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
     }
 
     @Override
-    public List<Film> findPopularFilmsByRate(Integer count, Integer genreId, Integer year) {
-        if (genreId != 0 && year != 0) {
-            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR,
-                    lazyFilmMapper, genreId, year, count);
-        } else if (genreId != 0) {
-            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE, lazyFilmMapper, genreId, count);
-        } else if (year != 0){
-            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_YEAR, lazyFilmMapper, year, count);
-        } else {
-            return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
-        }
+    public List<Film> findPopularFilmsByRateWithGenre(Integer count, Integer genreId) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE, lazyFilmMapper, genreId, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRateWithYear(Integer count, Integer year) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_YEAR, lazyFilmMapper, year, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRateWithGenreAndYear(Integer count, Integer genreId, Integer year) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR, lazyFilmMapper, genreId, year, count);
     }
 
     @Override
