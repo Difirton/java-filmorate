@@ -18,23 +18,28 @@ While in the directory on the command line, type:
 
 ## Rest service layer
 
-- (GET) http://localhost:8080/films (get list of all films)
-- (POST) http://localhost:8080/films (post create new film sending json info)
-- (PUT) http://localhost:8080/films/{id} (update existing film sending json info with specified id)
-- (GET) http://localhost:8080/films/{id} (get film with specified id)
-- (DELETE) http://localhost:8080/films/{id} (delete film with specified id)
-- (PUT) http://localhost:8080/films/{id}/like/{userId} (updates an existing movie, adds 1 like to it from the user)
-- (DELETE) http://localhost:8080/films/{id}/like/{userId} (removes 1 like from the user from the movie)
-- (GET) http://localhost:8080/films/popular (get list popular films)
-- (GET) http://localhost:8080/users (get list of all users)
-- (POST) http://localhost:8080/users (post create new user sending json info)
-- (PUT) http://localhost:8080/users/{id} (update existing user sending json info with specified id)
-- (GET) http://localhost:8080/users/{id} (get user with specified id)
-- (DELETE) http://localhost:8080/users/{id} (delete user with specified id)
-- (PUT) http://localhost:8080/users/{id}/friends/{friendId} (updates an existing user, adds friend)
-- (DELETE) http://localhost:8080/users/{id}/friends/{friendId} (updates an existing user, removes friend)
-- (GET) http://localhost:8080/users/{id}/friends (get all the user's friends)
-- (GET) http://localhost:8080/users/{id}/friends/{otherId} (get all mutual friends of users)
+#### [Link to API swagger-ui documentation and available endpoints](http://localhost:8080/swagger-ui/index.html)
+
+
+This link will be available after the application starts. Below are examples of methods and endpoints available for the API
+
+- [(GET) get list of all films](http://localhost:8080/films)
+- [(POST) create new film sending json info](http://localhost:8080/films)
+- [(PUT) update existing film sending json info with specified id](http://localhost:8080/films/{id})
+- [(GET) get film with specified id](http://localhost:8080/films/{id}) 
+- [(DELETE) remove film with specified id](http://localhost:8080/films/{id})
+- [(PUT) updates an existing movie, adds 1 like to it from the user](http://localhost:8080/films/{id}/like/{userId})
+- [(DELETE) removes 1 like from the user from the movie](http://localhost:8080/films/{id}/like/{userId})
+- [(GET)get list popular films](http://localhost:8080/films/popular)
+- [(GET) get list of all users](http://localhost:8080/users)
+- [(POST) create new user sending json info](http://localhost:8080/users)
+- [(PUT) update existing user sending json info with specified id](http://localhost:8080/users/{id})
+- [(GET) get user with specified id](http://localhost:8080/users/{id})
+- [(DELETE) remove user with specified id](http://localhost:8080/users/{id})
+- [(PUT) updates an existing user, adds friend](http://localhost:8080/users/{id}/friends/{friendId})
+- [(DELETE) updates an existing user, removes friend](http://localhost:8080/users/{id}/friends/{friendId})
+- [(GET) get all the user's friends](http://localhost:8080/users/{id}/friends)
+- [(GET) get all mutual friends of users](http://localhost:8080/users/{id}/friends/{otherId})
 
 
 ## Database dependency diagram
