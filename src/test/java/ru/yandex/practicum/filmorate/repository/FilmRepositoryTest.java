@@ -32,6 +32,8 @@ class FilmRepositoryTest {
     private FilmRepository filmRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private FilmGenreRepository filmGenreRepository;
 
     @BeforeEach
     void setUp() {
@@ -120,5 +122,28 @@ class FilmRepositoryTest {
         userRepository.updateAll(List.of(user1, user2));
         List<Film> commonFilms = filmRepository.findCommonFilms(user1.getId(), user2.getId());
         Assertions.assertThat(commonFilms).isEqualTo(List.of(film1));
+    }
+
+    @Test
+    @DisplayName("Test most popular film of some year")
+    void testMostPopularFilmsOfYear() {
+        List<Film> films = filmRepository.findPopularFilmsByRateWithYear(10, 1967);
+        Assertions.assertThat(films).isEqualTo(List.of(film1));
+    }
+
+    @Test
+    @DisplayName("Test most popular film of some genre")
+    void testMostPopularFilmsOfGenre() {
+        filmGenreRepository.saveFilmGenres(2L, List.of(1L));
+        List<Film> films = filmRepository.findPopularFilmsByRateWithGenre(10, 1);
+        Assertions.assertThat(films).isEqualTo(List.of(film2));
+    }
+
+    @Test
+    @DisplayName("Test most popular film of some genre and year")
+    void testMostPopularFilmsOfGenreAndYear() {
+        filmGenreRepository.saveFilmGenres(3L, List.of(2L));
+        List<Film> films = filmRepository.findPopularFilmsByRateWithGenreAndYear(10, 2, 2007);
+        Assertions.assertThat(films).isEqualTo(List.of(film3));
     }
 }
