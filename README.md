@@ -1,4 +1,7 @@
 # Repository Filmorate project
+![GitHub Actions](https://github.com/Difirton/java-filmorate/actions/workflows/api-tests.yml/badge.svg)
+![GitHub contributors](https://img.shields.io/github/contributors/Difirton/java-filmorate?color=green)
+![Coveralls](https://img.shields.io/badge/coverage-81%25-green)
 
 ## Quick start
 ### Requirements
