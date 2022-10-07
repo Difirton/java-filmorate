@@ -66,6 +66,14 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
             "(SELECT user_likes.film_id FROM users_likes_films user_likes INNER JOIN users_likes_films friend_likes " +
             "ON user_likes.film_id = friend_likes.film_id WHERE user_likes.user_id = ? AND friend_likes.user_id = ?) " +
             "ORDER BY rate DESC";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE = "SELECT films.* FROM films " +
+            "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
+            "WHERE fg.genre_id = ?1 ORDER BY rate DESC LIMIT ?2";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_YEAR = "SELECT * FROM films " +
+            "WHERE YEAR(release_date) = ?1 ORDER BY rate DESC LIMIT ?2";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR = "SELECT films.* FROM films " +
+            "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
+            "WHERE fg.genre_id = ?1 AND YEAR(release_date) = ?2 ORDER BY rate DESC LIMIT ?3";
 
     @Override
     public Film save(Film film) {
@@ -244,6 +252,21 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     @Override
     public List<Film> findPopularFilmsByRate(Integer count) {
         return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS, lazyFilmMapper, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRateWithGenre(Integer count, Integer genreId) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE, lazyFilmMapper, genreId, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRateWithYear(Integer count, Integer year) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_YEAR, lazyFilmMapper, year, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRateWithGenreAndYear(Integer count, Integer genreId, Integer year) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR, lazyFilmMapper, genreId, year, count);
     }
 
     @Override

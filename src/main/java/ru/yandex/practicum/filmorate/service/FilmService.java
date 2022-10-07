@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.repository.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -135,6 +136,22 @@ public class FilmService {
                     .filter(g -> genresIds.contains(g.getId()))
                     .collect(Collectors.toList()));
         }
+        return films;
+    }
+
+    public List<Film> getPopularFilms(Optional<Integer> rawCount, Optional<Integer> rawGenreID, Optional<Integer> rawYear) {
+        List<Film> films;
+        Integer count = rawCount.orElse(10);
+        if (rawGenreID.isPresent() && rawYear.isPresent()) {
+            films = filmRepository.findPopularFilmsByRateWithGenreAndYear(count, rawGenreID.get(), rawYear.get());
+        } else if (rawGenreID.isPresent()) {
+            films = filmRepository.findPopularFilmsByRateWithGenre(count, rawGenreID.get());
+        } else if (rawYear.isPresent()) {
+            films = filmRepository.findPopularFilmsByRateWithYear(count, rawYear.get());
+        } else {
+            films = filmRepository.findPopularFilmsByRate(count);
+        }
+        this.addGenresDirectorsInFilms(films);
         return films;
     }
 
