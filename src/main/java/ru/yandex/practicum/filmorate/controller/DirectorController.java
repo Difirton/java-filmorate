@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/directors")
-@Tag(name="The Director API", description="API for interacting with endpoints associated with directors")
+@Tag(name="The director API", description="API for interacting with endpoints associated with directors")
 public class DirectorController {
 
     private final DirectorService directorService;
