@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users_rates_reviews;
 DROP TABLE IF EXISTS reviews;
-
 DROP TABLE IF EXISTS directors_films;
 DROP TABLE IF EXISTS film_genres;
 DROP TABLE IF EXISTS users_likes_films;
@@ -96,7 +95,8 @@ CREATE TABLE events
     user_id BIGINT NOT NULL,
     event_type VARCHAR(20) NOT NULL,
     operation VARCHAR(20) NOT NULL,
-    entity_id BIGINT NOT NULL
+    entity_id BIGINT NOT NULL,
+    PRIMARY KEY (id)
 );
 
 ALTER TABLE genres ADD CONSTRAINT uk_genre_title UNIQUE (title);
@@ -116,7 +116,7 @@ ALTER TABLE reviews ADD CONSTRAINT fk_reviews_users FOREIGN KEY (user_id) REFERE
 ALTER TABLE reviews ADD CONSTRAINT fk_reviews_films FOREIGN KEY (film_id) REFERENCES films;
 ALTER TABLE users_rates_reviews ADD CONSTRAINT fk_users_rates_reviews_reviews FOREIGN KEY (review_id) REFERENCES reviews ON DELETE CASCADE;
 ALTER TABLE users_rates_reviews ADD CONSTRAINT fk_users_rates_reviews_users FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE;
-ALTER TABLE events ADD CONSTRAINT fk_events_user_id FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE;
+//ALTER TABLE events ADD CONSTRAINT fk_events_user_id FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE;
 
 INSERT INTO rating_mpa (title) VALUES ('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
 INSERT INTO genres (title) VALUES ('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик');
