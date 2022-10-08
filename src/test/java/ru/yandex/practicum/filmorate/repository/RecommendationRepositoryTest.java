@@ -2,20 +2,18 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_RecommendationRepositoryTest.sql"},
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class RecommendationRepositoryTest {
     private final RecommendationRepository recommendationRepository;
