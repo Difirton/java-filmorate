@@ -10,10 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.config.mapper.DirectorRepositoryMapper;
-import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryEagerMapper;
-import ru.yandex.practicum.filmorate.config.mapper.FilmRepositoryLazyMapper;
-import ru.yandex.practicum.filmorate.config.mapper.GenreRepositoryMapper;
+import ru.yandex.practicum.filmorate.config.mapper.*;
 import ru.yandex.practicum.filmorate.entity.*;
 import ru.yandex.practicum.filmorate.entity.binding.DirectorFilm;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
@@ -32,6 +29,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private final NamedParameterJdbcOperations namedJdbcTemplate;
     private final GenreRepositoryMapper genreMapper;
     private final DirectorRepositoryMapper directorMapper;
+    private final UserRepositoryMapper userMapper;
     private static final String SQL_INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)";
     private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?";
     private static final String SQL_INSERT_FILMS_ALL_ARGS = "INSERT INTO films (name, description, release_date, " +
@@ -49,7 +47,8 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String SQL_INSERT_USERS_LIKES = "INSERT INTO users_likes_films (film_id, user_id) VALUES (?,?)";
     private static final String SQL_DELETE_USERS_LIKES = "DELETE FROM users_likes_films " +
             "WHERE film_id = ? AND user_id = ?";
-    private static final String SQL_SELECT_ALL_USERS_LIKES = "SELECT user_id FROM users_likes_films WHERE film_id = ?";
+    private static final String SQL_SELECT_ALL_USERS_LIKES = "SELECT users.* FROM users_likes_films likes " +
+            "INNER JOIN users on likes.user_id = users.id WHERE film_id = ?";
     private static final String SQL_INSERT_DIRECTORS_FILMS = "INSERT INTO directors_films (film_id, director_id) " +
             "VALUES (?,?)";
     private static final String SQL_DELETE_DIRECTORS_FILMS = "DELETE FROM directors_films " +
@@ -62,6 +61,19 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String SQL_SELECT_FILMS_BY_DIRECTOR_ID = "SELECT * FROM films " +
             "INNER JOIN directors_films df ON films.id = df.film_id WHERE df.director_id = ? ";
     private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
+    private static final String SQL_SELECT_COMMON_FILMS = "SELECT * FROM films LEFT JOIN rating_mpa mpa " +
+            "ON films.rating_mpa_id = mpa.id WHERE films.id IN " +
+            "(SELECT user_likes.film_id FROM users_likes_films user_likes INNER JOIN users_likes_films friend_likes " +
+            "ON user_likes.film_id = friend_likes.film_id WHERE user_likes.user_id = ? AND friend_likes.user_id = ?) " +
+            "ORDER BY rate DESC";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE = "SELECT films.* FROM films " +
+            "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
+            "WHERE fg.genre_id = ?1 ORDER BY rate DESC LIMIT ?2";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_YEAR = "SELECT * FROM films " +
+            "WHERE YEAR(release_date) = ?1 ORDER BY rate DESC LIMIT ?2";
+    private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR = "SELECT films.* FROM films " +
+            "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
+            "WHERE fg.genre_id = ?1 AND YEAR(release_date) = ?2 ORDER BY rate DESC LIMIT ?3";
 
     private static final String SQL_SELECT_FILMS_LIKE_NAME_WITH_ORDER_RATE = "SELECT * FROM films WHERE name ILIKE :query ORDER BY rate DESC";
     private static final String SQL_SELECT_FILMS_LIKE_DIRECTOR_NAME_WITH_ORDER_RATE = "SELECT * FROM films WHERE id IN " +
@@ -195,10 +207,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
         Film film = this.jdbcOperations.queryForObject(SQL_SELECT_ALL_FILMS_WITH_RATING,
                 eagerFilmMapper, filmId);
         if (film != null) {
-            film.setUsersLikes(this.jdbcOperations.query(SQL_SELECT_ALL_USERS_LIKES,
-                    (rs, rowNum) -> User.builder()
-                            .id(rs.getLong("user_id"))
-                            .build(), filmId));
+            film.setUsersLikes(this.jdbcOperations.query(SQL_SELECT_ALL_USERS_LIKES, userMapper, filmId));
             film.setDirectors(this.jdbcOperations.query(SQL_SELECT_ALL_DIRECTORS_FILM, directorMapper, filmId));
             film.setGenres(this.jdbcOperations.query(SQL_SELECT_ALL_GENRES_FILM, genreMapper, filmId));
             return Optional.of(film);
@@ -257,6 +266,21 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     }
 
     @Override
+    public List<Film> findPopularFilmsByRateWithGenre(Integer count, Integer genreId) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE, lazyFilmMapper, genreId, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRateWithYear(Integer count, Integer year) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_YEAR, lazyFilmMapper, year, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmsByRateWithGenreAndYear(Integer count, Integer genreId, Integer year) {
+        return this.jdbcOperations.query(SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR, lazyFilmMapper, genreId, year, count);
+    }
+
+    @Override
     public int[][] updateAll(List<Film> films) {
         return jdbcOperations.batchUpdate(SQL_UPDATE_FILMS_ALL_ARGS,
                 films, films.size(),
@@ -302,5 +326,10 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     public List<Film> searchFilmsByDirectorName(String query) {
         SqlParameterSource parameters = new MapSqlParameterSource("query", "%" + query + "%");
         return namedJdbcTemplate.query(SQL_SELECT_FILMS_LIKE_DIRECTOR_NAME_WITH_ORDER_RATE, parameters, lazyFilmMapper);
+    }
+    
+    @Override
+    public List<Film> findCommonFilms(Long userId, Long friendId) {
+        return this.jdbcOperations.query(SQL_SELECT_COMMON_FILMS, eagerFilmMapper, userId, friendId);
     }
 }

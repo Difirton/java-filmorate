@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(scripts = "classpath:sql_scripts/schema_JdbcUserFriendTest.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_JdbcUserFriendTest.sql"},
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserFriendRepositoryJdbcImplTest {
     private UserFriend newUserFriend1To2;
     private UserFriend secondUserFriend2To1;

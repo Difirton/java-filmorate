@@ -21,6 +21,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -230,5 +231,20 @@ class FilmControllerTest {
         mockMvc.perform(get("/films/director/1?sortBy=likes"));
         verify(mockService, times(1)).getDirectorsFilms(1L, "likes");
 
+    }
+
+    @Test
+    @DisplayName("Request GET /films/common?userId={userId}&friendId={friendId}, expected host answer OK")
+    void testGetCommonFilms_OK_200() throws Exception {
+        mockMvc.perform(get("/films/common?userId=1&friendId=2"));
+        verify(mockService, times(1)).getCommonFilms(1L, 2L);
+
+    }
+
+    @Test
+    @DisplayName("Request GET /films/popular?count=1&genreId=2&year=1999, expected host answer OK")
+    void testGetMostPopularFilms_OK_200() throws Exception {
+        mockMvc.perform(get("/films/popular?count=1&genreId=2&year=1999"));
+        verify(mockService, times(1)).getPopularFilms(Optional.of(1), Optional.of(2), Optional.of(1999));
     }
 }

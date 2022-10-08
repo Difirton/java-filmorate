@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -139,6 +140,22 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getPopularFilms(Optional<Integer> rawCount, Optional<Integer> rawGenreID, Optional<Integer> rawYear) {
+        List<Film> films;
+        Integer count = rawCount.orElse(10);
+        if (rawGenreID.isPresent() && rawYear.isPresent()) {
+            films = filmRepository.findPopularFilmsByRateWithGenreAndYear(count, rawGenreID.get(), rawYear.get());
+        } else if (rawGenreID.isPresent()) {
+            films = filmRepository.findPopularFilmsByRateWithGenre(count, rawGenreID.get());
+        } else if (rawYear.isPresent()) {
+            films = filmRepository.findPopularFilmsByRateWithYear(count, rawYear.get());
+        } else {
+            films = filmRepository.findPopularFilmsByRate(count);
+        }
+        this.addGenresDirectorsInFilms(films);
+        return films;
+    }
+
     public List<Film> getDirectorsFilms(Long directorId, String param) {
         directorRepository.findById(directorId).orElseThrow(() -> new DirectorNotFoundException(directorId));
         List<Film> films;
@@ -180,5 +197,9 @@ public class FilmService {
 
     public List<Film> getRecommendationsForUser(Long userID) {
         return this.findFilmsByIds(recommendationRepository.findRecommendationsByUser(userID));
+    }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return filmRepository.findCommonFilms(userId, friendId);
     }
 }

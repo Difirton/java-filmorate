@@ -137,7 +137,7 @@ class FilmRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_saveFilmsWithDirector.sql")
+    @Sql(scripts = {"classpath:schema.sql","classpath:sql_scripts/schema_saveFilmsWithDirector.sql"})
     @DisplayName("Test film with director")
     void testSaveFilmWithDirector() {
         film1.setDirectors(List.of(Director.builder()
@@ -148,7 +148,7 @@ class FilmRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_saveFilmsWithDirector.sql")
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_saveFilmsWithDirector.sql"})
     @DisplayName("Test film with two directors")
     void testSaveFilmWithTwoDirectors() {
         film1.setDirectors(List.of(Director.builder()
@@ -167,7 +167,7 @@ class FilmRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_findFilmsByDirectorId.sql"})
     @DisplayName("Test find list of films by director id without parameters of sort")
     void testFindFilmsByDirectorId() {
         List<Film> filmsDirector1 = filmRepository.findFilmsByDirectorId(1L);
@@ -179,7 +179,7 @@ class FilmRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @Sql(scripts = {"classpath:schema.sql","classpath:sql_scripts/schema_findFilmsByDirectorId.sql"})
     @DisplayName("Test search for list of films by director id sorted by year")
     void testFindFilmsByDirectorIdWithParamYear() {
         List<Film> sortedFilmsDirector1 = filmRepository.findFilmsByDirectorId(1L, "year");
@@ -191,7 +191,7 @@ class FilmRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_findFilmsByDirectorId.sql"})
     @DisplayName("Test search for list of films by director id sorted by likes")
     void testFindFilmsByDirectorIdWithParamLikes() {
         List<Film> sortedFilmsDirector1 = filmRepository.findFilmsByDirectorId(1L, "likes");
@@ -203,18 +203,18 @@ class FilmRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_findFilmsByDirectorId.sql"})
     @DisplayName("Test search for list of films by director id sorted by likes")
     void testFindFilmsByIdsTwoElements() {
         List<Long> testData = List.of(2L, 3L);
         List<Film> result = filmRepository.findFilmsByIds(testData);
         assertEquals(result.get(0).getName(), "test name 2");
         assertEquals(result.get(1).getName(), "test name 3");
-        assertTrue(result.size() == 2);
+        assertEquals(2, result.size());
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @Sql(scripts = {"classpath:schema.sql","classpath:sql_scripts/schema_findFilmsByDirectorId.sql"})
     @DisplayName("Test search for list of films by director id sorted by likes")
     void testFindFilmsByIdsEmptyList() {
         List<Long> testData = List.of();
@@ -223,13 +223,13 @@ class FilmRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_findFilmsByDirectorId.sql")
+    @Sql(scripts = {"classpath:schema.sql","classpath:sql_scripts/schema_findFilmsByDirectorId.sql"})
     @DisplayName("Test search for list of films by director id sorted by likes")
     void testFindFilmsByIdsOneElement() {
         List<Long> testData = List.of(1L);
         List<Film> result = filmRepository.findFilmsByIds(testData);
         assertEquals(result.get(0).getName(), "test name 1");
-        assertTrue(result.size() == 1);
+        assertEquals(1, result.size());
     }
 
     @Test
