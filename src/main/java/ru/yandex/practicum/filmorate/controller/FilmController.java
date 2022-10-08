@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.entity.Film;
@@ -18,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/films")
@@ -37,8 +35,7 @@ public class FilmController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Film newFilm(@Valid @RequestBody Film film) {
-        log.info("Request to create new film: " + film.toString());
+    public Film createFilm(@Valid @RequestBody Film film) {
         return filmService.createFilm(film);
     }
 
@@ -70,7 +67,6 @@ public class FilmController {
     @PutMapping("/{id}")
     public Film updateFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id,
                                @Valid @RequestBody Film film) {
-        log.info("Request to update film with id = {}, parameters to update: {}", id ,film.toString());
         return filmService.updateFilm(id, film);
     }
 
@@ -101,7 +97,6 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
     public void deleteFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id) {
-        log.info("Request to delete film with {}", id);
         filmService.removeFilmById(id);
     }
 
@@ -117,7 +112,6 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        log.info("Request to update film with id = {}, parameters to update: {}", film.getId(), film);
         return filmService.updateFilm(film.getId(), film);
     }
 
@@ -134,7 +128,6 @@ public class FilmController {
     @PutMapping("{id}/like/{userId}")
     public Film addLikeFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id,
                             @PathVariable("userId") @Parameter(description = "The user ID") Long userId) {
-        log.info("Request to add like to film with id = {} from user with id = {}", id, userId);
         return filmService.addLikeFilm(id, userId);
     }
 
@@ -151,7 +144,6 @@ public class FilmController {
     @DeleteMapping("{id}/like/{userId}")
     public void removeLikeFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id,
                                @PathVariable("userId") @Parameter(description = "The user ID") Long userId) {
-        log.info("Request to remove like user with id = {} of film with id = {}", userId, id);
         filmService.removeLikeFilm(id, userId);
     }
 
