@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.*;
@@ -12,6 +11,8 @@ import ru.yandex.practicum.filmorate.error.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -167,6 +168,24 @@ public class FilmService {
             throw new IllegalArgumentException("Invalid search query films by director's id with parameter: " + param);
         }
         this.addGenresDirectorsInFilms(films);
+        return films;
+    }
+
+    public List<Film> searchFilms(String query, List<String> byFields) {
+        boolean byFilmName = byFields.contains("title");
+        boolean byDirectorName = byFields.contains("director");
+        if (!byFilmName && !byDirectorName)
+            throw new IllegalArgumentException("Invalid parameter byFields: " + byFields);
+        List<Film> films = new ArrayList<>();
+        if (byFilmName) {
+            films.addAll(filmRepository.searchFilmsByName(query));
+        }
+        if (byDirectorName) {
+            films.addAll(filmRepository.searchFilmsByDirectorName(query));
+        }
+        films = films.stream().distinct().collect(Collectors.toList());
+        this.addGenresDirectorsInFilms(films);
+        films.sort((x, y) -> y.getRate() - x.getRate());
         return films;
     }
 

@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -207,5 +208,12 @@ public class FilmController {
             @RequestParam(name = "userId") @Parameter(description = "The user ID") Long userId,
             @RequestParam(name = "friendId") @Parameter(description = "The another user ID") Long friendId) {
         return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {
+        List<String> byFields = Arrays.asList(by.toLowerCase().split(","));
+        return filmService.searchFilms(query, byFields);
     }
 }

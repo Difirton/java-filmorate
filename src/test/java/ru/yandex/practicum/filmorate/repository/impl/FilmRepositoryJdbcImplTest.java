@@ -231,4 +231,28 @@ class FilmRepositoryJdbcImplTest {
         assertEquals(result.get(0).getName(), "test name 1");
         assertEquals(1, result.size());
     }
+
+    @Test
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_searchFilms.sql"})
+    @DisplayName("Test search films by director name sorted by likes")
+    void testSearchFilmsByDirectorName() {
+        List<Film> films1 = filmRepository.searchFilmsByDirectorName("hitton");
+        List<Film> films2 = filmRepository.searchFilmsByDirectorName("k");
+        assertEquals(1, films1.size());
+        assertEquals(3, films2.size());
+        assertEquals(20, films1.get(0).getRate());
+        assertEquals("Toy`s history 2", films1.get(0).getName());
+        assertEquals("Toy`s history 1", films2.get(0).getName());
+        assertEquals("Toy`s history 2", films2.get(1).getName());
+        assertEquals("Lucky man", films2.get(2).getName());
+    }
+
+    @Test
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_searchFilms.sql"})
+    @DisplayName("Test search films by film name sorted by likes")
+    void testSearchFilmsByName() {
+        List<Film> films = filmRepository.searchFilmsByName("toy");
+        assertEquals(films.get(0).getName(), "Toy`s history 1");
+        assertEquals(films.get(1).getName(), "Toy`s history 2");
+    }
 }
