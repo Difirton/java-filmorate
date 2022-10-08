@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(scripts = "classpath:sql_scripts/schema_ReviewRateRepositoryJdbcImplTest.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_ReviewRateRepositoryJdbcImplTest.sql"},
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReviewRateRepositoryJdbcImplTest {
     private User firstUser;
     private User secondUser;
