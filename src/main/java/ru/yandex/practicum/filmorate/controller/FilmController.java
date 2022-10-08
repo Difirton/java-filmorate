@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,6 +89,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
     public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {
-        return filmService.searchFilms(query, by);
+        List<String> byFields = Arrays.asList(by.toLowerCase().split(","));
+        return filmService.searchFilms(query, byFields);
     }
 }

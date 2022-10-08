@@ -124,6 +124,6 @@ class FilmServiceTest {
     @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_searchFilms.sql"})
     @DisplayName("Test search films by incorrect filter")
     void testSearchFilmsThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> filmService.searchFilms("uck", "something_bad"));
+        assertThrows(IllegalArgumentException.class, () -> filmService.searchFilms("uck", List.of("something_bad")));
     }
 }

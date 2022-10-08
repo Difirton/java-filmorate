@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.*;
@@ -155,22 +154,19 @@ public class FilmService {
         return films;
     }
 
-    public List<Film> searchFilms(String query, String by) {
-        List<String> byItems = Arrays.asList(by.toLowerCase().split(","));
-        boolean byFilmName = byItems.contains("title");
-        boolean byDirectorName = byItems.contains("director");
-
+    public List<Film> searchFilms(String query, List<String> byFields) {
+        boolean byFilmName = byFields.contains("title");
+        boolean byDirectorName = byFields.contains("director");
         if (!byFilmName && !byDirectorName)
-            throw new IllegalArgumentException("Invalid parameter by: " + by);
-
+            throw new IllegalArgumentException("Invalid parameter byFields: " + byFields);
         List<Film> films = new ArrayList<>();
-
-        if (byFilmName)
+        if (byFilmName) {
             films.addAll(filmRepository.searchFilmsByName(query));
-        if (byDirectorName)
+        }
+        if (byDirectorName) {
             films.addAll(filmRepository.searchFilmsByDirectorName(query));
+        }
         films = films.stream().distinct().collect(Collectors.toList());
-
         this.addGenresDirectorsInFilms(films);
         films.sort((x, y) -> y.getRate() - x.getRate());
         return films;
