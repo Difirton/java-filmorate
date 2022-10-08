@@ -209,4 +209,11 @@ public class FilmController {
             @RequestParam(name = "friendId") @Parameter(description = "The another user ID") Long friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {
+        List<String> byFields = Arrays.asList(by.toLowerCase().split(","));
+        return filmService.searchFilms(query, byFields);
+    }
 }
