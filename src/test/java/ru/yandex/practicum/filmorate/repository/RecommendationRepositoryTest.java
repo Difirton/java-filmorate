@@ -3,15 +3,13 @@ package ru.yandex.practicum.filmorate.repository;
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.UserService;
 
-
-import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest
@@ -21,12 +19,9 @@ class RecommendationRepositoryTest {
     private final RecommendationRepository recommendationRepository;
     private final FilmService filmService;
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @Test
-    void findRecommendationsByUserTest() {
+    @DisplayName("Test find recommendations by User")
+    void testFindRecommendationsByUser() {
         //      matrix of likes
         //
         //      USER_ID |   1   2   3

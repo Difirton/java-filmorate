@@ -84,7 +84,7 @@ class GenreRepositoryJdbcImplTest {
     }
 
     @Test
-    @Sql(scripts = "classpath:sql_scripts/schema_findGenresByFilmId.sql")
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_findGenresByFilmId.sql"})
     @DisplayName("Test find genres by film id in GenreRepository")
     void testFindGenresByFilmId() {
         List<Genre> genres = genreRepository.findGenresByFilmId(1L);
