@@ -15,7 +15,7 @@ public class SwaggerConfig {
                 .info(
                         new Info()
                                 .title("Filmorate")
-                                .version("1.0.0")
+                                .version("0.0.1")
                                 .contact(
                                         new Contact()
                                                 .email("difirton@yandex.ru")

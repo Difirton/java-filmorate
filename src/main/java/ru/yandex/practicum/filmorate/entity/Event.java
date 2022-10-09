@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,8 @@ import ru.yandex.practicum.filmorate.entity.constant.Operation;
 @Builder
 public class Event {
 
-    private Long eventId;
+    @JsonProperty(value = "eventId")
+    private Long id;
     private Long timestamp;
     private Long userId;
     private EventType eventType;

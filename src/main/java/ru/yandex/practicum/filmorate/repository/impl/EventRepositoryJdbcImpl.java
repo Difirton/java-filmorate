@@ -29,13 +29,13 @@ public class EventRepositoryJdbcImpl implements EventRepository {
             "entity_id) VALUES (?,?,?,?,?)";
 
     private static final String SQL_UPDATE_ALL_FIELDS = "UPDATE events SET timestamp = ?, user_id = ?, event_type = ?," +
-            "operation = ?, entity_id = ? WHERE eventId = ?";
+            "operation = ?, entity_id = ? WHERE id = ?";
 
-    private static final String SQL_DELETE_BY_ID = "DELETE FROM events WHERE eventId = ?";
+    private static final String SQL_DELETE_BY_ID = "DELETE FROM events WHERE id = ?";
 
     private static final String SQL_SELECT_ALL = "SELECT * FROM events";
 
-    private static final String SQL_SELECT_BY_ID = "SELECT * FROM events WHERE eventId = ?";
+    private static final String SQL_SELECT_BY_ID = "SELECT * FROM events WHERE id = ?";
 
     private static final String SQL_SELECT_EVENTS_BY_USER_ID = "SELECT * FROM events WHERE user_id = ?";
 
@@ -51,14 +51,19 @@ public class EventRepositoryJdbcImpl implements EventRepository {
             ps.setLong(5, event.getEntityId());
             return ps;
         }, keyHolder);
-        event.setEventId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        event.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return event;
     }
 
     @Override
     public Event update(Event event) {
         jdbcOperations.update(SQL_UPDATE_ALL_FIELDS,
-                event.getTimestamp(), event.getUserId(), event.getEventType(), event.getOperation(), event.getEntityId());
+                event.getTimestamp(),
+                event.getUserId(),
+                event.getEventType().toString(),
+                event.getOperation().toString(),
+                event.getEntityId(),
+                event.getId());
         return event;
     }
 
