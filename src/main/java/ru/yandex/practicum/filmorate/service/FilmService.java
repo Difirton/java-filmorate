@@ -30,7 +30,6 @@ public class FilmService {
     private final DirectorFilmRepository directorFilmRepository;
     private final RecommendationRepository recommendationRepository;
     private final RatingMpaRepository ratingMpaRepository;
-    private final EventRepository eventRepository;
 
     @Transactional
     public Film createFilm(Film film) {
@@ -111,15 +110,6 @@ public class FilmService {
             return film;
         }
         film.addUserLike(userService.getUserById(userId));
-        Event event = Event.builder()
-                .eventId(0L)
-                .timestamp(System.currentTimeMillis())
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(Operations.ADD)
-                .entityId(id)
-                .build();
-        eventRepository.save(event);
         return filmRepository.update(film);
     }
 
@@ -128,15 +118,6 @@ public class FilmService {
         Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
         film.removeUserLike(userService.getUserById(userId));
         filmRepository.update(film);
-        Event event = Event.builder()
-                .eventId(0L)
-                .timestamp(System.currentTimeMillis())
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(Operations.REMOVE)
-                .entityId(id)
-                .build();
-        eventRepository.save(event);
     }
 
     public List<Film> getPopularFilms(Integer count) {
