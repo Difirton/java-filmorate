@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RatingMPA {
     private Long id;
-
     @JsonProperty(value = "name")
     private String title;
 }

@@ -6,7 +6,9 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.config.mapper.UserFriendRepositoryLazyMapper;
+import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.entity.UserFriend;
 import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
@@ -27,8 +29,8 @@ public class UserFriendRepositoryJdbcImpl implements UserFriendRepository {
             "VALUES (?, ?, ?)";
     private static final String SQL_UPDATE_ALL_FIELDS = "UPDATE user_friends " +
             "SET user_id = ?, friend_id = ?, approved = ? WHERE id = ?";
-    private static final String SQL_DELETE_BY_ID = "DELETE FROM user_friends WHERE id = ?";
-    private static final String SQL_DELETE_BY_USER_ID_AND_FRIEND_ID = "DELETE FROM user_friends " +
+    private static final String SQL_DELETE_BY_ID = "DELETE user_friends WHERE id = ?";
+    private static final String SQL_DELETE_BY_USER_ID_AND_FRIEND_ID = "DELETE user_friends " +
             "WHERE user_id = ? AND friend_id = ?";
     private static final String SQL_SELECT_ALL = "SELECT * FROM user_friends";
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM user_friends WHERE id = ?";
@@ -96,6 +98,7 @@ public class UserFriendRepositoryJdbcImpl implements UserFriendRepository {
     }
 
     @Override
+    @Transactional
     public int[] saveAll(List<UserFriend> usersFriends) {
         return this.jdbcOperations.batchUpdate(SQL_INSERT_ALL_FIELDS,
                 new BatchPreparedStatementSetter() {
