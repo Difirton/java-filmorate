@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.entity.Review;
@@ -17,7 +16,6 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reviews")
@@ -36,8 +34,7 @@ public class ReviewController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Review crateReview(@Valid @RequestBody Review review) {
-        log.info("Request to create new review: " + review.toString());
+    public Review createReview(@Valid @RequestBody Review review) {
         return reviewService.createReview(review);
     }
 
@@ -53,7 +50,6 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public Review updateReview(@Valid @RequestBody Review review) {
-        log.info("Request to update review with id = {}, parameters to update: {}", review.getId(), review);
         return reviewService.updateReview(review.getId(), review);
     }
 
@@ -84,7 +80,6 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable("id") @Parameter(description = "The review ID") Long id) {
-        log.info("Request to delete review with {}", id);
         reviewService.removeReviewById(id);
     }
 

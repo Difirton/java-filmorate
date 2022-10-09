@@ -12,9 +12,27 @@
 
 While in the directory on the command line, type:
 
-`mvn package`
+`./mvn package`
 
 `java -jar target/filmorate-0.0.1-SNAPSHOT.jar`
+
+## Quick start with Docker
+### Requirements
+
+- Java Platform (JDK) 11
+- Apache Maven 4.x
+- Docker client
+
+
+While in the directory on the command line, type:
+
+`./mvn package`
+
+`java -jar target/filmorate-0.0.1-SNAPSHOT.jar`
+
+`docker build -t filmorate:0.0.1`
+
+`docker run -d -p 8080:8080 -t filmorate:0.0.1`
 
 ## Rest service layer
 

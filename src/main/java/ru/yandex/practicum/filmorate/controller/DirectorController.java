@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.entity.Director;
@@ -16,7 +15,6 @@ import ru.yandex.practicum.filmorate.service.DirectorService;
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/directors")
@@ -36,8 +34,7 @@ public class DirectorController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Director newDirector(@Valid @RequestBody Director director) {
-        log.info("Request to create new director: " + director.toString());
+    public Director createDirector(@Valid @RequestBody Director director) {
         return directorService.createDirector(director);
     }
 
@@ -84,7 +81,6 @@ public class DirectorController {
     @PutMapping("/{id}")
     public Director updateDirector(@PathVariable("id") @Parameter(description = "The director ID") Long id,
                                    @Valid @RequestBody Director director) {
-        log.info("Request to update director with id = {}, parameters to update: {}", id, director.toString());
         return directorService.updateDirector(id, director);
     }
 
@@ -100,7 +96,6 @@ public class DirectorController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public Director updateDirector(@Valid @RequestBody Director director) {
-        log.info("Request to update director with id = {}, parameters to update: {}", director.getId(), director);
         return directorService.updateDirector(director.getId(), director);
     }
 
@@ -116,7 +111,6 @@ public class DirectorController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable("id") @Parameter(description = "The director ID") Long id) {
-        log.info("Request to delete director with {}", id);
         directorService.removeDirectorById(id);
     }
 }

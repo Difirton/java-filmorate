@@ -7,18 +7,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.entity.Event;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -26,6 +26,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final FilmService filmService;
+    private final EventService eventService;
 
     @Operation(summary = "Creates a new user", tags = "user")
     @ApiResponses(value = {
@@ -38,8 +39,7 @@ public class UserController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public User newUser(@Valid @RequestBody User user) {
-        log.info("Request to create new user: " + user.toString());
+    public User createUser(@Valid @RequestBody User user) {
         return userService.createUser(user);
     }
 
@@ -71,7 +71,6 @@ public class UserController {
     @PutMapping("/{id}")
     public User updateUser(@PathVariable("id") @Parameter(description = "The user ID") Long id,
                            @Valid @RequestBody User user) {
-        log.info("Request to update user with id = {}, parameters to update: {}", id ,user.toString());
         return userService.updateUser(id, user);
     }
 
@@ -102,7 +101,6 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable("id") @Parameter(description = "The user ID") Long id) {
-        log.info("Request to delete user with {}", id);
         userService.removeUserById(id);
     }
 
@@ -118,7 +116,6 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        log.info("Request to update user with id = {}, parameters to update: {}", user.getId() ,user);
         return userService.updateUser(user.getId(), user);
     }
 
@@ -135,7 +132,6 @@ public class UserController {
     @PutMapping("{id}/friends/{friendId}")
     public User addFriend(@PathVariable("id") @Parameter(description = "The user ID") Long id,
                           @PathVariable("friendId") @Parameter(description = "The user ID") Long friendId) {
-        log.info("Request to add a user with id = {} as a friend to a user with id ={}", id ,friendId);
         return userService.addFriend(id, friendId);
     }
 
@@ -152,7 +148,6 @@ public class UserController {
     @DeleteMapping("{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable("id") @Parameter(description = "The user ID") Long id,
                              @PathVariable("friendId") @Parameter(description = "The another user ID") Long friendId) {
-        log.info("Request to remove user with id = {} from friends of user with id = {}", friendId, id);
         userService.removeFriend(id, friendId);
     }
 
@@ -201,5 +196,20 @@ public class UserController {
     @GetMapping("{id}/recommendations")
     public List<Film> getRecommendationsForUser(@PathVariable("id") @Parameter(description = "The user ID") Long userID) {
         return filmService.getRecommendationsForUser(userID);
+    }
+
+    @Operation(summary = "Get a list of recommended movies to watch", tags = {"user", "event"})
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get a list of events",
+                    content = {
+                            @Content(mediaType = "application/json")
+                    })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/users/{id}/feed")
+    public List<Event> getEvents(@PathVariable("id") Long id) {
+        return eventService.getEventsByUserId(id);
     }
 }
