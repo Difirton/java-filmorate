@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
-import ru.yandex.practicum.filmorate.error.RatingMpaNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.RatingMpaNotFoundException;
 import ru.yandex.practicum.filmorate.repository.RatingMpaRepository;
 
 import java.util.List;

@@ -1,46 +1,44 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.filmorate.entity.Review;
-import ru.yandex.practicum.filmorate.entity.ReviewRate;
-import ru.yandex.practicum.filmorate.entity.User;
-import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.error.ReviewNotFoundException;
-import ru.yandex.practicum.filmorate.error.UserNotFoundException;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.ReviewRateRepository;
-import ru.yandex.practicum.filmorate.repository.ReviewRepository;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.entity.*;
+import ru.yandex.practicum.filmorate.entity.constant.EventTypes;
+import ru.yandex.practicum.filmorate.entity.constant.Operations;
+import ru.yandex.practicum.filmorate.error.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.repository.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final ReviewRateRepository reviewRateRepository;
-
-    @Autowired
-    public ReviewService(ReviewRepository reviewRepository,
-                         FilmRepository filmRepository,
-                         UserRepository userRepository,
-                         ReviewRateRepository reviewRateRepository) {
-        this.reviewRepository = reviewRepository;
-        this.filmRepository = filmRepository;
-        this.userRepository = userRepository;
-        this.reviewRateRepository = reviewRateRepository;
-    }
+    private final EventRepository eventRepository;
 
     @Transactional
     public Review createReview(Review review) {
         filmRepository.findById(review.getFilmId()).orElseThrow(() -> new FilmNotFoundException(review.getFilmId()));
         userRepository.findById(review.getUserId()).orElseThrow(() -> new UserNotFoundException(review.getUserId()));
-        return reviewRepository.save(review);
+        Review newReview = reviewRepository.save(review);
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId(newReview.getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(Operations.ADD)
+                .entityId(newReview.getId())
+                .build();
+        eventRepository.save(event);
+        return newReview;
     }
 
     public Review getReviewById(Long id) {
@@ -84,6 +82,14 @@ public class ReviewService {
     public Review updateReview(Long id, Review newReview) {
         filmRepository.findById(newReview.getFilmId()).orElseThrow(() -> new FilmNotFoundException(newReview.getFilmId()));
         userRepository.findById(newReview.getUserId()).orElseThrow(() -> new UserNotFoundException(newReview.getUserId()));
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId(id)
+                .eventType(EventTypes.REVIEW)
+                .operation(Operations.UPDATE)
+                .entityId(newReview.getId())
+                .build();
+        eventRepository.save(event);
         return reviewRepository.findById(id)
                 .map(r -> {
                     r.setContent(newReview.getContent());
@@ -97,6 +103,14 @@ public class ReviewService {
     }
 
     public void removeReviewById(Long id) {
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId(getReviewById(id).getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(Operations.REMOVE)
+                .entityId(getReviewById(id).getId())
+                .build();
+        eventRepository.save(event);
         reviewRepository.deleteById(id);
     }
 

@@ -11,7 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
-import ru.yandex.practicum.filmorate.error.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.time.LocalDate;

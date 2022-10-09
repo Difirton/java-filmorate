@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.Director;
-import ru.yandex.practicum.filmorate.error.DirectorNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 
 import java.util.List;

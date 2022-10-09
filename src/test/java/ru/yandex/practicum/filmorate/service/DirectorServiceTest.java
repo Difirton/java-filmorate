@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.entity.Director;
-import ru.yandex.practicum.filmorate.error.DirectorNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 
 import java.util.List;

@@ -208,7 +208,7 @@ public class UserController {
                     })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/users/{id}/feed")
+    @GetMapping("/{id}/feed")
     public List<Event> getEvents(@PathVariable("id") Long id) {
         return eventService.getEventsByUserId(id);
     }

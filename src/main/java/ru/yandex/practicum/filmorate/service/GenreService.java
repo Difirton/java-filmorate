@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.entity.Genre;
-import ru.yandex.practicum.filmorate.error.GenreNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
 
 import java.util.List;
