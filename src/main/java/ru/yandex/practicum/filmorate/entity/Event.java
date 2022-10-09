@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.entity.constant.EventTypes;
-import ru.yandex.practicum.filmorate.entity.constant.Operations;
+import ru.yandex.practicum.filmorate.entity.constant.EventType;
+import ru.yandex.practicum.filmorate.entity.constant.Operation;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +16,7 @@ public class Event {
     private Long eventId;
     private Long timestamp;
     private Long userId;
-    private EventTypes eventType;
-    private Operations operation;
+    private EventType eventType;
+    private Operation operation;
     private Long entityId;
 }

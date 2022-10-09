@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.Director;
@@ -10,13 +10,9 @@ import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DirectorService {
     private final DirectorRepository directorRepository;
-
-    @Autowired
-    public DirectorService(DirectorRepository directorRepository) {
-        this.directorRepository = directorRepository;
-    }
 
     @Transactional
     public Director createDirector(Director director) {

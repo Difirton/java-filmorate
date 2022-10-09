@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.*;
-import ru.yandex.practicum.filmorate.entity.constant.EventTypes;
-import ru.yandex.practicum.filmorate.entity.constant.Operations;
+import ru.yandex.practicum.filmorate.entity.constant.EventType;
+import ru.yandex.practicum.filmorate.entity.constant.Operation;
 import ru.yandex.practicum.filmorate.error.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.repository.EventRepository;
 import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
@@ -19,7 +17,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserFriendRepository userFriendRepository;
-    private final EventRepository eventRepository;
+    private final EventService eventService;
 
     @Transactional
     public User createUser(User user) {
@@ -65,13 +63,7 @@ public class UserService {
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         userFriendRepository.save(user, friend);
         user.addFriend(friend);
-        eventRepository.save(Event.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(userId)
-                .eventType(EventTypes.FRIEND)
-                .operation(Operations.ADD)
-                .entityId(friendId)
-                .build());
+        eventService.createEvent(userId, EventType.FRIEND, Operation.ADD, friendId);
         return user;
     }
 
@@ -80,13 +72,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         userFriendRepository.delete(UserFriend.builder().user(user).friend(friend).build());
-        eventRepository.save(Event.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(userId)
-                .eventType(EventTypes.FRIEND)
-                .operation(Operations.REMOVE)
-                .entityId(friendId)
-                .build());
+        eventService.createEvent(userId, EventType.FRIEND, Operation.REMOVE, friendId);
     }
 
     public List<User> getUserFriends(Long id) {

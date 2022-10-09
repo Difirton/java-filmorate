@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.*;
-import ru.yandex.practicum.filmorate.entity.constant.EventTypes;
-import ru.yandex.practicum.filmorate.entity.constant.Operations;
+import ru.yandex.practicum.filmorate.entity.constant.EventType;
+import ru.yandex.practicum.filmorate.entity.constant.Operation;
 import ru.yandex.practicum.filmorate.error.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.error.exception.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.error.exception.UserNotFoundException;
@@ -23,21 +22,14 @@ public class ReviewService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final ReviewRateRepository reviewRateRepository;
-    private final EventRepository eventRepository;
+    private final EventService eventService;
 
     @Transactional
     public Review createReview(Review review) {
         filmRepository.findById(review.getFilmId()).orElseThrow(() -> new FilmNotFoundException(review.getFilmId()));
         userRepository.findById(review.getUserId()).orElseThrow(() -> new UserNotFoundException(review.getUserId()));
         Review newReview = reviewRepository.save(review);
-        Event event = Event.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(newReview.getUserId())
-                .eventType(EventTypes.REVIEW)
-                .operation(Operations.ADD)
-                .entityId(newReview.getId())
-                .build();
-        eventRepository.save(event);
+        eventService.createEvent(newReview.getUserId(), EventType.REVIEW, Operation.ADD, newReview.getId());
         return newReview;
     }
 
@@ -82,14 +74,7 @@ public class ReviewService {
     public Review updateReview(Long id, Review newReview) {
         filmRepository.findById(newReview.getFilmId()).orElseThrow(() -> new FilmNotFoundException(newReview.getFilmId()));
         userRepository.findById(newReview.getUserId()).orElseThrow(() -> new UserNotFoundException(newReview.getUserId()));
-        Event event = Event.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(id)
-                .eventType(EventTypes.REVIEW)
-                .operation(Operations.UPDATE)
-                .entityId(newReview.getId())
-                .build();
-        eventRepository.save(event);
+        eventService.createEvent(id, EventType.REVIEW, Operation.UPDATE, newReview.getId());
         return reviewRepository.findById(id)
                 .map(r -> {
                     r.setContent(newReview.getContent());
@@ -103,14 +88,8 @@ public class ReviewService {
     }
 
     public void removeReviewById(Long id) {
-        Event event = Event.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(getReviewById(id).getUserId())
-                .eventType(EventTypes.REVIEW)
-                .operation(Operations.REMOVE)
-                .entityId(getReviewById(id).getId())
-                .build();
-        eventRepository.save(event);
+        Review review = reviewRepository.findById(id).orElseThrow(() -> new ReviewNotFoundException(id));
+        eventService.createEvent(review.getUserId(), EventType.REVIEW, Operation.REMOVE, review.getId());
         reviewRepository.deleteById(id);
     }
 

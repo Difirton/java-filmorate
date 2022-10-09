@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.entity.*;
 import ru.yandex.practicum.filmorate.entity.binding.DirectorFilm;
 import ru.yandex.practicum.filmorate.entity.binding.FilmGenre;
-import ru.yandex.practicum.filmorate.entity.constant.EventTypes;
-import ru.yandex.practicum.filmorate.entity.constant.Operations;
+import ru.yandex.practicum.filmorate.entity.constant.EventType;
+import ru.yandex.practicum.filmorate.entity.constant.Operation;
 import ru.yandex.practicum.filmorate.error.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.error.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.repository.*;
@@ -31,7 +31,7 @@ public class FilmService {
     private final DirectorFilmRepository directorFilmRepository;
     private final RecommendationRepository recommendationRepository;
     private final RatingMpaRepository ratingMpaRepository;
-    private final EventRepository eventRepository;
+    private final EventService eventService;
 
     @Transactional
     public Film createFilm(Film film) {
@@ -109,23 +109,11 @@ public class FilmService {
         if (film.getUsersLikes().stream()
                 .map(User::getId)
                 .anyMatch(i -> i.equals(userId))) {
-            eventRepository.save(Event.builder()
-                    .timestamp(System.currentTimeMillis())
-                    .userId(userId)
-                    .eventType(EventTypes.LIKE)
-                    .operation(Operations.ADD)
-                    .entityId(id)
-                    .build());
+            eventService.createEvent(userId, EventType.LIKE, Operation.ADD, id);
             return film;
         }
         film.addUserLike(userService.getUserById(userId));
-        eventRepository.save(Event.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(Operations.ADD)
-                .entityId(id)
-                .build());
+        eventService.createEvent(userId, EventType.LIKE, Operation.ADD, id);
         return filmRepository.update(film);
     }
 
@@ -134,13 +122,7 @@ public class FilmService {
         Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
         film.removeUserLike(userService.getUserById(userId));
         filmRepository.update(film);
-        eventRepository.save(Event.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(Operations.REMOVE)
-                .entityId(id)
-                .build());
+        eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, id);
     }
 
     public List<Film> getPopularFilms(Integer count) {
