@@ -16,6 +16,8 @@ import ru.yandex.practicum.filmorate.entity.User;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -110,7 +112,7 @@ class FilmRepositoryTest {
         userRepository.update(user1);
         List<Film> popularFilms = filmRepository.findPopularFilmsByRate(10);
         Assertions.assertThat(popularFilms).isEqualTo(List.of(film2, film1, film3));
-        Assertions.assertThat(film1.getRate() == 0);
+        assertEquals(0, film1.getRate());
     }
 
     @Test

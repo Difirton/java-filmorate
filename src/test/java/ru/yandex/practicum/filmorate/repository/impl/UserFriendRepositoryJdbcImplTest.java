@@ -45,28 +45,28 @@ class UserFriendRepositoryJdbcImplTest {
     @DisplayName("Test save userFriend in UserFriendRepository")
     void testSave() {
         UserFriend returnedUserFriend = userFriendRepository.save(newUserFriend1To2);
-        assertEquals(returnedUserFriend.getId(), 1);
-        assertEquals(returnedUserFriend.getUser().getId(), 1L);
+        assertEquals(1, returnedUserFriend.getId());
+        assertEquals(1L, returnedUserFriend.getUser().getId());
         UserFriend userFriendAfterSaveInDB = userFriendRepository.findById(1L).get();
-        assertEquals(userFriendAfterSaveInDB.getFriend().getId(), 2L);
+        assertEquals(2L, userFriendAfterSaveInDB.getFriend().getId());
     }
 
     @Test
     @DisplayName("Test save two users in UserFriendRepository")
     void testSaveUserFriend() {
         UserFriend returnedUserFriend = userFriendRepository.save(user, friend);
-        assertEquals(returnedUserFriend.getUser().getId(), 1L);
+        assertEquals(1L, returnedUserFriend.getUser().getId());
         UserFriend userFriendAfterSaveInDB = userFriendRepository.findById(1L).get();
-        assertEquals(userFriendAfterSaveInDB.getFriend().getId(), 2L);
+        assertEquals(2L, userFriendAfterSaveInDB.getFriend().getId());
     }
 
     @Test
     @DisplayName("Test save two users and boolean in UserFriendRepository")
     void testSaveUserFriendIsApproved() {
         UserFriend returnedUserFriend = userFriendRepository.save(user, friend, true);
-        assertEquals(returnedUserFriend.getUser().getId(), 1L);
+        assertEquals(1L, returnedUserFriend.getUser().getId());
         UserFriend userFriendAfterSaveInDB = userFriendRepository.findById(1L).get();
-        assertEquals(userFriendAfterSaveInDB.getFriend().getId(), 2L);
+        assertEquals(2L, userFriendAfterSaveInDB.getFriend().getId());
     }
 
     @Test
@@ -76,37 +76,36 @@ class UserFriendRepositoryJdbcImplTest {
         newUserFriend1To2 = UserFriend.builder().id(1L).user(User.builder().id(1L).build())
                 .friend(User.builder().id(3L).build()).build();
         UserFriend returnedUserFriend = userFriendRepository.update(newUserFriend1To2);
-        assertEquals(returnedUserFriend.getFriend().getId(), 3L);
+        assertEquals(3L, returnedUserFriend.getFriend().getId());
         UserFriend userFriendAfterSaveInDB = userFriendRepository.findById(1L).get();
-        System.out.println(userFriendAfterSaveInDB);
-        assertEquals(userFriendAfterSaveInDB.getFriend().getId(), 3L);
+        assertEquals(3L, userFriendAfterSaveInDB.getFriend().getId());
     }
 
     @Test
     @DisplayName("Test delete by id in UserFriendRepository")
     void testDeleteById() {
         userFriendRepository.save(newUserFriend1To2);
-        assertEquals(userFriendRepository.findAll().size(), 1);
+        assertEquals(1, userFriendRepository.findAll().size());
         userFriendRepository.deleteById(1L);
-        assertEquals(userFriendRepository.findAll().size(), 0);
+        assertEquals(0, userFriendRepository.findAll().size());
     }
 
     @Test
     @DisplayName("Test delete in UserFriendRepository")
     void testDelete() {
         userFriendRepository.save(newUserFriend1To2);
-        assertEquals(userFriendRepository.findAll().size(), 1);
+        assertEquals(1, userFriendRepository.findAll().size());
         userFriendRepository.delete(newUserFriend1To2);
-        assertEquals(userFriendRepository.findAll().size(), 0);
+        assertEquals(0, userFriendRepository.findAll().size());
     }
 
     @Test
     @DisplayName("Test find all in UserFriendRepository")
     void testFindAll() {
         userFriendRepository.save(newUserFriend1To2);
-        assertEquals(userFriendRepository.findAll().size(), 1);
+        assertEquals(1, userFriendRepository.findAll().size());
         userFriendRepository.save(secondUserFriend2To1);
-        assertEquals(userFriendRepository.findAll().size(), 2);
+        assertEquals(2, userFriendRepository.findAll().size());
     }
 
     @Test
@@ -115,15 +114,15 @@ class UserFriendRepositoryJdbcImplTest {
         userFriendRepository.save(newUserFriend1To2);
         userFriendRepository.save(secondUserFriend2To1);
         userFriendRepository.save(thirdUserFriend1To3);
-        assertEquals(userFriendRepository.findById(2L).get().getFriend().getId(), 1L);
+        assertEquals(1L, userFriendRepository.findById(2L).get().getFriend().getId());
     }
 
     @Test
     @DisplayName("Test save all in UserFriendRepository")
     void testSaveAll() {
         userFriendRepository.saveAll(List.of(newUserFriend1To2, secondUserFriend2To1, thirdUserFriend1To3));
-        assertEquals(userFriendRepository.findAll().size(), 3);
-        assertEquals(userFriendRepository.findById(2L).get().getFriend().getId(), 1L);
+        assertEquals(3, userFriendRepository.findAll().size());
+        assertEquals(1L, userFriendRepository.findById(2L).get().getFriend().getId());
     }
 
     @Test
@@ -134,5 +133,6 @@ class UserFriendRepositoryJdbcImplTest {
         secondUserFriend2To1.setUser(User.builder().id(3L).build());
         secondUserFriend2To1.setFriend(User.builder().id(2L).build());
         userFriendRepository.updateAll(List.of(secondUserFriend2To1));
+        assertEquals(secondUserFriend2To1, userFriendRepository.findById(2L).get());
     }
 }

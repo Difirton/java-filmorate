@@ -30,10 +30,6 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ActiveProfiles("test")
 class ReviewServiceTest {
-    private Film film;
-    private User user;
-    private Review review;
-
     @MockBean
     private ReviewRepository mockReviewRepository;
     @MockBean(FilmRepositoryJdbcImpl.class)
@@ -47,16 +43,16 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = User.builder().id(1L).email("mail@mail.ru").login("testuser").name("Test User")
+        User user = User.builder().id(1L).email("mail@mail.ru").login("testuser").name("Test User")
                 .birthday(LocalDate.of(2000, 2, 22)).build();
         when(mockUserRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        film = Film.builder().id(1L).name("Test film").description("Test Film Description")
+        Film film = Film.builder().id(1L).name("Test film").description("Test Film Description")
                 .releaseDate(LocalDate.of(2000, 2, 22)).duration(180).rate(0)
                 .ratingMPA(RatingMPA.builder().id(1L).title("G").build()).build();
         when(mockFilmRepository.findById(1L)).thenReturn(Optional.of(film));
 
-        review = Review.builder().id(1L).content("TestGoodReview").filmId(1L).userId(1L).isPositive(true).build();
+        Review review = Review.builder().id(1L).content("TestGoodReview").filmId(1L).userId(1L).isPositive(true).build();
         when(mockReviewRepository.findById(1L)).thenReturn(Optional.of(review));
     }
 

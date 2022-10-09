@@ -46,9 +46,9 @@ class UserRepositoryJdbcImplTest {
     @DisplayName("Test save user in UserRepository")
     void testSave() {
         userRepository.save(newUser);
-        assertEquals(userRepository.findById(1L).get().getLogin(), "test1");
-        assertEquals(userRepository.findById(1L).get().getEmail(), "test1@mail.ru");
-        assertEquals(userRepository.findById(1L).get().getName(), "test1");
+        assertEquals("test1", userRepository.findById(1L).get().getLogin());
+        assertEquals("test1@mail.ru", userRepository.findById(1L).get().getEmail());
+        assertEquals("test1", userRepository.findById(1L).get().getName());
         assertEquals(userRepository.findById(1L).get().getBirthday(), LocalDate.of(2000, 1, 1));
     }
 
@@ -61,9 +61,9 @@ class UserRepositoryJdbcImplTest {
         newUser.setLogin("updated");
         newUser.setBirthday(LocalDate.of(2010, 1, 1));
         userRepository.update(newUser);
-        assertEquals(userRepository.findById(1L).get().getLogin(), "updated");
-        assertEquals(userRepository.findById(1L).get().getEmail(), "updated@mail.ru");
-        assertEquals(userRepository.findById(1L).get().getName(), "updated");
+        assertEquals("updated", userRepository.findById(1L).get().getLogin());
+        assertEquals("updated@mail.ru", userRepository.findById(1L).get().getEmail());
+        assertEquals("updated", userRepository.findById(1L).get().getName());
         assertEquals(userRepository.findById(1L).get().getBirthday(), LocalDate.of(2010, 1, 1));
     }
 
@@ -71,20 +71,20 @@ class UserRepositoryJdbcImplTest {
     @DisplayName("Test delete user by id in UserRepository")
     void testDeleteById() {
         userRepository.save(newUser);
-        assertEquals(userRepository.findAll().size(), 1);
+        assertEquals(1, userRepository.findAll().size());
         userRepository.deleteById(1L);
-        assertEquals(userRepository.findAll().size(), 0);
+        assertEquals(0, userRepository.findAll().size());
     }
 
     @Test
     @DisplayName("Test find all users in UserRepository")
     void testFindAll() {
         userRepository.save(newUser);
-        assertEquals(userRepository.findAll().size(), 1);
+        assertEquals(1, userRepository.findAll().size());
         userRepository.save(secondUser);
-        assertEquals(userRepository.findAll().size(), 2);
+        assertEquals(2, userRepository.findAll().size());
         userRepository.save(thirdUser);
-        assertEquals(userRepository.findAll().size(), 3);
+        assertEquals(3, userRepository.findAll().size());
         assertEquals(userRepository.findAll().get(0), newUser);
         assertEquals(userRepository.findAll().get(1), secondUser);
         assertEquals(userRepository.findAll().get(2), thirdUser);

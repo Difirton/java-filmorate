@@ -74,8 +74,7 @@ public class ReviewService {
     public Review updateReview(Long id, Review newReview) {
         filmRepository.findById(newReview.getFilmId()).orElseThrow(() -> new FilmNotFoundException(newReview.getFilmId()));
         userRepository.findById(newReview.getUserId()).orElseThrow(() -> new UserNotFoundException(newReview.getUserId()));
-        eventService.createEvent(id, EventType.REVIEW, Operation.UPDATE, newReview.getId());
-        return reviewRepository.findById(id)
+        Review updatedReview = reviewRepository.findById(id)
                 .map(r -> {
                     r.setContent(newReview.getContent());
                     r.setIsPositive(newReview.getIsPositive());
@@ -85,6 +84,8 @@ public class ReviewService {
                     return reviewRepository.update(r);
                 })
                 .orElseThrow(() -> new ReviewNotFoundException(id));
+        eventService.createEvent(id, EventType.REVIEW, Operation.UPDATE, newReview.getId());
+        return updatedReview;
     }
 
     public void removeReviewById(Long id) {

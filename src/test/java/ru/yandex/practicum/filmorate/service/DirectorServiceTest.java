@@ -52,20 +52,20 @@ class DirectorServiceTest {
     @DisplayName("Test create new Director")
     void testCreateDirector() {
         when(mockRepository.save(director1)).thenReturn(director1);
-        assertEquals(directorService.createDirector(director1), director1);
+        assertEquals(director1, directorService.createDirector(director1));
     }
 
     @Test
     @DisplayName("Get director by id, expected ok")
     void testGetDirectorById() {
-        assertEquals(directorService.getDirectorById(1L), director1);
+        assertEquals(director1, directorService.getDirectorById(1L));
     }
 
     @Test
     @DisplayName("Get all directors, expected ok")
     void testGetAllDirectors() {
         when(mockRepository.findAll()).thenReturn(List.of(director1, director2, director3));
-        assertEquals(directorService.getAllDirectors(), List.of(director1, director2, director3));
+        assertEquals(List.of(director1, director2, director3), directorService.getAllDirectors());
     }
 
     @Test
@@ -77,7 +77,7 @@ class DirectorServiceTest {
                 .build();
         when(mockRepository.update(any(Director.class))).thenReturn(director1);
         Director directorAfterUpdate = directorService.updateDirector(1L, updatedDirector);
-        assertEquals(directorAfterUpdate.getName(), "updated");
+        assertEquals("updated", directorAfterUpdate.getName());
     }
 
     @Test

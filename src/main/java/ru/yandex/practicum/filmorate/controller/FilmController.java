@@ -202,6 +202,18 @@ public class FilmController {
         return filmService.getCommonFilms(userId, friendId);
     }
 
+    @Operation(summary = "Get a list of movies sorted by popularity and search criteria", tags = {"film", "director"},
+            description = "Returns a list of movies sorted by popularity. Can take the values director " +
+                    "(search by director), title (search by title), or both values separated by commas when searching " +
+                    "both by director and title")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Found a list of movies sorted by popularity",
+                    content = {
+                            @Content(mediaType = "application/json")
+                    })
+    })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
     public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {

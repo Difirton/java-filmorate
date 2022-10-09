@@ -47,13 +47,13 @@ class GenreServiceTest {
     @DisplayName("Get all genres, expected ok")
     void testGetAllGenres() {
         when(mockRepository.findAll()).thenReturn(List.of(genre1, genre2, genre3));
-        assertEquals(genreService.getAllGenres(), List.of(genre1, genre2, genre3));
+        assertEquals(List.of(genre1, genre2, genre3), genreService.getAllGenres());
     }
 
     @Test
     @DisplayName("Get genre by id, expected ok")
     void testGetGenreById() {
         when(mockRepository.findById(2L)).thenReturn(Optional.of(genre2));
-        assertEquals(genreService.getGenreById(2L), genre2);
+        assertEquals(genre2, genreService.getGenreById(2L));
     }
 }

@@ -35,10 +35,10 @@ class GenreRepositoryJdbcImplTest {
     @DisplayName("Test save in GenreRepository")
     void testSave() {
         Genre returnedGenre = genreRepository.save(newGenre);
-        assertEquals(newGenre.getId(), 7);
-        assertEquals(returnedGenre.getTitle(), "newGenre");
+        assertEquals(7, newGenre.getId());
+        assertEquals("newGenre", returnedGenre.getTitle());
         Genre genreAfterSaveInDB = genreRepository.findById(7L).get();
-        assertEquals(genreAfterSaveInDB.getTitle(), "newGenre");
+        assertEquals("newGenre", genreAfterSaveInDB.getTitle());
     }
 
     @Test
@@ -46,41 +46,41 @@ class GenreRepositoryJdbcImplTest {
     void testUpdate() {
         newGenre.setId(1L);
         Genre returnedGenre = genreRepository.update(newGenre);
-        assertEquals(returnedGenre.getTitle(), "newGenre");
+        assertEquals("newGenre", returnedGenre.getTitle());
         Genre genreAfterSaveInDB = genreRepository.findById(1L).get();
-        assertEquals(genreAfterSaveInDB.getTitle(), "newGenre");
+        assertEquals("newGenre", genreAfterSaveInDB.getTitle());
     }
 
     @Test
     @DisplayName("Test delete by id in GenreRepository")
     void testDeleteById() {
         genreRepository.deleteById(1L);
-        assertEquals(genreRepository.findAll().size(), 5);
+        assertEquals(5, genreRepository.findAll().size());
     }
 
     @Test
     @DisplayName("Test find all in GenreRepository")
     void testFindAll() {
-        assertEquals(genreRepository.findAll().size(), 6);
+        assertEquals(6, genreRepository.findAll().size());
         genreRepository.save(newGenre);
-        assertEquals(genreRepository.findAll().size(), 7);
+        assertEquals(7, genreRepository.findAll().size());
     }
 
     @Test
+    @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_findGenresByFilmId.sql"})
     @DisplayName("Test find by id in GenreRepository")
     void testFindById() {
-        assertEquals(genreRepository.findById(1L).get().getTitle(), "Комедия");
-        assertEquals(genreRepository.findById(3L).get().getTitle(), "Мультфильм");
+        assertEquals("test", genreRepository.findById(7L).get().getTitle());
     }
 
     @Test
     @DisplayName("Test save List ratings in GenreRepository")
     void testSaveAll() {
         genreRepository.saveAll(List.of(newGenre, secondGenre, thirdGenre));
-        assertEquals(genreRepository.findAll().size(), 9);
-        assertEquals(genreRepository.findById(7L).get().getTitle(), "newGenre");
-        assertEquals(genreRepository.findById(8L).get().getTitle(), "secondGenre");
-        assertEquals(genreRepository.findById(9L).get().getTitle(), "thirdGenre");
+        assertEquals(9, genreRepository.findAll().size());
+        assertEquals("newGenre", genreRepository.findById(7L).get().getTitle());
+        assertEquals("secondGenre", genreRepository.findById(8L).get().getTitle());
+        assertEquals("thirdGenre", genreRepository.findById(9L).get().getTitle());
     }
 
     @Test
@@ -88,7 +88,7 @@ class GenreRepositoryJdbcImplTest {
     @DisplayName("Test find genres by film id in GenreRepository")
     void testFindGenresByFilmId() {
         List<Genre> genres = genreRepository.findGenresByFilmId(1L);
-        assertEquals(genres.get(0).getTitle(), "Комедия");
-        assertEquals(genres.get(1).getTitle(), "Триллер");
+        assertEquals("test", genres.get(0).getTitle());
+        assertEquals("test_2", genres.get(1).getTitle());
     }
 }

@@ -30,6 +30,8 @@ class FilmServiceTest {
     private FilmRepository mockRepository;
     @MockBean
     private UserService mockUserService;
+    @MockBean
+    private EventService mockEventService;
     @Autowired
     private FilmService filmService;
 
@@ -89,7 +91,7 @@ class FilmServiceTest {
     @DisplayName("Test create new Film")
     void testCreateFilm() {
         when(mockRepository.save(film)).thenReturn(film);
-        assertEquals(filmService.createFilm(film), film);
+        assertEquals(film, filmService.createFilm(film));
     }
 
     @Test
@@ -104,7 +106,7 @@ class FilmServiceTest {
                 .ratingMPA(RatingMPA.builder().id(2L).title("T").build())
                 .build();
         when(mockRepository.findAll()).thenReturn(List.of(film, film2));
-        assertEquals(filmService.getAllFilms(), List.of(film, film2));
+        assertEquals(List.of(film, film2), filmService.getAllFilms());
     }
 
     @Test
@@ -117,13 +119,14 @@ class FilmServiceTest {
                 .name("test").build());
         when(mockRepository.update(film)).thenReturn(film);
         Film updatedFilm = filmService.addLikeFilm(1L, 1L);
-        assertEquals(updatedFilm.getRate(), 5);
+        assertEquals(5, updatedFilm.getRate());
     }
 
     @Test
     @Sql(scripts = {"classpath:schema.sql", "classpath:sql_scripts/schema_searchFilms.sql"})
     @DisplayName("Test search films by incorrect filter")
     void testSearchFilmsThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> filmService.searchFilms("uck", List.of("something_bad")));
+        assertThrows(IllegalArgumentException.class, () -> filmService.searchFilms("uck",
+                List.of("something_bad")));
     }
 }

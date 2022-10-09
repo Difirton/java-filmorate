@@ -27,6 +27,8 @@ class UserServiceTest {
     private UserRepository mockRepository;
     @MockBean
     private UserFriendRepository mockUserFriendRepository;
+    @MockBean
+    private EventService mockEventService;
     @Autowired
     private UserService userService;
 
@@ -107,9 +109,9 @@ class UserServiceTest {
         when(mockRepository.findById(1L)).thenReturn(Optional.of(user));
         when(mockRepository.findById(2L)).thenReturn(Optional.of(friend));
         userService.addFriend(1L, 2L);
-        assertEquals(user.getFriends().get(0).getFriend().getId(), 2L);
-        assertEquals(user.getFriends().get(0).getFriend().getLogin(), "test");
-        assertEquals(user.getFriends().get(0).getFriend().getEmail(), "test@mail.ru");
-        assertEquals(user.getFriends().get(0).getFriend().getName(), "test");
+        assertEquals(2L, user.getFriends().get(0).getFriend().getId());
+        assertEquals("test", user.getFriends().get(0).getFriend().getLogin());
+        assertEquals("test@mail.ru", user.getFriends().get(0).getFriend().getEmail());
+        assertEquals("test", user.getFriends().get(0).getFriend().getName());
     }
 }
