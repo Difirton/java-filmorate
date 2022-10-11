@@ -179,8 +179,10 @@ public class FilmService {
     public List<Film> searchFilms(String query, List<String> byFields) {
         boolean byFilmName = byFields.contains("title");
         boolean byDirectorName = byFields.contains("director");
-        if (!byFilmName && !byDirectorName)
+        if (!byFilmName && !byDirectorName) {
+            log.error("Invalid parameter byFields: " + byFields);
             throw new IllegalArgumentException("Invalid parameter byFields: " + byFields);
+        }
         List<Film> films = new ArrayList<>();
         if (byFilmName) {
             films.addAll(filmRepository.searchFilmsByName(query));

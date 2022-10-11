@@ -6,6 +6,7 @@ import java.util.List;
  * An interface supplies the only method, that returns
  * ID's of films recommended for user
  *
+ * @author Alexey Poltavsky
  */
 public interface RecommendationRepository {
 

@@ -34,6 +34,14 @@ While in the directory on the command line, type:
 
 `docker run -d -p 8080:8080 -t filmorate:0.0.1`
 
+### Repository Filmorate project in Docker Hub
+
+#### [Link to repository Filmorate project in Docker Hub](https://hub.docker.com/repository/docker/difiton/filmorate)
+
+The built Docker image is in the difiton/filmorate repository. To run it, just enter the command:
+
+`docker pull difiton/filmorate:latest`
+
 ## Rest service layer
 
 #### [Link to API swagger-ui documentation and available endpoints](http://localhost:8080/swagger-ui/index.html)
