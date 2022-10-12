@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.entity.UserFilmMark;
 import ru.yandex.practicum.filmorate.repository.UserFilmMarkRepository;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
@@ -21,8 +23,7 @@ import java.util.Optional;
 public class UserFilmMarkRepositoryJdbcImpl implements UserFilmMarkRepository {
     private final JdbcOperations jdbcOperations;
     private final UserFilmMarkMapper userFilmMarkMapper;
-    private final NamedParameterJdbcOperations namedJdbcTemplate;
-    private final String SQL_INSERT = "INSERT INTO users_films_marks (user_id, film_id, mark) VALUES (?, ?, ?)";
+    private final String SQL_INSERT_ALL_FIELDS = "INSERT INTO users_films_marks (user_id, film_id, mark) VALUES (?, ?, ?)";
     private final String SQL_UPDATE_ALL_FIELDS = "UPDATE users_films_marks SET user_id = ?, film_id = ?, mark = ? WHERE id = ?";
     private final String SQL_DELETE_BY_ID = "DELETE FROM users_films_marks WHERE id = ?";
     private final String SQL_SELECT_ALL = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login, " +
@@ -47,7 +48,7 @@ public class UserFilmMarkRepositoryJdbcImpl implements UserFilmMarkRepository {
     public UserFilmMark save(UserFilmMark userFilmMark) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         this.jdbcOperations.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT_ALL_FIELDS, Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, userFilmMark.getUser().getId());
             ps.setLong(2, userFilmMark.getFilm().getId());
             ps.setInt(3, userFilmMark.getMark());
@@ -83,7 +84,17 @@ public class UserFilmMarkRepositoryJdbcImpl implements UserFilmMarkRepository {
     }
 
     @Override
-    public int[] saveAll(List<UserFilmMark> t) {
-        return new int[0];
+    public int[] saveAll(List<UserFilmMark> userFilmMarks) {
+        return this.jdbcOperations.batchUpdate(SQL_INSERT_ALL_FIELDS,
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                        preparedStatement.setLong(1, userFilmMarks.get(i).getUser().getId());
+                        preparedStatement.setLong(2, userFilmMarks.get(i).getFilm().getId());
+                        preparedStatement.setInt(3, userFilmMarks.get(i).getMark());
+                    }
+                    public int getBatchSize() {
+                        return userFilmMarks.size();
+                    }
+                });
     }
 }

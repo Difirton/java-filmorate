@@ -84,7 +84,6 @@ class UserFilmMarkRepositoryJdbcImplTest {
                 .build();
     }
 
-
     @Test
     @DisplayName("Test find mark of film by user and film ids in UserFilmMarkRepository")
     void testFindByUserIdAndFilmId() {
@@ -141,16 +140,22 @@ class UserFilmMarkRepositoryJdbcImplTest {
     }
 
     @Test
+    @DisplayName("Test find director by id in UserFilmMarkRepository")
     void testFindById() {
         userFilmMarkRepository.save(user1Film2Mark8);
         userFilmMarkRepository.save(user1Film1Mark5);
-        userFilmMarkRepository.save(user1Film1Mark5);
+        userFilmMarkRepository.save(user2Film1Mark4);
         assertEquals(user1, userFilmMarkRepository.findById(1L).get().getUser());
         assertEquals(film1, userFilmMarkRepository.findById(2L).get().getFilm());
-        assertEquals(5, userFilmMarkRepository.findById(3L).get().getMark());
+        assertEquals(4, userFilmMarkRepository.findById(3L).get().getMark());
     }
 
     @Test
-    void saveAll() {
+    @DisplayName("Test save List directors in UserFilmMarkRepository")
+    void testSaveAll() {
+        userFilmMarkRepository.saveAll(List.of(user1Film2Mark8, user1Film1Mark5, user2Film1Mark4));
+        assertEquals(user1, userFilmMarkRepository.findById(1L).get().getUser());
+        assertEquals(film1, userFilmMarkRepository.findById(2L).get().getFilm());
+        assertEquals(4, userFilmMarkRepository.findById(3L).get().getMark());
     }
 }
