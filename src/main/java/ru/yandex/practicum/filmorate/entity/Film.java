@@ -45,7 +45,7 @@ public class Film {
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
-    private List<User> usersLikes = new ArrayList<>();
+    private List<UserFilmMark> usersMarks = new ArrayList<>();
 
     private List<Genre> genres = new ArrayList<>();
 
@@ -55,16 +55,14 @@ public class Film {
         return new FilmBuilder();
     }
 
-    public void addUserLike(User user) {
-        this.rate++;
-        usersLikes.add(user);
-        user.getLikesFilms().add(this);
+    public void addUserMark(UserFilmMark userFilmMark) {
+        usersMarks.add(userFilmMark);
+        userFilmMark.getUser().getMarksFilms().add(userFilmMark);
     }
 
-    public void removeUserLike(User user) {
-        this.rate--;
-        usersLikes.remove(user);
-        user.getLikesFilms().remove(this);
+    public void removeUserMark(UserFilmMark userFilmMark) {
+        usersMarks.remove(userFilmMark);
+        userFilmMark.getUser().getMarksFilms().remove(userFilmMark);
     }
 
     public static class FilmBuilder {
@@ -88,7 +86,7 @@ public class Film {
         @NotNull
         private RatingMPA ratingMPA;
 
-        private List<User> usersLikes = new ArrayList<>();
+        private List<UserFilmMark> usersMarks = new ArrayList<>();
 
         private List<Genre> genres = new ArrayList<>();
 
@@ -131,8 +129,8 @@ public class Film {
             return this;
         }
 
-        public FilmBuilder usersLikes(List<User> usersLikes) {
-            this.usersLikes = usersLikes;
+        public FilmBuilder usersMarks(List<UserFilmMark> usersMarks) {
+            this.usersMarks = usersMarks;
             return this;
         }
 
@@ -147,7 +145,7 @@ public class Film {
         }
 
         public Film build() {
-            return new Film(id, name, description, releaseDate, duration, rate, ratingMPA, usersLikes, genres, directors);
+            return new Film(id, name, description, releaseDate, duration, rate, ratingMPA, usersMarks, genres, directors);
         }
     }
 }
