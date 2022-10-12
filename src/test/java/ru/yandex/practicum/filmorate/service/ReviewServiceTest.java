@@ -48,7 +48,7 @@ class ReviewServiceTest {
         when(mockUserRepository.findById(1L)).thenReturn(Optional.of(user));
 
         Film film = Film.builder().id(1L).name("Test film").description("Test Film Description")
-                .releaseDate(LocalDate.of(2000, 2, 22)).duration(180).rate(0)
+                .releaseDate(LocalDate.of(2000, 2, 22)).duration(180).rate(0.0)
                 .ratingMPA(RatingMPA.builder().id(1L).title("G").build()).build();
         when(mockFilmRepository.findById(1L)).thenReturn(Optional.of(film));
 

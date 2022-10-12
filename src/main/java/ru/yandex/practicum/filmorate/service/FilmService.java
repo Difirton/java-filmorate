@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.entity.constant.EventType;
 import ru.yandex.practicum.filmorate.entity.constant.Operation;
 import ru.yandex.practicum.filmorate.error.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.error.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.error.exception.MarkNotFoundException;
 import ru.yandex.practicum.filmorate.repository.*;
 
 import java.util.ArrayList;
@@ -32,10 +33,11 @@ public class FilmService {
     private final RecommendationRepository recommendationRepository;
     private final RatingMpaRepository ratingMpaRepository;
     private final EventService eventService;
+    private final UserFilmMarkRepository userFilmMarkRepository;
 
     @Transactional
     public Film createFilm(Film film) {
-        film.setRate(0);
+        film.setRate(0.0);
         return filmRepository.save(film);
     }
 
@@ -85,7 +87,7 @@ public class FilmService {
                     f.setGenres(newFilm.getGenres().stream()
                             .distinct()
                             .collect(Collectors.toList()));
-                    f.setUsersLikes(newFilm.getUsersLikes());
+                    f.setUsersMarks(newFilm.getUsersMarks());
                     f.setDirectors(newFilm.getDirectors());
                     return filmRepository.update(f);
                 })
@@ -104,25 +106,32 @@ public class FilmService {
     }
 
     @Transactional
-    public Film addLikeFilm(Long id, Long userId) {
+    public Film addFilmMark(Long id, Long userId, Integer mark) {
         Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
-        if (film.getUsersLikes().stream()
+        if (film.getUsersMarks().stream()
+                .map(UserFilmMark::getUser)
                 .map(User::getId)
                 .anyMatch(i -> i.equals(userId))) {
-            eventService.createEvent(userId, EventType.LIKE, Operation.ADD, id);
+            eventService.createEvent(userId, EventType.MARK, Operation.ADD, id);
             return film;
         }
-        film.addUserLike(userService.getUserById(userId));
-        eventService.createEvent(userId, EventType.LIKE, Operation.ADD, id);
+        film.addUserMark(UserFilmMark.builder()
+                .film(film)
+                .user(userService.getUserById(userId))
+                .mark(mark)
+                .build());
+        eventService.createEvent(userId, EventType.MARK, Operation.ADD, id);
         return filmRepository.update(film);
     }
 
     @Transactional
-    public void removeLikeFilm(Long id, Long userId) {
+    public void removeMarkFilm(Long id, Long userId) {
         Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException(id));
-        film.removeUserLike(userService.getUserById(userId));
-        filmRepository.update(film);
-        eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, id);
+        UserFilmMark mark = userFilmMarkRepository.findByUserIdAndFilmId(userId, id)
+                .orElseThrow(() -> new MarkNotFoundException(userId, id));
+        film.removeUserMark(mark);
+        userFilmMarkRepository.deleteById(mark.getId());
+        eventService.createEvent(userId, EventType.MARK, Operation.REMOVE, id);
     }
 
     public List<Film> getPopularFilms(Integer count) {
@@ -192,7 +201,7 @@ public class FilmService {
         }
         films = films.stream().distinct().collect(Collectors.toList());
         this.addGenresDirectorsInFilms(films);
-        films.sort((x, y) -> y.getRate() - x.getRate());
+        films.sort((x, y) -> Double.compare(y.getRate(), x.getRate()));
         return films;
     }
 

@@ -182,33 +182,33 @@ class FilmControllerTest {
                 .andExpect(status().is4xxClientError());
     }
 
-    @Test
-    @DisplayName("Request PUT /films/{id}/like/{userId}, expected host answer OK")
-    void testPutLikeFilm_OK_200() throws Exception {
-        film.addUserLike(User.builder().build());
-        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
-        mockMvc.perform(put("/films/1/like/1")
-                        .content(jsonMapper.writeValueAsString(film))
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.rate", is(1)))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Request DELETE /films/{id}/like/{userId}, expected host answer OK")
-    void testDeleteLikeFilm_OK_200() throws Exception {
-        User user = User.builder().build();
-        film.addUserLike(user);
-        film.removeUserLike(user);
-        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
-        mockMvc.perform(put("/films/1/like/1")
-                        .content(jsonMapper.writeValueAsString(film))
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.rate", is(0)))
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    @DisplayName("Request PUT /films/{id}/like/{userId}, expected host answer OK")
+//    void testPutLikeFilm_OK_200() throws Exception {
+//        film.addUserLike(User.builder().build());
+//        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
+//        mockMvc.perform(put("/films/1/like/1")
+//                        .content(jsonMapper.writeValueAsString(film))
+//                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$.id", is(1)))
+//                .andExpect(jsonPath("$.rate", is(1)))
+//                .andExpect(status().isOk());
+//    }
+//
+//    @Test
+//    @DisplayName("Request DELETE /films/{id}/like/{userId}, expected host answer OK")
+//    void testDeleteLikeFilm_OK_200() throws Exception {
+//        User user = User.builder().build();
+//        film.addUserLike(user);
+//        film.removeUserLike(user);
+//        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
+//        mockMvc.perform(put("/films/1/like/1")
+//                        .content(jsonMapper.writeValueAsString(film))
+//                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$.id", is(1)))
+//                .andExpect(jsonPath("$.rate", is(0)))
+//                .andExpect(status().isOk());
+//    }
 
     @Test
     @DisplayName("Request GET /director/{directorId}, expected host answer OK")

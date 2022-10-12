@@ -17,8 +17,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"usersLikes", "genres", "ratingMPA", "directors"})
-@ToString(exclude = {"usersLikes", "genres", "ratingMPA", "directors"})
+@EqualsAndHashCode(exclude = {"usersMarks", "genres", "ratingMPA", "directors"})
+@ToString(exclude = {"usersMarks", "genres", "ratingMPA", "directors"})
 public class Film {
     private Long id;
 
@@ -36,7 +36,7 @@ public class Film {
     private Integer duration;
 
     @PositiveOrZero
-    private Integer rate = 0;
+    private Double rate = 0.0;
 
     @NotNull
     @JsonProperty(value = "mpa")
@@ -81,7 +81,7 @@ public class Film {
         private Integer duration;
 
         @PositiveOrZero
-        private Integer rate = 0;
+        private Double rate = 0.0;
 
         @NotNull
         private RatingMPA ratingMPA;
@@ -119,7 +119,7 @@ public class Film {
             return this;
         }
 
-        public FilmBuilder rate(Integer rate) {
+        public FilmBuilder rate(Double rate) {
             this.rate = rate;
             return this;
         }

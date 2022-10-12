@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"email", "login"})
-@ToString(exclude = {"likesFilms", "friends"})
+@ToString(exclude = {"marksFilms", "friends"})
 public class User {
     private Long id;
 

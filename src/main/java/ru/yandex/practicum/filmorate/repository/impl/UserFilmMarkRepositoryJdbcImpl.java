@@ -1,0 +1,82 @@
+package ru.yandex.practicum.filmorate.repository.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.config.mapper.UserFilmMarkMapper;
+import ru.yandex.practicum.filmorate.entity.UserFilmMark;
+import ru.yandex.practicum.filmorate.repository.UserFilmMarkRepository;
+
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+public class UserFilmMarkRepositoryJdbcImpl implements UserFilmMarkRepository {
+    private final JdbcOperations jdbcOperations;
+    private final UserFilmMarkMapper userFilmMarkMapper;
+    private final NamedParameterJdbcOperations namedJdbcTemplate;
+    private final String SQL_INSERT = "INSERT INTO users_films_marks (user_id, film_id, mark) VALUES (?, ?, ?)";
+    private final String SQL_UPDATE_ALL_FIELDS = "UPDATE users_films_marks SET user_id = ?, film_id = ?, mark = ? WHERE id = ?";
+    private final String SQL_DELETE_BY_ID = "DELETE FROM users_films_marks WHERE id = ?";
+    private final String SQL_SELECT_ALL = "SELECT * FROM users_films_marks ORDER BY id";
+    private final String SQL_SELECT_BY_ID = "SELECT * FROM users_films_marks WHERE id = ?";
+    private static final String SQL_SELECT_USER_MARK = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login" +
+            "u.birthday, ufm.film_id, f.name, f.description, f.release_date, f.rate, ufm.mark  " +
+            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = users.id" +
+            "INNER JOIN films AS f ON ufm.film_id = films.id WHERE film_id = ? AND user_id = ?";
+
+    @Override
+    public Optional<UserFilmMark> findByUserIdAndFilmId(Long userId, Long filmId) {
+        return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_USER_MARK, userFilmMarkMapper, filmId, userId));
+    }
+
+    @Override
+    public UserFilmMark save(UserFilmMark userFilmMark) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        this.jdbcOperations.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, userFilmMark.getUser().getId());
+            ps.setLong(2, userFilmMark.getFilm().getId());
+            ps.setInt(3, userFilmMark.getMark());
+            return ps;
+        }, keyHolder);
+        userFilmMark.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        return userFilmMark;
+    }
+
+    @Override
+    public UserFilmMark update(UserFilmMark userFilmMark) {
+        jdbcOperations.update(SQL_UPDATE_ALL_FIELDS,
+                userFilmMark.getUser().getId(),
+                userFilmMark.getFilm().getId(),
+                userFilmMark.getMark());
+        return userFilmMark;
+    }
+
+    @Override
+    public int deleteById(Long id) {
+        return this.jdbcOperations.update(SQL_DELETE_BY_ID, id);
+    }
+
+    @Override
+    public List<UserFilmMark> findAll() {
+        return this.jdbcOperations.query(SQL_SELECT_ALL, userFilmMarkMapper);
+    }
+
+    @Override
+    public Optional<UserFilmMark> findById(Long id) {
+        return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_BY_ID, userFilmMarkMapper, id));
+    }
+
+    @Override
+    public int[] saveAll(List<UserFilmMark> t) {
+        return new int[0];
+    }
+}

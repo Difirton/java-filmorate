@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.entity.constant;
 
 public enum EventType {
-    LIKE,
+    MARK,
     REVIEW,
     FRIEND
 }

@@ -22,7 +22,7 @@ CREATE TABLE films
     description VARCHAR(200),
     duration INTEGER,
     name VARCHAR(255) NOT NULL,
-    rate INTEGER,
+    rate DOUBLE,
     release_date DATE,
     rating_mpa_id BIGINT,
         PRIMARY KEY (id)
@@ -49,11 +49,6 @@ CREATE TABLE users
     login VARCHAR(255) NOT NULL,
     name VARCHAR(255),
         PRIMARY KEY (id)
-);
-CREATE TABLE users_likes_films
-(
-    user_id BIGINT NOT NULL,
-    film_id BIGINT NOT NULL
 );
 CREATE TABLE rating_mpa
 (
@@ -117,8 +112,6 @@ ALTER TABLE film_genres ADD CONSTRAINT fk_film_genres_film FOREIGN KEY (film_id)
 ALTER TABLE film_genres ADD CONSTRAINT fk_film_genres_genre FOREIGN KEY (genre_id) REFERENCES genres ON DELETE CASCADE;
 ALTER TABLE user_friends ADD CONSTRAINT fk_friend_id FOREIGN KEY (friend_id) REFERENCES users ON DELETE CASCADE;
 ALTER TABLE user_friends ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE;
-ALTER TABLE users_likes_films ADD CONSTRAINT fk_film_like_id FOREIGN KEY (film_id) REFERENCES films ON DELETE CASCADE;
-ALTER TABLE users_likes_films ADD CONSTRAINT fk_user_like_id FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE;
 ALTER TABLE films ADD CONSTRAINT fk_rating_mpa_films FOREIGN KEY (rating_mpa_id) REFERENCES rating_mpa;
 ALTER TABLE directors_films ADD CONSTRAINT fk_director_id FOREIGN KEY (director_id) REFERENCES directors ON DELETE CASCADE;
 ALTER TABLE directors_films ADD CONSTRAINT fk_film_id FOREIGN KEY (film_id) REFERENCES films ON DELETE CASCADE;
