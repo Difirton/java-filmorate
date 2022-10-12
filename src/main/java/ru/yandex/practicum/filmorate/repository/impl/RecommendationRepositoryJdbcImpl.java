@@ -37,12 +37,12 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
             .add("LIMIT ?2")
             .toString();
 
-    private final String SQL_SELECT_MARKS_DIFFS =
+    private static final String SQL_SELECT_MARKS_DIFFS =
             "SELECT f1.film_id AS id1, f2.film_id AS id2, f1.mark - f2.mark AS diff " +
             "FROM users_films_marks AS f1 " +
             "INNER JOIN users_films_marks AS f2 ON f1.user_id = f2.user_id";
 
-    private final String SQL_ALL_FILMS_RATED_WITH_USER_MARKS =
+    private static final String SQL_ALL_FILMS_RATED_WITH_USER_MARKS =
             "WITH all_films_rated AS (SELECT DISTINCT film_id FROM users_films_marks), " +
                     "user_marks AS (SELECT film_id, mark FROM users_films_marks WHERE user_id = ?) " +
                     "SELECT all_films_rated.film_id, user_marks.mark " +
@@ -51,7 +51,6 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
 
     @Override
     public List<Long> findRecommendationsByUser(Long userId, int count) {
-        //return this.recommendationsBasedOnLikes(userId, count);
         return this.recommendationsBasedOnMarks(userId, count);
     }
 
@@ -60,18 +59,29 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
         return this.findRecommendationsByUser(userId, DEFAULT_RECOMMENDATIONS_COUNT);
     }
 
-    private List<Long> recommendationsBasedOnLikes(Long userId, int count) {
-        return jdbcOperations.queryForList(SQL_RECOMMENDATIONS_ON_LIKES, Long.class, userId, count);
-    }
-
     private List<Long> recommendationsBasedOnMarks(Long userId, int count) {
         Map<Long, Map<Long, Double>> filmsMarkDiff = new HashMap<>();
         Map<Long, Map<Long, Integer>> filmsMarkWeight = new HashMap<>();
 
         SqlRowSet rs = jdbcOperations.queryForRowSet(SQL_SELECT_MARKS_DIFFS);
-        System.out.println(SQL_SELECT_MARKS_DIFFS);
+        this.collectDifferenceAndWeightMatrices(rs, filmsMarkDiff, filmsMarkWeight);
+        this.normalizeDifferenceMatrix(filmsMarkDiff, filmsMarkWeight);
 
-        // collect difference and weight matrices
+        Map<Long, Integer> filmsRatedByUser = new HashMap<>();
+        Map<Long, Double> filmsNotRatedByUser = new HashMap<>();
+
+        this.collectUsersMarks(userId, filmsRatedByUser, filmsNotRatedByUser);
+        this.predictFilmMarks(filmsRatedByUser, filmsMarkDiff, filmsNotRatedByUser, filmsMarkWeight);
+        return filmsNotRatedByUser.entrySet()
+                                  .stream()
+                                  .filter(e -> e.getValue() > 5.0)
+                                  .sorted((e1, e2) -> (int) (e1.getValue() - e2.getValue()))
+                                  .map(Map.Entry::getKey)
+                                  .collect(Collectors.toList());
+    }
+
+    private void collectDifferenceAndWeightMatrices(SqlRowSet rs, Map<Long, Map<Long, Double>> filmsMarkDiff,
+                                                    Map<Long, Map<Long, Integer>> filmsMarkWeight ) {
         while (rs.next()) {
             long film1Id = rs.getLong("ID1");
             long film2Id = rs.getLong("ID2");
@@ -89,8 +99,10 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
                     film2Id,
                     filmsMarkWeight.get(film1Id).getOrDefault(film2Id, 0) + 1);
         }
+    }
 
-        // normalize difference matrix
+    private void normalizeDifferenceMatrix(Map<Long, Map<Long, Double>> filmsMarkDiff,
+                                           Map<Long, Map<Long, Integer>> filmsMarkWeight ) {
         for (Long film1Id : filmsMarkDiff.keySet()) {
             for (Long film2Id : filmsMarkDiff.get(film1Id).keySet()) {
                 double oldValue = filmsMarkDiff.get(film1Id).get(film2Id);
@@ -98,12 +110,11 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
                 filmsMarkDiff.get(film1Id).put(film2Id, oldValue / marksCount);
             }
         }
+    }
 
-        Map<Long, Integer> filmsRatedByUser = new HashMap<>();
-        Map<Long, Double> filmsNotRatedByUser = new HashMap<>();
-
-        // collect users marks
-        rs = jdbcOperations.queryForRowSet(SQL_ALL_FILMS_RATED_WITH_USER_MARKS, userId);
+    private void collectUsersMarks(Long userId, Map<Long, Integer> filmsRatedByUser,
+                                   Map<Long, Double> filmsNotRatedByUser) {
+        SqlRowSet rs = jdbcOperations.queryForRowSet(SQL_ALL_FILMS_RATED_WITH_USER_MARKS, userId);
         while (rs.next()) {
             Long filmId = rs.getLong("FILM_ID");
             int filmMark = rs.getInt("MARK");
@@ -113,8 +124,10 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
                 filmsRatedByUser.put(filmId, filmMark);
             }
         }
+    }
 
-        // predict film marks
+    private void predictFilmMarks(Map<Long, Integer> filmsRatedByUser, Map<Long, Map<Long, Double>> filmsMarkDiff,
+                                  Map<Long, Double> filmsNotRatedByUser, Map<Long, Map<Long, Integer>> filmsMarkWeight) {
         for (Long filmId : filmsNotRatedByUser.keySet()) {
             long rowMark = 0;
             long totalWeight = 0;
@@ -124,15 +137,13 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
                 rowMark += (markEntry.getValue() + filmsMarkDiff.get(filmId).get(ratedFilmId)) * ratedFilmWeight;
                 totalWeight += ratedFilmWeight;
             }
-            filmsNotRatedByUser.put(filmId, (double) rowMark / (double) totalWeight);
+            double castTotalWeight = totalWeight;
+            if (castTotalWeight == 0) {
+                filmsNotRatedByUser.put(filmId, rowMark / Double.MIN_VALUE);
+            } else {
+                filmsNotRatedByUser.put(filmId, (double) rowMark / (double) totalWeight);
+            }
         }
-
-        return filmsNotRatedByUser.entrySet()
-                                  .stream()
-                                  .filter(e -> e.getValue() > 5.0)
-                                  .sorted((e1, e2) -> (int) (e1.getValue() - e2.getValue()))
-                                  .map(Map.Entry::getKey)
-                                  .collect(Collectors.toList());
     }
 }
 
