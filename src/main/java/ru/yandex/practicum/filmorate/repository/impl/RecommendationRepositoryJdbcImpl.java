@@ -1,24 +1,11 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.config.mapper.UserFilmMarkMapper;
-import ru.yandex.practicum.filmorate.entity.Film;
-import ru.yandex.practicum.filmorate.entity.Genre;
-import ru.yandex.practicum.filmorate.entity.User;
-import ru.yandex.practicum.filmorate.entity.UserFilmMark;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.RecommendationRepository;
-import ru.yandex.practicum.filmorate.repository.UserFilmMarkRepository;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
-import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +16,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RecommendationRepositoryJdbcImpl implements RecommendationRepository {
     private final JdbcOperations jdbcOperations;
-    private final FilmRepository filmRepository;
-    private final UserFilmMarkMapper userFilmMarkMapper;
-    private final UserFilmMarkRepository userFilmMarkRepository;
-    private final UserRepository userRepository;
-    private final UserService userService;
 
     private static final String SQL_RECOMMENDATIONS_ON_LIKES = new StringJoiner(" ")
             .add("WITH COLIKERS AS (")
@@ -55,118 +37,102 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
             .add("LIMIT ?2")
             .toString();
 
-    private final String SQL_SELECT_ALL_MARKS = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login, " +
-            "u.birthday, ufm.film_id, f.name filmname, f.description, f.release_date, f.rate, ufm.mark  " +
-            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = u.id " +
-            "INNER JOIN films AS f ON ufm.film_id = f.id";
+    private final String SQL_SELECT_MARKS_DIFFS =
+            "SELECT f1.film_id AS id1, f2.film_id AS id2, f1.mark - f2.mark AS diff " +
+            "FROM users_films_marks AS f1 " +
+            "INNER JOIN users_films_marks AS f2 ON f1.user_id = f2.user_id";
+
+    private final String SQL_ALL_FILMS_RATED_WITH_USER_MARKS =
+            "WITH all_films_rated AS (SELECT DISTINCT film_id FROM users_films_marks), " +
+                    "user_marks AS (SELECT film_id, mark FROM users_films_marks WHERE user_id = ?) " +
+                    "SELECT all_films_rated.film_id, user_marks.mark " +
+                    "FROM all_films_rated " +
+                    "LEFT JOIN user_marks ON all_films_rated.film_id = user_marks.film_id";
 
     @Override
-    public List<Long> findRecommendationsByUser(Long userID, int count) {
-        //return this.recommendationsBasedOnLikes(userID, count);
-        return this.recommendationsBasedOnMarks(userID, count);
+    public List<Long> findRecommendationsByUser(Long userId, int count) {
+        //return this.recommendationsBasedOnLikes(userId, count);
+        return this.recommendationsBasedOnMarks(userId, count);
     }
 
     @Override
-    public List<Long> findRecommendationsByUser(Long userID) {
-        return this.findRecommendationsByUser(userID, DEFAULT_RECOMMENDATIONS_COUNT);
+    public List<Long> findRecommendationsByUser(Long userId) {
+        return this.findRecommendationsByUser(userId, DEFAULT_RECOMMENDATIONS_COUNT);
     }
 
-    private List<Long> recommendationsBasedOnLikes(Long userID, int count) {
-        return jdbcOperations.queryForList(SQL_RECOMMENDATIONS_ON_LIKES, Long.class, userID, count);
+    private List<Long> recommendationsBasedOnLikes(Long userId, int count) {
+        return jdbcOperations.queryForList(SQL_RECOMMENDATIONS_ON_LIKES, Long.class, userId, count);
     }
 
-    private List<Long> recommendationsBasedOnMarks(Long userID, int count) {
-        Map<User, Map<Film, Integer>> data = this.getData();
-        Map<Film, Map<Film, Double>> diff = new HashMap<>();
-        Map<Film, Map<Film, Integer>> freq = new HashMap<>();
-        HashMap<Film, Double> clean = new HashMap<>();
+    private List<Long> recommendationsBasedOnMarks(Long userId, int count) {
+        Map<Long, Map<Long, Double>> filmsMarkDiff = new HashMap<>();
+        Map<Long, Map<Long, Integer>> filmsMarkWeight = new HashMap<>();
 
-        for (Map<Film, Integer> userMarks : data.values()) {
-            for (Map.Entry<Film, Integer> filmMark : userMarks.entrySet()) {
-                Film film = filmMark.getKey();
-                if (!diff.containsKey(film)) {
-                    diff.put(film, new HashMap<>());
-                    freq.put(film, new HashMap<>());
-                }
+        SqlRowSet rs = jdbcOperations.queryForRowSet(SQL_SELECT_MARKS_DIFFS);
+        System.out.println(SQL_SELECT_MARKS_DIFFS);
 
-                for (Map.Entry<Film, Integer> otherFilmMark : userMarks.entrySet()) {
-                    Film otherFilm = otherFilmMark.getKey();
-
-                    freq.get(film).put(
-                            otherFilm,
-                            freq.get(film).getOrDefault(otherFilm, 0) + 1);
-                    diff.get(film).put(
-                            otherFilm,
-                            diff.get(film).getOrDefault(otherFilm, 0.0) + filmMark.getValue() - otherFilmMark.getValue());
-                }
-            }
-        }
-
-        for (Film film : diff.keySet()) {
-            for (Film otherFilm : diff.get(film).keySet()) {
-                double oldValue = diff.get(film).get(otherFilm);
-                int marksCount = freq.get(film).get(otherFilm);
-                diff.get(film).put(otherFilm, oldValue / marksCount);
-            }
-        }
-
-        Map<Film, Integer> userMarks = data.get(userService.getUserById(userID));
-
-        Map<Film, Double> uPred = new HashMap<>();
-        Map<Film, Double> uFreq = new HashMap<>();
-
-        for (Film dataFilm : userMarks.keySet()) {
-            for (Film diffFilm : diff.keySet()) {
-                double predictedValue =
-                        diff.get(diffFilm).get(dataFilm) + userMarks.get(dataFilm).doubleValue();
-                double finalValue = predictedValue * freq.get(diffFilm).get(dataFilm);
-                uPred.put(diffFilm, uPred.getOrDefault(diffFilm, 0.0) + finalValue);
-                uFreq.put(diffFilm, uFreq.getOrDefault(diffFilm, 0.0) + freq.get(diffFilm).get(dataFilm));
-            }
-        }
-
-        for (Film film : uPred.keySet()) {
-            if (uFreq.get(film) > 0) {
-                clean.put(film, uPred.get(film) / uFreq.get(film).intValue());
-            }
-        }
-
-        for (Film film : filmRepository.findAll()) {
-            if (userMarks.containsKey(film)) {
-                clean.put(film, userMarks.get(film).doubleValue());
-            } else if (!clean.containsKey(film)) {
-                clean.put(film, -1.0);
-            }
-        }
-
-        return clean.entrySet().stream()
-                    .filter(e->e.getValue() > 5.0)
-                    .sorted((e1, e2) -> (int) (e1.getValue() - e2.getValue()))
-                    .map(Map.Entry::getKey)
-                    .map(Film::getId)
-                    .collect(Collectors.toList());
-    }
-
-    private Map<User, Map<Film, Integer>> getData() {
-        Map<User, Map<Film, Integer>> data = new HashMap<>();
-
-        SqlRowSet rs = jdbcOperations.queryForRowSet(SQL_SELECT_ALL_MARKS);
+        // collect difference and weight matrices
         while (rs.next()) {
-            User user = User.builder()
-                            .login(rs.getString("login"))
-                            .email(rs.getString("email"))
-                            .build();
-            Film film = Film.builder()
-                    .name(rs.getString("FILMNAME"))
-                    .description(rs.getString("description"))
-                    .rate(rs.getDouble("rate"))
-                    .build();
+            long film1Id = rs.getLong("ID1");
+            long film2Id = rs.getLong("ID2");
+            int dif1to2 = rs.getInt("DIFF");
 
-            data.putIfAbsent(user, new HashMap<>());
-            data.get(user).put(film, rs.getInt("mark"));
+            if (!filmsMarkDiff.containsKey(film1Id)) {
+                filmsMarkDiff.put(film1Id, new HashMap<>());
+                filmsMarkWeight.put(film1Id, new HashMap<>());
+            }
+
+            filmsMarkDiff.get(film1Id).put(
+                    film2Id,
+                    filmsMarkDiff.get(film1Id).getOrDefault(film2Id, 0.0) + dif1to2);
+            filmsMarkWeight.get(film1Id).put(
+                    film2Id,
+                    filmsMarkWeight.get(film1Id).getOrDefault(film2Id, 0) + 1);
         }
 
-        return data;
+        // normalize difference matrix
+        for (Long film1Id : filmsMarkDiff.keySet()) {
+            for (Long film2Id : filmsMarkDiff.get(film1Id).keySet()) {
+                double oldValue = filmsMarkDiff.get(film1Id).get(film2Id);
+                int marksCount = filmsMarkWeight.get(film1Id).get(film2Id);
+                filmsMarkDiff.get(film1Id).put(film2Id, oldValue / marksCount);
+            }
+        }
+
+        Map<Long, Integer> filmsRatedByUser = new HashMap<>();
+        Map<Long, Double> filmsNotRatedByUser = new HashMap<>();
+
+        // collect users marks
+        rs = jdbcOperations.queryForRowSet(SQL_ALL_FILMS_RATED_WITH_USER_MARKS, userId);
+        while (rs.next()) {
+            Long filmId = rs.getLong("FILM_ID");
+            int filmMark = rs.getInt("MARK");
+            if (filmMark == 0) {
+                filmsNotRatedByUser.put(filmId, (double) filmMark);
+            } else {
+                filmsRatedByUser.put(filmId, filmMark);
+            }
+        }
+
+        // predict film marks
+        for (Long filmId : filmsNotRatedByUser.keySet()) {
+            long rowMark = 0;
+            long totalWeight = 0;
+            for (Map.Entry<Long, Integer> markEntry : filmsRatedByUser.entrySet()) {
+                long ratedFilmId = markEntry.getKey();
+                int ratedFilmWeight = filmsMarkWeight.get(filmId).get(ratedFilmId);
+                rowMark += (markEntry.getValue() + filmsMarkDiff.get(filmId).get(ratedFilmId)) * ratedFilmWeight;
+                totalWeight += ratedFilmWeight;
+            }
+            filmsNotRatedByUser.put(filmId, (double) rowMark / (double) totalWeight);
+        }
+
+        return filmsNotRatedByUser.entrySet()
+                                  .stream()
+                                  .filter(e -> e.getValue() > 5.0)
+                                  .sorted((e1, e2) -> (int) (e1.getValue() - e2.getValue()))
+                                  .map(Map.Entry::getKey)
+                                  .collect(Collectors.toList());
     }
 }
 
