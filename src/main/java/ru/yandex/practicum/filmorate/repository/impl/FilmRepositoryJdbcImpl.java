@@ -46,10 +46,10 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String SQL_INSERT_USERS_MARKS = "INSERT INTO users_films_marks (film_id, user_id, mark) VALUES (?, ?, ?)";
     private static final String SQL_DELETE_USERS_MARKS = "DELETE FROM users_films_marks " +
             "WHERE film_id = ? AND user_id = ? AND mark = ?";
-    private static final String SQL_SELECT_ALL_USERS_MARKS = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login" +
-            "u.birthday, ufm.film_id, f.name, f.description, f.release_date, f.rate, ufm.mark  FROM users_films_marks AS ufm" +
-            "INNER JOIN users AS u ON ufm.user_id = users.id" +
-            "INNER JOIN films AS f ON ufm.film_id = films.id WHERE film_id = ?";
+    private static final String SQL_SELECT_ALL_USERS_MARKS = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login, " +
+            "u.birthday, ufm.film_id, f.name, f.description, f.duration, f.release_date, f.rate, ufm.mark  " +
+            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = u.id " +
+            "INNER JOIN films AS f ON ufm.film_id = f.id WHERE film_id = ?";
     private static final String SQL_INSERT_DIRECTORS_FILMS = "INSERT INTO directors_films (film_id, director_id) " +
             "VALUES (?,?)";
     private static final String SQL_DELETE_DIRECTORS_FILMS = "DELETE FROM directors_films " +
@@ -64,9 +64,9 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
     private static final String SQL_SELECT_COMMON_FILMS = "SELECT * FROM films LEFT JOIN rating_mpa mpa " +
             "ON films.rating_mpa_id = mpa.id WHERE films.id IN " +
-            "(SELECT user_likes.film_id FROM users_likes_films user_likes INNER JOIN users_likes_films friend_likes " +
-            "ON user_likes.film_id = friend_likes.film_id WHERE user_likes.user_id = ? AND friend_likes.user_id = ?) " +
-            "ORDER BY rate DESC";
+            "(SELECT user_likes.film_id FROM users_films_marks user_likes INNER JOIN users_films_marks friend_likes " +
+            "ON user_likes.film_id = friend_likes.film_id WHERE user_likes.user_id = ? AND friend_likes.user_id = ? " +
+            "AND user_likes.mark > 5 AND friend_likes.mark > 5) ORDER BY rate DESC";
     private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE = "SELECT films.* FROM films " +
             "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
             "WHERE fg.genre_id = ?1 ORDER BY rate DESC LIMIT ?2";
