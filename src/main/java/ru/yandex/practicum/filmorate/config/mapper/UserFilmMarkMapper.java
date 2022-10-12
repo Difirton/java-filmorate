@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.config.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.entity.Film;
-import ru.yandex.practicum.filmorate.entity.Review;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.entity.UserFilmMark;
 
@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
+@Component
 public class UserFilmMarkMapper implements RowMapper<UserFilmMark> {
     @Override
     public UserFilmMark mapRow(ResultSet rs, int rowNum) throws SQLException {

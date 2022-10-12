@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS users_rates_reviews;
+DROP TABLE IF EXISTS users_films_marks;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS directors_films;
 DROP TABLE IF EXISTS film_genres;
