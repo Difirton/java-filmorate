@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.entity.UserFilmMark;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -75,10 +76,30 @@ class FilmRepositoryTest {
 //    @Test
 //    @DisplayName("Test find 2 popular films")
 //    void testFindPopularFilmsWhenLikesHaveTwoFilms() {
-//        film1.addUserLike(user1);
-//        film2.addUserLike(user2);
-//        film2.addUserLike(user3);
-//        film2.addUserLike(user1);
+//        film1.addUserMark(UserFilmMark.builder()
+//                .id(1L)
+//                .user(user1)
+//                .film(film1)
+//                .mark(5)
+//                .build());
+//        film2.addUserMark(UserFilmMark.builder()
+//                .id(1L)
+//                .user(user2)
+//                .film(film2)
+//                .mark(8)
+//                .build());
+//        film2.addUserMark(UserFilmMark.builder()
+//                .id(1L)
+//                .user(user3)
+//                .film(film2)
+//                .mark(7)
+//                .build());
+//        film2.addUserMark(UserFilmMark.builder()
+//                .id(1L)
+//                .user(user1)
+//                .film(film2)
+//                .mark(6)
+//                .build());
 //        filmRepository.updateAll(List.of(film1, film2, film3));
 //        userRepository.updateAll(List.of(user1, user2, user3, user4));
 //        List<Film> popularFilms = filmRepository.findPopularFilmsByRate(2);

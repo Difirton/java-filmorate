@@ -10377,3 +10377,23 @@ java.sql.SQLClientInfoException: Client info name 'ApplicationName' not supporte
 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 	at java.base/java.lang.Thread.run(Thread.java:833)
+2022-10-12 21:37:37 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "USERS_LIKES_FILMS" не найдена
+Table "USERS_LIKES_FILMS" not found; SQL statement:
+WITH COLIKERS AS ( SELECT USERS_LIKES_FILMS.user_id, COLIKES.user_id AS coliker_id, COUNT(USERS_LIKES_FILMS.film_id) AS coliker_weight FROM USERS_LIKES_FILMS LEFT JOIN USERS_LIKES_FILMS COLIKES ON USERS_LIKES_FILMS.film_id = COLIKES.film_id AND USERS_LIKES_FILMS.user_id = ?1 AND COLIKES.user_id <> ?1 GROUP BY USERS_LIKES_FILMS.user_id, coliker_id) SELECT film_id FROM USERS_LIKES_FILMS JOIN COLIKERS ON USERS_LIKES_FILMS.user_id = COLIKERS.coliker_id AND COLIKERS.user_id = ?1 AND USERS_LIKES_FILMS.film_id NOT IN (SELECT film_id FROM USERS_LIKES_FILMS WHERE user_id = ?1) GROUP BY film_id ORDER BY SUM(COLIKERS.coliker_weight) DESC LIMIT ?2 [42102-214]
+2022-10-12 21:37:37 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "USERS_LIKES_FILMS" не найдена
+Table "USERS_LIKES_FILMS" not found; SQL statement:
+WITH COLIKERS AS ( SELECT USERS_LIKES_FILMS.user_id, COLIKES.user_id AS coliker_id, COUNT(USERS_LIKES_FILMS.film_id) AS coliker_weight FROM USERS_LIKES_FILMS LEFT JOIN USERS_LIKES_FILMS COLIKES ON USERS_LIKES_FILMS.film_id = COLIKES.film_id AND USERS_LIKES_FILMS.user_id = ?1 AND COLIKES.user_id <> ?1 GROUP BY USERS_LIKES_FILMS.user_id, coliker_id) SELECT film_id FROM USERS_LIKES_FILMS JOIN COLIKERS ON USERS_LIKES_FILMS.user_id = COLIKERS.coliker_id AND COLIKERS.user_id = ?1 AND USERS_LIKES_FILMS.film_id NOT IN (SELECT film_id FROM USERS_LIKES_FILMS WHERE user_id = ?1) GROUP BY film_id ORDER BY SUM(COLIKERS.coliker_weight) DESC LIMIT ?2 [42102-214]
+2022-10-12 21:37:37 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "USERS_LIKES_FILMS" не найдена
+Table "USERS_LIKES_FILMS" not found; SQL statement:
+WITH COLIKERS AS ( SELECT USERS_LIKES_FILMS.user_id, COLIKES.user_id AS coliker_id, COUNT(USERS_LIKES_FILMS.film_id) AS coliker_weight FROM USERS_LIKES_FILMS LEFT JOIN USERS_LIKES_FILMS COLIKES ON USERS_LIKES_FILMS.film_id = COLIKES.film_id AND USERS_LIKES_FILMS.user_id = ?1 AND COLIKES.user_id <> ?1 GROUP BY USERS_LIKES_FILMS.user_id, coliker_id) SELECT film_id FROM USERS_LIKES_FILMS JOIN COLIKERS ON USERS_LIKES_FILMS.user_id = COLIKERS.coliker_id AND COLIKERS.user_id = ?1 AND USERS_LIKES_FILMS.film_id NOT IN (SELECT film_id FROM USERS_LIKES_FILMS WHERE user_id = ?1) GROUP BY film_id ORDER BY SUM(COLIKERS.coliker_weight) DESC LIMIT ?2 [42102-214]
+2022-10-12 21:37:38 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "USERS_LIKES_FILMS" не найдена
+Table "USERS_LIKES_FILMS" not found; SQL statement:
+WITH COLIKERS AS ( SELECT USERS_LIKES_FILMS.user_id, COLIKES.user_id AS coliker_id, COUNT(USERS_LIKES_FILMS.film_id) AS coliker_weight FROM USERS_LIKES_FILMS LEFT JOIN USERS_LIKES_FILMS COLIKES ON USERS_LIKES_FILMS.film_id = COLIKES.film_id AND USERS_LIKES_FILMS.user_id = ?1 AND COLIKES.user_id <> ?1 GROUP BY USERS_LIKES_FILMS.user_id, coliker_id) SELECT film_id FROM USERS_LIKES_FILMS JOIN COLIKERS ON USERS_LIKES_FILMS.user_id = COLIKERS.coliker_id AND COLIKERS.user_id = ?1 AND USERS_LIKES_FILMS.film_id NOT IN (SELECT film_id FROM USERS_LIKES_FILMS WHERE user_id = ?1) GROUP BY film_id ORDER BY SUM(COLIKERS.coliker_weight) DESC LIMIT ?2 [42102-214]
+2022-10-12 21:37:38 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "USERS_LIKES_FILMS" не найдена
+Table "USERS_LIKES_FILMS" not found; SQL statement:
+WITH COLIKERS AS ( SELECT USERS_LIKES_FILMS.user_id, COLIKES.user_id AS coliker_id, COUNT(USERS_LIKES_FILMS.film_id) AS coliker_weight FROM USERS_LIKES_FILMS LEFT JOIN USERS_LIKES_FILMS COLIKES ON USERS_LIKES_FILMS.film_id = COLIKES.film_id AND USERS_LIKES_FILMS.user_id = ?1 AND COLIKES.user_id <> ?1 GROUP BY USERS_LIKES_FILMS.user_id, coliker_id) SELECT film_id FROM USERS_LIKES_FILMS JOIN COLIKERS ON USERS_LIKES_FILMS.user_id = COLIKERS.coliker_id AND COLIKERS.user_id = ?1 AND USERS_LIKES_FILMS.film_id NOT IN (SELECT film_id FROM USERS_LIKES_FILMS WHERE user_id = ?1) GROUP BY film_id ORDER BY SUM(COLIKERS.coliker_weight) DESC LIMIT ?2 [42102-214]

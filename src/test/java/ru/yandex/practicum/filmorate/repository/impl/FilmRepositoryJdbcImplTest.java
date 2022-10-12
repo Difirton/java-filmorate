@@ -47,24 +47,24 @@ class FilmRepositoryJdbcImplTest {
         assertEquals(filmRepository.findById(1L).get(), film1);
     }
 
-//    @Test
-//    @DisplayName("Test update film in FilmRepository")
-//    void testUpdate() {
-//        filmRepository.save(film1);
-//        film1.setName("updated");
-//        film1.setDescription("updated");
-//        film1.setDuration(1000);
-//        film1.setRatingMPA(RatingMPA.builder().id(4L).build());
-//        film1.setRate(10);
-//        film1.setReleaseDate(LocalDate.of(2000, 1, 1));
-//        filmRepository.update(film1);
-//        assertEquals("updated", filmRepository.findById(1L).get().getName());
-//        assertEquals("updated", filmRepository.findById(1L).get().getDescription());
-//        assertEquals(1000, filmRepository.findById(1L).get().getDuration());
-//        assertEquals("R", filmRepository.findById(1L).get().getRatingMPA().getTitle());
-//        assertEquals(10, filmRepository.findById(1L).get().getRate());
-//        assertEquals(LocalDate.of(2000, 1, 1), filmRepository.findById(1L).get().getReleaseDate());
-//    }
+    @Test
+    @DisplayName("Test update film in FilmRepository")
+    void testUpdate() {
+        filmRepository.save(film1);
+        film1.setName("updated");
+        film1.setDescription("updated");
+        film1.setDuration(1000);
+        film1.setRatingMPA(RatingMPA.builder().id(4L).build());
+        film1.setRate(10.0);
+        film1.setReleaseDate(LocalDate.of(2000, 1, 1));
+        filmRepository.update(film1);
+        assertEquals("updated", filmRepository.findById(1L).get().getName());
+        assertEquals("updated", filmRepository.findById(1L).get().getDescription());
+        assertEquals(1000, filmRepository.findById(1L).get().getDuration());
+        assertEquals("R", filmRepository.findById(1L).get().getRatingMPA().getTitle());
+        assertEquals(10, filmRepository.findById(1L).get().getRate());
+        assertEquals(LocalDate.of(2000, 1, 1), filmRepository.findById(1L).get().getReleaseDate());
+    }
 
     @Test
     @DisplayName("Test delete by id film in FilmRepository")
@@ -92,29 +92,29 @@ class FilmRepositoryJdbcImplTest {
         filmRepository.saveAll(List.of(film1, film2, film3));
         assertEquals(film2, filmRepository.findById(2L).get());
     }
-//
-//    @Test
-//    @DisplayName("Test find popular films in FilmRepository")
-//    void testFindPopularFilmsByRate() {
-//        assertEquals(List.of(), filmRepository.findPopularFilmsByRate(10));
-//        film1.setRate(5);
-//        film2.setRate(3);
-//        film3.setRate(10);
-//        filmRepository.saveAll(List.of(film1, film2, film3));
-//        assertEquals(List.of(film3, film1, film2), filmRepository.findPopularFilmsByRate(10));
-//    }
 
-//    @Test
-//    @DisplayName("Test size of list find popular films in FilmRepository")
-//    void testFindPopularFilmsByRateAndSize() {
-//        assertEquals(List.of(), filmRepository.findPopularFilmsByRate(10));
-//        film1.setRate(3);
-//        film2.setRate(2);
-//        film3.setRate(1);
-//        filmRepository.saveAll(List.of(film1, film2, film3));
-//        assertEquals(List.of(film1, film2, film3), filmRepository.findPopularFilmsByRate(10));
-//        assertEquals(List.of(film1, film2), filmRepository.findPopularFilmsByRate(2));
-//    }
+    @Test
+    @DisplayName("Test find popular films in FilmRepository")
+    void testFindPopularFilmsByRate() {
+        assertEquals(List.of(), filmRepository.findPopularFilmsByRate(10));
+        film1.setRate(5.0);
+        film2.setRate(3.0);
+        film3.setRate(10.0);
+        filmRepository.saveAll(List.of(film1, film2, film3));
+        assertEquals(List.of(film3, film1, film2), filmRepository.findPopularFilmsByRate(10));
+    }
+
+    @Test
+    @DisplayName("Test size of list find popular films in FilmRepository")
+    void testFindPopularFilmsByRateAndSize() {
+        assertEquals(List.of(), filmRepository.findPopularFilmsByRate(10));
+        film1.setRate(3.0);
+        film2.setRate(2.0);
+        film3.setRate(1.0);
+        filmRepository.saveAll(List.of(film1, film2, film3));
+        assertEquals(List.of(film1, film2, film3), filmRepository.findPopularFilmsByRate(10));
+        assertEquals(List.of(film1, film2), filmRepository.findPopularFilmsByRate(2));
+    }
 
     @Test
     @DisplayName("Test save all list of films in FilmRepository")
@@ -123,20 +123,20 @@ class FilmRepositoryJdbcImplTest {
         assertEquals(List.of(film1, film2, film3), filmRepository.findAll());
     }
 
-//    @Test
-//    @DisplayName("Test update all list of films in FilmRepository")
-//    void testUpdateAll() {
-//        filmRepository.saveAll(List.of(film1, film2, film3));
-//        film1.setName("updated");
-//        film2.setDescription("updated");
-//        film3.setRate(11);
-//        film1.setDuration(1000);
-//        film3.setRatingMPA(RatingMPA.builder().id(4L).build());
-//        filmRepository.updateAll(List.of(film1, film2, film3));
-//        assertEquals(film1, filmRepository.findById(1L).get());
-//        assertEquals(film2, filmRepository.findById(2L).get());
-//        assertEquals(film3, filmRepository.findById(3L).get());
-//    }
+    @Test
+    @DisplayName("Test update all list of films in FilmRepository")
+    void testUpdateAll() {
+        filmRepository.saveAll(List.of(film1, film2, film3));
+        film1.setName("updated");
+        film2.setDescription("updated");
+        film3.setRate(11.0);
+        film1.setDuration(1000);
+        film3.setRatingMPA(RatingMPA.builder().id(4L).build());
+        filmRepository.updateAll(List.of(film1, film2, film3));
+        assertEquals(film1, filmRepository.findById(1L).get());
+        assertEquals(film2, filmRepository.findById(2L).get());
+        assertEquals(film3, filmRepository.findById(3L).get());
+    }
 
     @Test
     @Sql(scripts = {"classpath:schema.sql","classpath:sql_scripts/schema_saveFilmsWithDirector.sql"})

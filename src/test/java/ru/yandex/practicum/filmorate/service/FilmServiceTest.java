@@ -118,8 +118,8 @@ class FilmServiceTest {
 //                .email("test@mail.ru")
 //                .name("test").build());
 //        when(mockRepository.update(film)).thenReturn(film);
-//        Film updatedFilm = filmService.addLikeFilm(1L, 1L);
-//        assertEquals(5, updatedFilm.getRate());
+//        Film updatedFilm = filmService.addFilmMark(1L, 1L, 6);
+//        assertEquals(5.0, updatedFilm.getRate());
 //    }
 
     @Test
