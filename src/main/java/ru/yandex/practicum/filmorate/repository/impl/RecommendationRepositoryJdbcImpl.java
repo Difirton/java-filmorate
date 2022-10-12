@@ -44,6 +44,9 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
 
         SqlRowSet rs = jdbcOperations.queryForRowSet(SQL_SELECT_MARKS_DIFFS);
         this.collectDifferenceAndWeightMatrices(rs, filmsMarkDiff, filmsMarkWeight);
+        System.out.println(String.valueOf('-').repeat(10));
+        System.out.println(filmsMarkDiff);
+        System.out.println(filmsMarkWeight);
         this.normalizeDifferenceMatrix(filmsMarkDiff, filmsMarkWeight);
 
         Map<Long, Integer> filmsRatedByUser = new HashMap<>();
@@ -112,8 +115,8 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
             long totalWeight = 0;
             for (Map.Entry<Long, Integer> markEntry : filmsRatedByUser.entrySet()) {
                 long ratedFilmId = markEntry.getKey();
-                int ratedFilmWeight = filmsMarkWeight.get(filmId).get(ratedFilmId);
-                rowMark += (markEntry.getValue() + filmsMarkDiff.get(filmId).get(ratedFilmId)) * ratedFilmWeight;
+                int ratedFilmWeight = filmsMarkWeight.get(filmId).getOrDefault(ratedFilmId, 0);
+                rowMark += (markEntry.getValue() + filmsMarkDiff.get(filmId).getOrDefault(ratedFilmId, 0.0)) * ratedFilmWeight;
                 totalWeight += ratedFilmWeight;
             }
             double castTotalWeight = totalWeight;
