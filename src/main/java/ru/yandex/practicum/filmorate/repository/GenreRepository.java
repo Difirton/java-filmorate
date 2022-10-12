@@ -7,4 +7,6 @@ import java.util.List;
 public interface GenreRepository extends StandardCRUDRepository<Genre> {
 
     List<Genre> findGenresByFilmId(Long filmId);
+
+    List<Genre> findGenresByIds(List<Long> genresIds);
 }

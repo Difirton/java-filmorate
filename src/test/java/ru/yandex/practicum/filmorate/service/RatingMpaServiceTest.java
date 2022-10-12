@@ -47,13 +47,13 @@ class RatingMpaServiceTest {
     @DisplayName("Get all ratings MPA, expected ok")
     void testGetAllRatingsMpa() {
         when(mockRepository.findAll()).thenReturn(List.of(ratingMPA1, ratingMPA2, ratingMPA3));
-        assertEquals(ratingMpaService.getAllRatingsMpa(), List.of(ratingMPA1, ratingMPA2, ratingMPA3));
+        assertEquals(List.of(ratingMPA1, ratingMPA2, ratingMPA3), ratingMpaService.getAllRatingsMpa());
     }
 
     @Test
     @DisplayName("Get rating MPA by id, expected ok")
     void testGetRatingsMpaById() {
         when(mockRepository.findById(2L)).thenReturn(Optional.of(ratingMPA2));
-        assertEquals(ratingMpaService.getRatingsMpaById(2L), ratingMPA2);
+        assertEquals(ratingMPA2, ratingMpaService.getRatingsMpaById(2L));
     }
 }

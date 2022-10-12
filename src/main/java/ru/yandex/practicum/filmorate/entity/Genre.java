@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"title", "id"})
 @ToString(exclude = "films")
-@Builder
 public class Genre {
     private Long id;
 
@@ -20,6 +19,39 @@ public class Genre {
     @JsonProperty(value = "name")
     private String title;
 
-    @Builder.Default
     private List<Film> films = new ArrayList<>();
+
+    public static GenreBuilder builder() {
+        return new GenreBuilder();
+    }
+
+    public static class GenreBuilder {
+        private Long id;
+
+        @NotBlank
+        private String title;
+
+        private List<Film> films;
+
+        private GenreBuilder() { }
+
+        public GenreBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public GenreBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public GenreBuilder films(List<Film> films) {
+            this.films = films;
+            return this;
+        }
+
+        public Genre build() {
+            return new Genre(id, title, films);
+        }
+    }
 }

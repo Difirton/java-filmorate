@@ -1,28 +1,25 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.filmorate.entity.User;
-import ru.yandex.practicum.filmorate.entity.UserFriend;
-import ru.yandex.practicum.filmorate.error.UserNotFoundException;
+import ru.yandex.practicum.filmorate.entity.*;
+import ru.yandex.practicum.filmorate.entity.constant.EventType;
+import ru.yandex.practicum.filmorate.entity.constant.Operation;
+import ru.yandex.practicum.filmorate.error.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.repository.UserFriendRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
-import ru.yandex.practicum.filmorate.repository.impl.JdbcUserRepositoryImpl;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private UserRepository userRepository;
-    private UserFriendRepository userFriendRepository;
+    private final UserRepository userRepository;
+    private final UserFriendRepository userFriendRepository;
+    private final EventService eventService;
 
-    @Autowired
-    public UserService(UserRepository userRepository, UserFriendRepository userFriendRepository) {
-        this.userRepository = userRepository;
-        this.userFriendRepository = userFriendRepository;
-    }
-
+    @Transactional
     public User createUser(User user) {
         if (user.getName() == null || user.getName().equals("")) {
             user.setName(user.getLogin());
@@ -34,6 +31,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     public User updateUser(Long id, User newUser) {
         return userRepository.findById(id)
                 .map(u -> {
@@ -65,6 +63,7 @@ public class UserService {
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         userFriendRepository.save(user, friend);
         user.addFriend(friend);
+        eventService.createEvent(userId, EventType.FRIEND, Operation.ADD, friendId);
         return user;
     }
 
@@ -73,9 +72,11 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new UserNotFoundException(friendId));
         userFriendRepository.delete(UserFriend.builder().user(user).friend(friend).build());
+        eventService.createEvent(userId, EventType.FRIEND, Operation.REMOVE, friendId);
     }
 
     public List<User> getUserFriends(Long id) {
+        userRepository.findById(id).orElseThrow(() ->new UserNotFoundException(id));
         return userRepository.findAllFriendsUser(id);
     }
 

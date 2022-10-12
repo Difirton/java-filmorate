@@ -69,7 +69,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request POST /users, expected host answer CREATED")
-    public void testPostNewUser_CREATED_201() throws Exception {
+    void testPostNewUser_CREATED_201() throws Exception {
         User newUser = User.builder()
                 .id(2L)
                 .email("222mail@mail.ru")
@@ -93,7 +93,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request GET /users, expected host answer OK")
-    public void testFindAllUsers_OK_200() throws Exception {
+    void testFindAllUsers_OK_200() throws Exception {
         List<User> users = Arrays.asList(
                 User.builder()
                         .id(1L)
@@ -130,7 +130,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request PUT /users/1/friends/2, expected host answer OK")
-    public void testAddUserFriend_OK_200() throws Exception {
+    void testAddUserFriend_OK_200() throws Exception {
         User friend = User.builder()
                 .id(2L)
                 .email("mail@mail.ru")
@@ -148,7 +148,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request PUT /users/1, expected host answer OK")
-    public void testUpdateUser_OK_200() throws Exception {
+    void testUpdateUser_OK_200() throws Exception {
         User updateUser = User.builder()
                 .id(1L)
                 .email("update@yandex.com")
@@ -172,7 +172,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request DELETE /users/1, expected host answer OK")
-    public void testDeleteUser_OK_200() throws Exception {
+    void testDeleteUser_OK_200() throws Exception {
         doNothing().when(mockService).removeUserById(1L);
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
@@ -181,7 +181,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request DELETE /users/1/friends/2, expected host answer OK")
-    public void testDeleteUserFriend_OK_200() throws Exception {
+    void testDeleteUserFriend_OK_200() throws Exception {
         User friend = User.builder()
                 .id(2L)
                 .email("mail@mail.ru")
@@ -197,7 +197,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Request GET /users/{id}/friends, expected host answer OK")
-    public void testGetUserFriends_OK_200() throws Exception {
+    void testGetUserFriends_OK_200() throws Exception {
         User friend1 = User.builder()
                 .id(2L)
                 .email("2mail@mail.ru")

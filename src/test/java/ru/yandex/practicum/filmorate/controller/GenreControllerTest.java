@@ -1,7 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class GenreControllerTest {
-    private static final ObjectMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
     private Genre genre;
     @Autowired
     private MockMvc mockMvc;

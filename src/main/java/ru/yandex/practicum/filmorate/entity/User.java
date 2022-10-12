@@ -4,16 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"email", "login"})
 @ToString(exclude = {"likesFilms", "friends"})
-@Builder
 public class User {
     private Long id;
 
@@ -30,13 +33,11 @@ public class User {
     @Past
     private LocalDate birthday;
 
-    @Builder.Default
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
     private List<UserFriend> friends = new ArrayList<>();
 
-    @Builder.Default
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
@@ -65,5 +66,74 @@ public class User {
                 .user(this)
                 .friend(user).build();
         friends.remove(removedFriend);
+    }
+
+    public static UserBuilder builder() {
+        return new UserBuilder();
+    }
+
+    public static class UserBuilder {
+        private Long id;
+
+        @Email(message = "Invalid email format")
+        @NotBlank(message = "Email should not be blank")
+        private String email;
+
+        @NotBlank(message = "Login should not be blank")
+        @Pattern(regexp = "[a-zA-Z0-9_.]*", message = "Login should not contain spaces")
+        private   String login;
+
+        private String name;
+
+        @Past
+        private LocalDate birthday;
+
+        private List<UserFriend> friends = new ArrayList<>();
+
+        private List<Film> likesFilms = new ArrayList<>();
+
+        private UserBuilder() { }
+
+        public UserBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public UserBuilder email(@Email(message = "Invalid email format")
+                                 @NotBlank(message = "Email should not be blank") String email) {
+            this.email = email;
+            return this;
+        }
+
+        public UserBuilder login(@NotBlank(message = "Login should not be blank")
+                                 @Pattern(regexp = "[a-zA-Z0-9_.]*", message = "Login should not contain spaces")
+                                         String login) {
+            this.login = login;
+            return this;
+        }
+
+        public UserBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public UserBuilder birthday(@Past LocalDate birthday) {
+            this.birthday = birthday;
+            return this;
+        }
+
+        public UserBuilder friends(List<UserFriend> friends) {
+            this.friends = friends;
+            return this;
+        }
+
+        public UserBuilder likesFilms(List<Film> likesFilms) {
+            this.likesFilms = likesFilms;
+            return this;
+        }
+
+        public User build() {
+            return new User(id, email, login, name, birthday, friends, likesFilms);
+        }
     }
 }
