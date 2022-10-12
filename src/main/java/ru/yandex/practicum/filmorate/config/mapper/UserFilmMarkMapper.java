@@ -16,27 +16,28 @@ public class UserFilmMarkMapper implements RowMapper<UserFilmMark> {
     @Override
     public UserFilmMark mapRow(ResultSet rs, int rowNum) throws SQLException {
         return UserFilmMark.builder()
-                .id(rs.getLong("ufm.id"))
+                .id(rs.getLong(1))
                 .user(User.builder()
-                        .id(rs.getLong("ufm.user_id"))
-                        .name(rs.getString("u.name"))
-                        .email(rs.getString("u.email"))
-                        .login(rs.getString("u.login"))
-                        .birthday(this.getDate(rs, "u.birthday"))
+                        .id(rs.getLong(2))
+                        .name(rs.getString(3))
+                        .email(rs.getString(4))
+                        .login(rs.getString(5))
+                        .birthday(this.getDate(rs, 6))
                         .build())
                 .film(Film.builder()
-                        .id(rs.getLong("ufm.film_id"))
-                        .name(rs.getString("f.name"))
-                        .duration(rs.getInt("f.description"))
-                        .releaseDate(this.getDate(rs, "f.release_date"))
-                        .rate(rs.getDouble("f.rate"))
+                        .id(rs.getLong(7))
+                        .name(rs.getString(8))
+                        .description(rs.getString(9))
+                        .duration(rs.getInt(10))
+                        .releaseDate(this.getDate(rs, 11))
+                        .rate(rs.getDouble(12))
                         .build())
-                .mark(rs.getInt("ufm.mark"))
+                .mark(rs.getInt(13))
                 .build();
     }
 
-    private LocalDate getDate(ResultSet rs, String fieldName) throws SQLException {
-        Date dateToCheck = rs.getDate(fieldName);
+    private LocalDate getDate(ResultSet rs, int field) throws SQLException {
+        Date dateToCheck = rs.getDate(field);
         if (dateToCheck == null) {
             return null;
         }

@@ -25,16 +25,22 @@ public class UserFilmMarkRepositoryJdbcImpl implements UserFilmMarkRepository {
     private final String SQL_INSERT = "INSERT INTO users_films_marks (user_id, film_id, mark) VALUES (?, ?, ?)";
     private final String SQL_UPDATE_ALL_FIELDS = "UPDATE users_films_marks SET user_id = ?, film_id = ?, mark = ? WHERE id = ?";
     private final String SQL_DELETE_BY_ID = "DELETE FROM users_films_marks WHERE id = ?";
-    private final String SQL_SELECT_ALL = "SELECT * FROM users_films_marks ORDER BY id";
-    private final String SQL_SELECT_BY_ID = "SELECT * FROM users_films_marks WHERE id = ?";
-    private static final String SQL_SELECT_USER_MARK = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login" +
-            "u.birthday, ufm.film_id, f.name, f.description, f.release_date, f.rate, ufm.mark  " +
-            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = users.id" +
-            "INNER JOIN films AS f ON ufm.film_id = films.id WHERE film_id = ? AND user_id = ?";
+    private final String SQL_SELECT_ALL = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login, " +
+            "u.birthday, ufm.film_id, f.name, f.description, f.duration, f.release_date, f.rate, ufm.mark  " +
+            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = u.id " +
+            "INNER JOIN films AS f ON ufm.film_id = f.id ORDER BY ufm.id";
+    private final String SQL_SELECT_BY_ID = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login, " +
+            "u.birthday, ufm.film_id, f.name, f.description, f.duration, f.release_date, f.rate, ufm.mark  " +
+            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = u.id " +
+            "INNER JOIN films AS f ON ufm.film_id = f.id WHERE ufm.id = ?";
+    private static final String SQL_SELECT_USER_MARK_BY_FILM_AND_USER_IDS = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login, " +
+            "u.birthday, ufm.film_id, f.name, f.description, f.duration, f.release_date, f.rate, ufm.mark  " +
+            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = u.id " +
+            "INNER JOIN films AS f ON ufm.film_id = f.id WHERE film_id = ? AND user_id = ?";
 
     @Override
     public Optional<UserFilmMark> findByUserIdAndFilmId(Long userId, Long filmId) {
-        return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_USER_MARK, userFilmMarkMapper, filmId, userId));
+        return Optional.ofNullable(jdbcOperations.queryForObject(SQL_SELECT_USER_MARK_BY_FILM_AND_USER_IDS, userFilmMarkMapper, filmId, userId));
     }
 
     @Override
@@ -56,7 +62,8 @@ public class UserFilmMarkRepositoryJdbcImpl implements UserFilmMarkRepository {
         jdbcOperations.update(SQL_UPDATE_ALL_FIELDS,
                 userFilmMark.getUser().getId(),
                 userFilmMark.getFilm().getId(),
-                userFilmMark.getMark());
+                userFilmMark.getMark(),
+                userFilmMark.getId());
         return userFilmMark;
     }
 
