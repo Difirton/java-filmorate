@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.Genre;
+import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.entity.UserFilmMark;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.RecommendationRepository;
@@ -63,21 +64,21 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
     }
 
     private List<Long> recommendationsBasedOnMarks(Long userID, int count) {
-        Map<Long, Map<Long, Integer>> data = this.getData();
+        Map<User, Map<Film, Integer>> data = this.getData();
         Map<Long, Map<Long, Double>> diff = new HashMap<>();
         Map<Long, Map<Long, Integer>> freq = new HashMap<>();
         HashMap<Long, Double> clean = new HashMap<>();
 
-        for (Map<Long, Integer> userMarks : data.values()) {
-            for (Map.Entry<Long, Integer> filmMark : userMarks.entrySet()) {
-                long filmId = filmMark.getKey();
+        for (Map<Film, Integer> userMarks : data.values()) {
+            for (Map.Entry<Film, Integer> filmMark : userMarks.entrySet()) {
+                long filmId = filmMark.getKey().getId();
                 if (!diff.containsKey(filmId)) {
                     diff.put(filmId, new HashMap<>());
                     freq.put(filmId, new HashMap<>());
                 }
 
-                for (Map.Entry<Long, Integer> otherFilmMark : userMarks.entrySet()) {
-                    long otherFilmId = otherFilmMark.getKey();
+                for (Map.Entry<Film, Integer> otherFilmMark : userMarks.entrySet()) {
+                    long otherFilmId = otherFilmMark.getKey().getId();
 
                     freq.get(filmId).put(
                             otherFilmId,
@@ -98,16 +99,17 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
         }
 
 
-        for (Map.Entry<Long, Map<Long, Integer>> userMarks : data.entrySet()) {
+        for (Map.Entry<User, Map<Film, Integer>> userMarks : data.entrySet()) {
             Map<Long, Double> uPred = new HashMap<>();
             Map<Long, Double> uFreq = new HashMap<>();
-            for (Long dataFilmID : userMarks.getValue().keySet()) {
+            for (Film dataFilm : userMarks.getValue().keySet()) {
+                Long dataFilmId = dataFilm.getId();
                 for (Long diffFilmId : diff.keySet()) {
                     double predictedValue =
-                            diff.get(diffFilmId).get(dataFilmID) + userMarks.getValue().get(dataFilmID).doubleValue();
-                    double finalValue = predictedValue * freq.get(diffFilmId).get(dataFilmID);
+                            diff.get(diffFilmId).get(dataFilmId) + userMarks.getValue().get(dataFilm).doubleValue();
+                    double finalValue = predictedValue * freq.get(diffFilmId).get(dataFilmId);
                     uPred.put(diffFilmId, uPred.get(diffFilmId) + finalValue);
-                    uFreq.put(diffFilmId, uFreq.get(diffFilmId) + freq.get(diffFilmId).get(dataFilmID));
+                    uFreq.put(diffFilmId, uFreq.get(diffFilmId) + freq.get(diffFilmId).get(dataFilmId));
                 }
             }
 
@@ -117,11 +119,11 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
                 }
             }
 
-            for (Long filmId : filmRepository.findAll().stream().map(Film::getId).collect(Collectors.toList())) {
-                if (userMarks.getValue().containsKey(filmId)) {
-                    clean.put(filmId, userMarks.getValue().get(filmId).doubleValue());
-                } else if (!clean.containsKey(filmId)) {
-                    clean.put(filmId, -1.0);
+            for (Film film : filmRepository.findAll()) {
+                if (userMarks.getValue().containsKey(film)) {
+                    clean.put(film.getId(), userMarks.getValue().get(film).doubleValue());
+                } else if (!clean.containsKey(film.getId())) {
+                    clean.put(film.getId(), -1.0);
                 }
             }
         }
@@ -132,37 +134,37 @@ public class RecommendationRepositoryJdbcImpl implements RecommendationRepositor
                     .collect(Collectors.toList());
     }
 
-    private Map<Long, Map<Long, Integer>> getData() {
-        Map<Long, Map<Long, Integer>> data = new HashMap<>();
-        data.put(1L, Map.of(
-                1L, 4,
-                2L, 6,
-                4L, 8,
-                5L, 3));
+    private Map<User, Map<Film, Integer>> getData() {
+        Map<User, Map<Film, Integer>> data = new HashMap<>();
+        data.put(User.builder().id(1L).build(), Map.of(
+                Film.builder().id(1L).build(), 4,
+                Film.builder().id(2L).build(), 6,
+                Film.builder().id(4L).build(), 8,
+                Film.builder().id(5L).build(), 3));
 
-        data.put(2L, Map.of(
-                1L, 7,
-                2L, 4,
-                3L, 3,
-                4L, 4));
+        data.put(User.builder().id(2L).build(), Map.of(
+                Film.builder().id(1L).build(), 7,
+                Film.builder().id(2L).build(), 4,
+                Film.builder().id(4L).build(), 3,
+                Film.builder().id(4L).build(), 4));
 
-        data.put(3L, Map.of(
-                2L, 1,
-                3L, 9,
-                4L, 2,
-                5L, 3));
-
-        data.put(4L, Map.of(
-                1L, 2,
-                2L, 8,
-                3L, 6,
-                5L, 5));
-
-        data.put(5L, Map.of(
-                1L, 1,
-                3L, 4,
-                4L, 8,
-                5L, 9));
+//        data.put(3L, Map.of(
+//                2L, 1,
+//                3L, 9,
+//                4L, 2,
+//                5L, 3));
+//
+//        data.put(4L, Map.of(
+//                1L, 2,
+//                2L, 8,
+//                3L, 6,
+//                5L, 5));
+//
+//        data.put(5L, Map.of(
+//                1L, 1,
+//                3L, 4,
+//                4L, 8,
+//                5L, 9));
 
 
         return data;
