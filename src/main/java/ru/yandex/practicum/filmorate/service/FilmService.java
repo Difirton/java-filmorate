@@ -120,6 +120,10 @@ public class FilmService {
                 .user(userService.getUserById(userId))
                 .mark(mark)
                 .build());
+        Integer sumMarks = film.getUsersMarks().stream()
+                .map(UserFilmMark::getMark)
+                .reduce(0, Integer::sum);
+        film.setRate(sumMarks / (double) film.getUsersMarks().size());
         eventService.createEvent(userId, EventType.MARK, Operation.ADD, id);
         return filmRepository.update(film);
     }
@@ -130,6 +134,14 @@ public class FilmService {
         UserFilmMark mark = userFilmMarkRepository.findByUserIdAndFilmId(userId, id)
                 .orElseThrow(() -> new MarkNotFoundException(userId, id));
         film.removeUserMark(mark);
+        if (!film.getUsersMarks().isEmpty()) {
+            Integer sumMarks = film.getUsersMarks().stream()
+                    .map(UserFilmMark::getMark)
+                    .reduce(0, Integer::sum);
+            film.setRate(sumMarks / (double) film.getUsersMarks().size());
+        } else {
+            film.setRate(0d);
+        }
         userFilmMarkRepository.deleteById(mark.getId());
         eventService.createEvent(userId, EventType.MARK, Operation.REMOVE, id);
     }
