@@ -32,7 +32,7 @@ class EventRepositoryJdbcImplTest {
         newEvent = Event.builder()
                 .timestamp(System.currentTimeMillis())
                 .userId(1L)
-                .eventType(EventType.MARK)
+                .eventType(EventType.LIKE)
                 .operation(Operation.ADD)
                 .entityId(1L)
                 .build();
@@ -46,7 +46,7 @@ class EventRepositoryJdbcImplTest {
         thirdEvent = Event.builder()
                 .timestamp(System.currentTimeMillis())
                 .userId(1L)
-                .eventType(EventType.MARK)
+                .eventType(EventType.LIKE)
                 .operation(Operation.REMOVE)
                 .entityId(2L)
                 .build();
@@ -57,7 +57,7 @@ class EventRepositoryJdbcImplTest {
     void testSave() {
         Event returnedEvent = eventRepository.save(newEvent);
         assertEquals(1, returnedEvent.getId());
-        assertEquals(EventType.MARK, returnedEvent.getEventType());
+        assertEquals(EventType.LIKE, returnedEvent.getEventType());
         Event eventAfterSaveInDB = eventRepository.findById(1L).get();
         assertEquals(Operation.ADD, eventAfterSaveInDB.getOperation());
     }
@@ -99,9 +99,9 @@ class EventRepositoryJdbcImplTest {
     @DisplayName("Test find director by id in EventRepository")
     void testFindById() {
         eventRepository.saveAll(List.of(newEvent, secondEvent, thirdEvent));
-        assertEquals(EventType.MARK, eventRepository.findById(1L).get().getEventType());
+        assertEquals(EventType.LIKE, eventRepository.findById(1L).get().getEventType());
         assertEquals(EventType.REVIEW, eventRepository.findById(2L).get().getEventType());
-        assertEquals(EventType.MARK, eventRepository.findById(3L).get().getEventType());
+        assertEquals(EventType.LIKE, eventRepository.findById(3L).get().getEventType());
     }
 
     @Test

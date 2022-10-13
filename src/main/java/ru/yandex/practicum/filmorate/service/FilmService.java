@@ -14,10 +14,7 @@ import ru.yandex.practicum.filmorate.error.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.error.exception.MarkNotFoundException;
 import ru.yandex.practicum.filmorate.repository.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,7 +109,7 @@ public class FilmService {
                 .map(UserFilmMark::getUser)
                 .map(User::getId)
                 .anyMatch(i -> i.equals(userId))) {
-            eventService.createEvent(userId, EventType.MARK, Operation.ADD, id);
+            eventService.createEvent(userId, EventType.LIKE, Operation.ADD, id);
             return film;
         }
         film.addUserMark(
@@ -122,12 +119,7 @@ public class FilmService {
                                 .user(userService.getUserById(userId))
                                 .mark(mark)
                                 .build()));
-        Integer sumMarks = film.getUsersMarks().stream()
-                .map(UserFilmMark::getMark)
-                .reduce(0, Integer::sum);
-        film.setRate(sumMarks / (double) film.getUsersMarks().size());
-        filmRepository.saveFilmRate(film.getId(), film.getRate());
-        eventService.createEvent(userId, EventType.MARK, Operation.ADD, id);
+        eventService.createEvent(userId, EventType.LIKE, Operation.ADD, id);
         return film;
     }
 
@@ -137,17 +129,11 @@ public class FilmService {
         UserFilmMark mark = userFilmMarkRepository.findByUserIdAndFilmId(userId, id)
                 .orElseThrow(() -> new MarkNotFoundException(userId, id));
         film.removeUserMark(mark);
-        if (!film.getUsersMarks().isEmpty()) {
-            Integer sumMarks = film.getUsersMarks().stream()
-                    .map(UserFilmMark::getMark)
-                    .reduce(0, Integer::sum);
-            film.setRate(sumMarks / (double) film.getUsersMarks().size());
-            filmRepository.saveFilmRate(film.getId(), film.getRate());
-        } else {
+        if (film.getUsersMarks().isEmpty()) {
             film.setRate(0d);
         }
         userFilmMarkRepository.deleteById(mark.getId());
-        eventService.createEvent(userId, EventType.MARK, Operation.REMOVE, id);
+        eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, id);
     }
 
     public List<Film> getPopularFilms(Integer count) {
@@ -217,8 +203,16 @@ public class FilmService {
         }
         films = films.stream().distinct().collect(Collectors.toList());
         this.addGenresDirectorsInFilms(films);
-        films.sort((x, y) -> Double.compare(y.getRate(), x.getRate()));
+        films.sort(this::filmComparator);
         return films;
+    }
+
+    private int filmComparator(Film film1, Film film2) {
+        int result = Double.compare(film2.getRate(), film1.getRate());
+        if (result == 0) {
+            return Long.compare(film2.getId(), film1.getId());
+        }
+        return result;
     }
 
     public List<Film> findFilmsByIds(List<Long> filmIds) {

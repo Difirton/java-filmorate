@@ -69,7 +69,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
             "AND user_likes.mark > 5 AND friend_likes.mark > 5) ORDER BY rate DESC";
     private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE = "SELECT films.* FROM films " +
             "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
-            "WHERE fg.genre_id = ?1 ORDER BY rate, id DESC DESC LIMIT ?2";
+            "WHERE fg.genre_id = ?1 ORDER BY rate, id DESC LIMIT ?2";
     private static final String SQL_SELECT_POPULAR_FILMS_WITH_YEAR = "SELECT * FROM films " +
             "WHERE YEAR(release_date) = ?1 ORDER BY rate DESC, id DESC LIMIT ?2";
     private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR = "SELECT films.* FROM films " +
@@ -84,7 +84,6 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
             "INNER JOIN directors d ON d.id = df.director_id " +
             "WHERE d.name ILIKE :query)" +
             "ORDER BY rate DESC";
-    private static final String SQL_UPDATE_FILMS_RATE = "UPDATE films SET rate = ? WHERE id = ?";
 
     @Override
     public Film save(Film film) {
@@ -349,10 +348,5 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     @Override
     public List<Film> findCommonFilms(Long userId, Long friendId) {
         return this.jdbcOperations.query(SQL_SELECT_COMMON_FILMS, eagerFilmMapper, userId, friendId);
-    }
-
-    @Override
-    public void saveFilmRate(Long filmId, Double rate) {
-        this.jdbcOperations.update(SQL_UPDATE_FILMS_RATE, rate, filmId);
     }
 }

@@ -27,6 +27,4 @@ public interface FilmRepository extends StandardCRUDRepository<Film> {
     List<Film> searchFilmsByDirectorName(String query);
 
     List<Film> findCommonFilms(Long userId, Long friendId);
-
-    void saveFilmRate(Long filmId, Double rate);
 }

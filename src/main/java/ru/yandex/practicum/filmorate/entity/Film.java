@@ -13,6 +13,7 @@ import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
@@ -57,11 +58,24 @@ public class Film {
 
     public void addUserMark(UserFilmMark userFilmMark) {
         usersMarks.add(userFilmMark);
+        Integer sumMarks = this.getUsersMarks().stream()
+                .map(UserFilmMark::getMark)
+                .reduce(0, Integer::sum);
+        this.setRate(sumMarks / (double) this.getUsersMarks().size());
         userFilmMark.getUser().getMarksFilms().add(userFilmMark);
     }
 
     public void removeUserMark(UserFilmMark userFilmMark) {
         usersMarks.remove(userFilmMark);
+        Integer sumMarks = this.getUsersMarks().stream()
+                .map(UserFilmMark::getMark)
+                .reduce(0, Integer::sum);
+        double newRate = sumMarks / (double) this.getUsersMarks().size();
+        if (Double.isNaN(newRate)) {
+            this.setRate(0.0);
+        } else {
+            this.setRate(newRate);
+        }
         userFilmMark.getUser().getMarksFilms().remove(userFilmMark);
     }
 
