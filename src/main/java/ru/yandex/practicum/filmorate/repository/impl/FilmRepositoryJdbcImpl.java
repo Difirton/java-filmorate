@@ -29,7 +29,8 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private final NamedParameterJdbcOperations namedJdbcTemplate;
     private final GenreRepositoryMapper genreMapper;
     private final DirectorRepositoryMapper directorMapper;
-    private final UserRepositoryMapper userMapper;
+    private final UserFilmMarkMapper userFilmMarkMapper;
+
     private static final String SQL_INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?,?)";
     private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ? AND genre_id = ?";
     private static final String SQL_INSERT_FILMS_ALL_ARGS = "INSERT INTO films (name, description, release_date, " +
@@ -41,14 +42,14 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String SQL_SELECT_ALL_FILMS_WITHOUT_RATING = "SELECT * FROM films";
     private static final String SQL_SELECT_ALL_FILMS_WITH_RATING = "SELECT * FROM films " +
             "LEFT JOIN rating_mpa rm ON films.rating_mpa_id = rm.id WHERE films.id = ?";
-    private static final String SQL_SELECT_POPULAR_FILMS = "SELECT * FROM films ORDER BY rate DESC LIMIT ?";
-    private static final String SQL_SELECT_LIKES_USERS_ID_BY_FILM_ID = "SELECT user_id FROM users_likes_films " +
-            "WHERE film_id = ?";
-    private static final String SQL_INSERT_USERS_LIKES = "INSERT INTO users_likes_films (film_id, user_id) VALUES (?,?)";
-    private static final String SQL_DELETE_USERS_LIKES = "DELETE FROM users_likes_films " +
-            "WHERE film_id = ? AND user_id = ?";
-    private static final String SQL_SELECT_ALL_USERS_LIKES = "SELECT users.* FROM users_likes_films likes " +
-            "INNER JOIN users on likes.user_id = users.id WHERE film_id = ?";
+    private static final String SQL_SELECT_POPULAR_FILMS = "SELECT * FROM films ORDER BY rate DESC, id DESC LIMIT ?";
+    private static final String SQL_INSERT_USERS_MARKS = "INSERT INTO users_films_marks (film_id, user_id, mark) VALUES (?, ?, ?)";
+    private static final String SQL_DELETE_USERS_MARKS = "DELETE FROM users_films_marks " +
+            "WHERE film_id = ? AND user_id = ? AND mark = ?";
+    private static final String SQL_SELECT_ALL_USERS_MARKS = "SELECT ufm.id, ufm.user_id, u.name, u.email, u.login, " +
+            "u.birthday, ufm.film_id, f.name, f.description, f.duration, f.release_date, f.rate, ufm.mark  " +
+            "FROM users_films_marks AS ufm INNER JOIN users AS u ON ufm.user_id = u.id " +
+            "INNER JOIN films AS f ON ufm.film_id = f.id WHERE film_id = ?";
     private static final String SQL_INSERT_DIRECTORS_FILMS = "INSERT INTO directors_films (film_id, director_id) " +
             "VALUES (?,?)";
     private static final String SQL_DELETE_DIRECTORS_FILMS = "DELETE FROM directors_films " +
@@ -63,19 +64,20 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
     private static final String NAMED_SQL_SELECT_FILMS_WITH_IDS = "SELECT * FROM films WHERE id IN (:ids)";
     private static final String SQL_SELECT_COMMON_FILMS = "SELECT * FROM films LEFT JOIN rating_mpa mpa " +
             "ON films.rating_mpa_id = mpa.id WHERE films.id IN " +
-            "(SELECT user_likes.film_id FROM users_likes_films user_likes INNER JOIN users_likes_films friend_likes " +
-            "ON user_likes.film_id = friend_likes.film_id WHERE user_likes.user_id = ? AND friend_likes.user_id = ?) " +
-            "ORDER BY rate DESC";
+            "(SELECT user_likes.film_id FROM users_films_marks user_likes INNER JOIN users_films_marks friend_likes " +
+            "ON user_likes.film_id = friend_likes.film_id WHERE user_likes.user_id = ? AND friend_likes.user_id = ? " +
+            "AND user_likes.mark > 5 AND friend_likes.mark > 5) ORDER BY rate DESC";
     private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE = "SELECT films.* FROM films " +
             "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
-            "WHERE fg.genre_id = ?1 ORDER BY rate DESC LIMIT ?2";
+            "WHERE fg.genre_id = ?1 ORDER BY rate, id DESC LIMIT ?2";
     private static final String SQL_SELECT_POPULAR_FILMS_WITH_YEAR = "SELECT * FROM films " +
-            "WHERE YEAR(release_date) = ?1 ORDER BY rate DESC LIMIT ?2";
+            "WHERE YEAR(release_date) = ?1 ORDER BY rate DESC, id DESC LIMIT ?2";
     private static final String SQL_SELECT_POPULAR_FILMS_WITH_GENRE_AND_YEAR = "SELECT films.* FROM films " +
             "INNER JOIN film_genres AS fg ON fg.film_id = films.id " +
-            "WHERE fg.genre_id = ?1 AND YEAR(release_date) = ?2 ORDER BY rate DESC LIMIT ?3";
+            "WHERE fg.genre_id = ?1 AND YEAR(release_date) = ?2 ORDER BY rate DESC, id DESC LIMIT ?3";
 
-    private static final String SQL_SELECT_FILMS_LIKE_NAME_WITH_ORDER_RATE = "SELECT * FROM films WHERE name ILIKE :query ORDER BY rate DESC";
+    private static final String SQL_SELECT_FILMS_LIKE_NAME_WITH_ORDER_RATE = "SELECT * FROM films WHERE name " +
+            "ILIKE :query ORDER BY rate DESC";
     private static final String SQL_SELECT_FILMS_LIKE_DIRECTOR_NAME_WITH_ORDER_RATE = "SELECT * FROM films WHERE id IN " +
             "(SELECT df.film_id " +
             "FROM directors_films df " +
@@ -113,7 +115,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
         ps.setString(2, film.getDescription());
         ps.setDate(3, Date.valueOf(film.getReleaseDate()));
         ps.setInt(4, film.getDuration());
-        ps.setInt(5, film.getRate());
+        ps.setDouble(5, film.getRate());
         ps.setLong(6, film.getRatingMPA().getId());
     }
 
@@ -122,7 +124,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
         this.jdbcOperations.update(SQL_UPDATE_FILMS_ALL_ARGS, film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getRate(), film.getRatingMPA().getId(), film.getId());
         this.checkFilmGenre(film);
-        this.checkFilmLikes(film);
+        this.checkFilmMarks(film);
         this.checkFilmDirectors(film);
         return film;
     }
@@ -141,22 +143,6 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
                 .collect(Collectors.toList());
         this.updateFilmCollection(film.getId(), genresIdToInsert, SQL_INSERT_FILM_GENRES);
         this.updateFilmCollection(film.getId(), genresIdToDelete, SQL_DELETE_FILM_GENRES);
-    }
-
-    private void checkFilmLikes(Film film) {
-        List<Long> usersIdBeforeUpdate = this.jdbcOperations.query(SQL_SELECT_LIKES_USERS_ID_BY_FILM_ID,
-                (rs, rowNum) -> rs.getLong("user_id"), film.getId());
-        List<Long> usersIdAfterUpdate = film.getUsersLikes().stream()
-                .map(User::getId)
-                .collect(Collectors.toList());
-        List<Long> usersIdToDelete = usersIdBeforeUpdate.stream()
-                .filter(id -> !usersIdAfterUpdate.contains(id))
-                .collect(Collectors.toList());
-        List<Long> usersIdToInsert = usersIdAfterUpdate.stream()
-                .filter(id -> !usersIdBeforeUpdate.contains(id))
-                .collect(Collectors.toList());
-        this.updateFilmCollection(film.getId(), usersIdToInsert, SQL_INSERT_USERS_LIKES);
-        this.updateFilmCollection(film.getId(), usersIdToDelete, SQL_DELETE_USERS_LIKES);
     }
 
     private void checkFilmDirectors(Film film) {
@@ -192,6 +178,37 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
         }
     }
 
+    private void checkFilmMarks(Film film) {
+        List<UserFilmMark> usersMarksBeforeUpdate = this.jdbcOperations.query(SQL_SELECT_ALL_USERS_MARKS,
+                userFilmMarkMapper, film.getId());
+        List<UserFilmMark> usersMarksAfterUpdate = film.getUsersMarks();
+        List<UserFilmMark> usersMarksDelete = usersMarksBeforeUpdate.stream()
+                .filter(fm -> !usersMarksAfterUpdate.contains(fm))
+                .collect(Collectors.toList());
+        List<UserFilmMark> usersMarksInsert = usersMarksAfterUpdate.stream()
+                .filter(fm -> !usersMarksBeforeUpdate.contains(fm))
+                .collect(Collectors.toList());
+        this.updateFilmMarks(film.getId(), usersMarksInsert, SQL_INSERT_USERS_MARKS);
+        this.updateFilmMarks(film.getId(), usersMarksDelete, SQL_DELETE_USERS_MARKS);
+    }
+
+    private void updateFilmMarks(Long filmId, List<UserFilmMark> userFilmMarks, String sqlRequiredOperation) {
+        if (!userFilmMarks.isEmpty()) {
+            this.jdbcOperations.batchUpdate(sqlRequiredOperation,
+                    new BatchPreparedStatementSetter() {
+                        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                            preparedStatement.setLong(1, filmId);
+                            preparedStatement.setLong(2, userFilmMarks.get(i).getUser().getId());
+                            preparedStatement.setLong(3, userFilmMarks.get(i).getMark());
+                        }
+
+                        public int getBatchSize() {
+                            return userFilmMarks.size();
+                        }
+                    });
+        }
+    }
+
     @Override
     public int deleteById(Long id) {
         return this.jdbcOperations.update(SQL_DELETE_FILM_BY_ID, id);
@@ -207,7 +224,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
         Film film = this.jdbcOperations.queryForObject(SQL_SELECT_ALL_FILMS_WITH_RATING,
                 eagerFilmMapper, filmId);
         if (film != null) {
-            film.setUsersLikes(this.jdbcOperations.query(SQL_SELECT_ALL_USERS_LIKES, userMapper, filmId));
+            film.setUsersMarks(this.jdbcOperations.query(SQL_SELECT_ALL_USERS_MARKS, userFilmMarkMapper, filmId));
             film.setDirectors(this.jdbcOperations.query(SQL_SELECT_ALL_DIRECTORS_FILM, directorMapper, filmId));
             film.setGenres(this.jdbcOperations.query(SQL_SELECT_ALL_GENRES_FILM, genreMapper, filmId));
             return Optional.of(film);
@@ -225,7 +242,7 @@ public class FilmRepositoryJdbcImpl implements FilmRepository {
                         ps.setString(2, films.get(i).getDescription());
                         ps.setDate(3, Date.valueOf(films.get(i).getReleaseDate()));
                         ps.setInt(4, films.get(i).getDuration());
-                        ps.setInt(5, films.get(i).getRate());
+                        ps.setDouble(5, films.get(i).getRate());
                         ps.setLong(6, films.get(i).getRatingMPA().getId());
                     }
 

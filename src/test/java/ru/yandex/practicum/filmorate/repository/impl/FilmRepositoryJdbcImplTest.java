@@ -55,7 +55,7 @@ class FilmRepositoryJdbcImplTest {
         film1.setDescription("updated");
         film1.setDuration(1000);
         film1.setRatingMPA(RatingMPA.builder().id(4L).build());
-        film1.setRate(10);
+        film1.setRate(10.0);
         film1.setReleaseDate(LocalDate.of(2000, 1, 1));
         filmRepository.update(film1);
         assertEquals("updated", filmRepository.findById(1L).get().getName());
@@ -97,9 +97,9 @@ class FilmRepositoryJdbcImplTest {
     @DisplayName("Test find popular films in FilmRepository")
     void testFindPopularFilmsByRate() {
         assertEquals(List.of(), filmRepository.findPopularFilmsByRate(10));
-        film1.setRate(5);
-        film2.setRate(3);
-        film3.setRate(10);
+        film1.setRate(5.0);
+        film2.setRate(3.0);
+        film3.setRate(10.0);
         filmRepository.saveAll(List.of(film1, film2, film3));
         assertEquals(List.of(film3, film1, film2), filmRepository.findPopularFilmsByRate(10));
     }
@@ -108,9 +108,9 @@ class FilmRepositoryJdbcImplTest {
     @DisplayName("Test size of list find popular films in FilmRepository")
     void testFindPopularFilmsByRateAndSize() {
         assertEquals(List.of(), filmRepository.findPopularFilmsByRate(10));
-        film1.setRate(3);
-        film2.setRate(2);
-        film3.setRate(1);
+        film1.setRate(3.0);
+        film2.setRate(2.0);
+        film3.setRate(1.0);
         filmRepository.saveAll(List.of(film1, film2, film3));
         assertEquals(List.of(film1, film2, film3), filmRepository.findPopularFilmsByRate(10));
         assertEquals(List.of(film1, film2), filmRepository.findPopularFilmsByRate(2));
@@ -129,7 +129,7 @@ class FilmRepositoryJdbcImplTest {
         filmRepository.saveAll(List.of(film1, film2, film3));
         film1.setName("updated");
         film2.setDescription("updated");
-        film3.setRate(11);
+        film3.setRate(11.0);
         film1.setDuration(1000);
         film3.setRatingMPA(RatingMPA.builder().id(4L).build());
         filmRepository.updateAll(List.of(film1, film2, film3));

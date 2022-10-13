@@ -115,36 +115,37 @@ public class FilmController {
         return filmService.updateFilm(film.getId(), film);
     }
 
-    @Operation(summary = "The user likes the film", tags = {"film", "like"})
+    @Operation(summary = "The user make mark the film", tags = {"film", "like"})
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Returns the likes film",
+                    description = "Returns the film with mark",
                     content = {
                             @Content(mediaType = "application/json")
                     })
     })
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("{id}/like/{userId}")
-    public Film addLikeFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id,
-                            @PathVariable("userId") @Parameter(description = "The user ID") Long userId) {
-        return filmService.addLikeFilm(id, userId);
+    public Film addMarkFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id,
+                            @PathVariable("userId") @Parameter(description = "The user ID") Long userId,
+                            @RequestParam("mark") @Parameter(description = "The mark of film") Optional<Integer> mark) {
+        return filmService.addFilmMark(id, userId, mark.orElse(10));
     }
 
-    @Operation(summary = "The user removes the like on the film", tags = "film")
+    @Operation(summary = "The user removes the mark on the film", tags = "film")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Returns the film without like",
+                    description = "Returns the film without mark and new rate",
                     content = {
                             @Content(mediaType = "application/json")
                     })
     })
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("{id}/like/{userId}")
-    public void removeLikeFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id,
+    public void removeMarkFilmV1(@PathVariable("id") @Parameter(description = "The film ID") Long id,
                                @PathVariable("userId") @Parameter(description = "The user ID") Long userId) {
-        filmService.removeLikeFilm(id, userId);
+        filmService.removeMarkFilm(id, userId);
     }
 
     @Operation(summary = "Get a list of the most popular films of the specified genre for the given year",
@@ -219,5 +220,38 @@ public class FilmController {
     public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {
         List<String> byFields = Arrays.asList(by.toLowerCase().split(","));
         return filmService.searchFilms(query, byFields);
+    }
+
+    @Operation(summary = "The user make mark the film", tags = {"film", "like"})
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Returns the film with mark",
+                    content = {
+                            @Content(mediaType = "application/json")
+                    })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("{id}/mark/{userId}")
+    public Film addMarkFilm(@PathVariable("id") @Parameter(description = "The film ID") Long id,
+                            @PathVariable("userId") @Parameter(description = "The user ID") Long userId,
+                            @RequestParam("mark") @Parameter(description = "The mark of film") Integer mark) {
+        return filmService.addFilmMark(id, userId, mark);
+    }
+
+    @Operation(summary = "The user removes the mark on the film", tags = "film")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Returns the film without mark and new rate",
+                    content = {
+                            @Content(mediaType = "application/json")
+                    })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("{id}/mark/{userId}")
+    public void removeMarkFilmV2(@PathVariable("id") @Parameter(description = "The film ID") Long id,
+                               @PathVariable("userId") @Parameter(description = "The user ID") Long userId) {
+        filmService.removeMarkFilm(id, userId);
     }
 }

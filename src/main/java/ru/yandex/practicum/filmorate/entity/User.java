@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"email", "login"})
-@ToString(exclude = {"likesFilms", "friends"})
+@ToString(exclude = {"marksFilms", "friends"})
 public class User {
     private Long id;
 
@@ -41,16 +41,16 @@ public class User {
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
-    private List<Film> likesFilms = new ArrayList<>();
+    private List<UserFilmMark> marksFilms = new ArrayList<>();
 
-    public void addLikeFilm(Film film) {
-        likesFilms.add(film);
-        film.getUsersLikes().add(this);
+    public void addMarkFilm(UserFilmMark userFilmMark) {
+        marksFilms.add(userFilmMark);
+        userFilmMark.getFilm().getUsersMarks().add(userFilmMark);
     }
 
-    public void removeLikeFilm(Film film) {
-        likesFilms.remove(film);
-        film.getUsersLikes().remove(this);
+    public void removeMarkFilm(UserFilmMark userFilmMark) {
+        marksFilms.remove(userFilmMark);
+        userFilmMark.getFilm().getUsersMarks().remove(userFilmMark);
     }
 
     public void addFriend(User user) {
@@ -90,7 +90,7 @@ public class User {
 
         private List<UserFriend> friends = new ArrayList<>();
 
-        private List<Film> likesFilms = new ArrayList<>();
+        private List<UserFilmMark> marksFilms = new ArrayList<>();
 
         private UserBuilder() { }
 
@@ -99,15 +99,12 @@ public class User {
             return this;
         }
 
-        public UserBuilder email(@Email(message = "Invalid email format")
-                                 @NotBlank(message = "Email should not be blank") String email) {
+        public UserBuilder email(String email) {
             this.email = email;
             return this;
         }
 
-        public UserBuilder login(@NotBlank(message = "Login should not be blank")
-                                 @Pattern(regexp = "[a-zA-Z0-9_.]*", message = "Login should not contain spaces")
-                                         String login) {
+        public UserBuilder login(String login) {
             this.login = login;
             return this;
         }
@@ -127,13 +124,13 @@ public class User {
             return this;
         }
 
-        public UserBuilder likesFilms(List<Film> likesFilms) {
-            this.likesFilms = likesFilms;
+        public UserBuilder marksFilms(List<UserFilmMark> marksFilms) {
+            this.marksFilms = marksFilms;
             return this;
         }
 
         public User build() {
-            return new User(id, email, login, name, birthday, friends, likesFilms);
+            return new User(id, email, login, name, birthday, friends, marksFilms);
         }
     }
 }

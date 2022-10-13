@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.RatingMPA;
 import ru.yandex.practicum.filmorate.entity.User;
+import ru.yandex.practicum.filmorate.entity.UserFilmMark;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
@@ -184,30 +185,23 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Request PUT /films/{id}/like/{userId}, expected host answer OK")
-    void testPutLikeFilm_OK_200() throws Exception {
-        film.addUserLike(User.builder().build());
-        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
-        mockMvc.perform(put("/films/1/like/1")
+    void testPutMarkFilm_OK_200() throws Exception {
+        film.setRate(7.0);
+        film.setId(1L);
+        when(mockService.addFilmMark(1L, 1L, 7)).thenReturn(film);
+        mockMvc.perform(put("/films/1/like/1?mark=7")
                         .content(jsonMapper.writeValueAsString(film))
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.rate", is(1)))
+                .andExpect(jsonPath("$.rate", is(7.0)))
                 .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("Request DELETE /films/{id}/like/{userId}, expected host answer OK")
-    void testDeleteLikeFilm_OK_200() throws Exception {
-        User user = User.builder().build();
-        film.addUserLike(user);
-        film.removeUserLike(user);
-        when(mockService.addLikeFilm(1L, 1L)).thenReturn(film);
-        mockMvc.perform(put("/films/1/like/1")
-                        .content(jsonMapper.writeValueAsString(film))
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.rate", is(0)))
-                .andExpect(status().isOk());
+    void testDeleteMarkFilm_OK_200() throws Exception {
+        mockMvc.perform(delete("/films/1/like/1")).andExpect(status().isOk());
+        verify(mockService, times(1)).removeMarkFilm(1L, 1L);
     }
 
     @Test

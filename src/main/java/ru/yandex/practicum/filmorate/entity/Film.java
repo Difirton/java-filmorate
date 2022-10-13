@@ -13,12 +13,13 @@ import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"usersLikes", "genres", "ratingMPA", "directors"})
-@ToString(exclude = {"usersLikes", "genres", "ratingMPA", "directors"})
+@EqualsAndHashCode(exclude = {"usersMarks", "genres", "ratingMPA", "directors"})
+@ToString(exclude = {"usersMarks", "genres", "ratingMPA", "directors"})
 public class Film {
     private Long id;
 
@@ -36,7 +37,7 @@ public class Film {
     private Integer duration;
 
     @PositiveOrZero
-    private Integer rate = 0;
+    private Double rate = 0.0;
 
     @NotNull
     @JsonProperty(value = "mpa")
@@ -45,7 +46,7 @@ public class Film {
     @JsonIdentityInfo(
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
-    private List<User> usersLikes = new ArrayList<>();
+    private List<UserFilmMark> usersMarks = new ArrayList<>();
 
     private List<Genre> genres = new ArrayList<>();
 
@@ -55,16 +56,27 @@ public class Film {
         return new FilmBuilder();
     }
 
-    public void addUserLike(User user) {
-        this.rate++;
-        usersLikes.add(user);
-        user.getLikesFilms().add(this);
+    public void addUserMark(UserFilmMark userFilmMark) {
+        usersMarks.add(userFilmMark);
+        Integer sumMarks = this.getUsersMarks().stream()
+                .map(UserFilmMark::getMark)
+                .reduce(0, Integer::sum);
+        this.setRate(sumMarks / (double) this.getUsersMarks().size());
+        userFilmMark.getUser().getMarksFilms().add(userFilmMark);
     }
 
-    public void removeUserLike(User user) {
-        this.rate--;
-        usersLikes.remove(user);
-        user.getLikesFilms().remove(this);
+    public void removeUserMark(UserFilmMark userFilmMark) {
+        usersMarks.remove(userFilmMark);
+        Integer sumMarks = this.getUsersMarks().stream()
+                .map(UserFilmMark::getMark)
+                .reduce(0, Integer::sum);
+        double newRate = sumMarks / (double) this.getUsersMarks().size();
+        if (Double.isNaN(newRate)) {
+            this.setRate(0.0);
+        } else {
+            this.setRate(newRate);
+        }
+        userFilmMark.getUser().getMarksFilms().remove(userFilmMark);
     }
 
     public static class FilmBuilder {
@@ -83,12 +95,12 @@ public class Film {
         private Integer duration;
 
         @PositiveOrZero
-        private Integer rate = 0;
+        private Double rate = 0.0;
 
         @NotNull
         private RatingMPA ratingMPA;
 
-        private List<User> usersLikes = new ArrayList<>();
+        private List<UserFilmMark> usersMarks = new ArrayList<>();
 
         private List<Genre> genres = new ArrayList<>();
 
@@ -121,7 +133,7 @@ public class Film {
             return this;
         }
 
-        public FilmBuilder rate(Integer rate) {
+        public FilmBuilder rate(Double rate) {
             this.rate = rate;
             return this;
         }
@@ -131,8 +143,8 @@ public class Film {
             return this;
         }
 
-        public FilmBuilder usersLikes(List<User> usersLikes) {
-            this.usersLikes = usersLikes;
+        public FilmBuilder usersMarks(List<UserFilmMark> usersMarks) {
+            this.usersMarks = usersMarks;
             return this;
         }
 
@@ -147,7 +159,7 @@ public class Film {
         }
 
         public Film build() {
-            return new Film(id, name, description, releaseDate, duration, rate, ratingMPA, usersLikes, genres, directors);
+            return new Film(id, name, description, releaseDate, duration, rate, ratingMPA, usersMarks, genres, directors);
         }
     }
 }

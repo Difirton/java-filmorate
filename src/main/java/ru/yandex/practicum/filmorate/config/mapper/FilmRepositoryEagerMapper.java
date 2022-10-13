@@ -20,7 +20,7 @@ public class FilmRepositoryEagerMapper implements RowMapper<Film> {
                 .description(rs.getString("description"))
                 .releaseDate(this.getDate(rs))
                 .duration(rs.getInt("duration"))
-                .rate(rs.getInt("rate"))
+                .rate(rs.getDouble("rate"))
                 .ratingMPA(RatingMPA.builder()
                         .id(rs.getLong("rating_mpa_id"))
                         .title(rs.getString("title"))

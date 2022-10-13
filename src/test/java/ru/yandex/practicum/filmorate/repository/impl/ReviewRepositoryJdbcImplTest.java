@@ -26,8 +26,20 @@ class ReviewRepositoryJdbcImplTest {
 
     @BeforeEach
     void setUp() {
-        goodReview = Review.builder().id(1L).content("TestGoodReview").filmId(1L).userId(1L).isPositive(true).build();
-        badReview = Review.builder().id(2L).content("TestBadReview").filmId(2L).userId(2L).isPositive(false).build();
+        goodReview = Review.builder()
+                .id(1L)
+                .content("TestGoodReview")
+                .filmId(1L)
+                .userId(1L)
+                .isPositive(true)
+                .build();
+        badReview = Review.builder()
+                .id(2L)
+                .content("TestBadReview")
+                .filmId(2L)
+                .userId(2L)
+                .isPositive(false)
+                .build();
     }
 
     @Test
