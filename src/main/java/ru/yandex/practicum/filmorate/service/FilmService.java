@@ -115,17 +115,20 @@ public class FilmService {
             eventService.createEvent(userId, EventType.MARK, Operation.ADD, id);
             return film;
         }
-        film.addUserMark(UserFilmMark.builder()
-                .film(film)
-                .user(userService.getUserById(userId))
-                .mark(mark)
-                .build());
+        film.addUserMark(
+                userFilmMarkRepository.save(
+                        UserFilmMark.builder()
+                                .film(film)
+                                .user(userService.getUserById(userId))
+                                .mark(mark)
+                                .build()));
         Integer sumMarks = film.getUsersMarks().stream()
                 .map(UserFilmMark::getMark)
                 .reduce(0, Integer::sum);
         film.setRate(sumMarks / (double) film.getUsersMarks().size());
+        filmRepository.saveFilmRate(film.getId(), film.getRate());
         eventService.createEvent(userId, EventType.MARK, Operation.ADD, id);
-        return filmRepository.update(film);
+        return film;
     }
 
     @Transactional
@@ -139,6 +142,7 @@ public class FilmService {
                     .map(UserFilmMark::getMark)
                     .reduce(0, Integer::sum);
             film.setRate(sumMarks / (double) film.getUsersMarks().size());
+            filmRepository.saveFilmRate(film.getId(), film.getRate());
         } else {
             film.setRate(0d);
         }
