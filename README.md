@@ -3,6 +3,9 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/Difirton/java-filmorate?color=green)
 ![Coveralls](https://img.shields.io/badge/coverage-81%25-green)
 
+## About
+This repository contains a backend for a service that will work with movies and user ratings, as well as return the top 5 movies recommended for viewing.
+
 ## Quick start
 ### Requirements
 
